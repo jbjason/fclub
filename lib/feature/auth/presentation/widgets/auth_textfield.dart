@@ -38,12 +38,11 @@ class AuthTextField extends StatelessWidget {
           ),
           child: TextFormField(
             controller: controller,
-            style: const TextStyle(fontSize: 13, color: Colors.white),
             decoration: const InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
-              contentPadding: EdgeInsets.symmetric(horizontal: 20),
+              contentPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 12),
               errorStyle: TextStyle(color: Colors.white, fontSize: 11),
               errorBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: Colors.grey),
@@ -61,6 +60,7 @@ class AuthTextField extends StatelessWidget {
                 return null;
               }
             },
+            onTapUpOutside: (event) => FocusScope.of(context).unfocus(),
           ),
         ),
         const SizedBox(height: 10),

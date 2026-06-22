@@ -6,7 +6,7 @@ class GlobalService {
 
   static final GlobalService instance = GlobalService._();
   static const String _authBoxName = 'auth_session';
-  static const String _meResponseKey = 'me_response';
+  static const String _currentUserKey = 'current_user';
 
   Box<dynamic>? _authBox;
   AuthUser? _currentUser;
@@ -18,11 +18,17 @@ class GlobalService {
   Future<void> initialize() async {
     await Hive.initFlutter();
     _authBox = await Hive.openBox<dynamic>(_authBoxName);
+
+    final cachedUser = _authBox?.get(_currentUserKey);
+    if (cachedUser is Map) {
+      _currentUser = AuthUser.fromMap(Map<String, dynamic>.from(cachedUser));
+    }
   }
 
-  void setSession({required AuthUser user, String? idToken}) {
+  Future<void> setSession({required AuthUser user, String? idToken}) async {
     _currentUser = user;
     _idToken = idToken;
+    await _authBox?.put(_currentUserKey, user.toMap());
   }
 
   void clearFirebaseSession() {
@@ -32,6 +38,6 @@ class GlobalService {
 
   Future<void> clearSession() async {
     clearFirebaseSession();
-    await _authBox?.delete(_meResponseKey);
+    await _authBox?.delete(_currentUserKey);
   }
 }

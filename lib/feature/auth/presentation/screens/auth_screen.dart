@@ -13,7 +13,7 @@ class AuthScreen extends StatelessWidget {
       backgroundColor: MyColor.logBackColor,
       body: Center(
         child: AnimatedContainer(
-          height: context.screenHeight * .5,
+          height: context.screenHeight * .45,
           width: context.screenWidth * .8,
           duration: const Duration(milliseconds: 300),
           decoration: BoxDecoration(

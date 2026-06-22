@@ -4,7 +4,6 @@ import 'package:fclub/core/util/my_dialog.dart';
 import 'package:fclub/feature/auth/data/model/auth_action_result.dart';
 import 'package:fclub/feature/auth/data/model/auth_user.dart';
 import 'package:fclub/feature/auth/data/repository/auth_repository.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SignInProvider with ChangeNotifier {
@@ -16,7 +15,6 @@ class SignInProvider with ChangeNotifier {
 
   AuthUser? _currentUser;
   bool _isSigningOut = false;
-  final bool _isDeletingAccount = false;
   String? _errorMessage;
   bool _isLoading = false;
 
@@ -24,46 +22,30 @@ class SignInProvider with ChangeNotifier {
   bool get isAuthenticated => _currentUser != null;
   bool get isLoading => _isLoading;
   bool get isSigningOut => _isSigningOut;
-  bool get isDeletingAccount => _isDeletingAccount;
   String? get errorMessage => _errorMessage;
-
-  void checkAuthState() {
-    final auth = FirebaseAuth.instance;
-    auth.authStateChanges().listen((User? user) {
-      if (user == null) {
-        print('User is currently signed out!');
-      } else {
-        print('User is signed in!');
-      }
-    });
-  }
 
   Future<void> signIn(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
-    final auth = FirebaseAuth.instance;
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
     try {
-      _isLoading = true;
-      notifyListeners();
-      await auth.signInWithEmailAndPassword(
+      _currentUser = await _authRepository.signInWithEmail(
         email: emailController.text.trim(),
         password: passController.text.trim(),
       );
-      _isLoading = false;
-      notifyListeners();
       MyDialog().showSuccessToast(
         msg: 'Logged in successfully!',
         context: context,
       );
-    } on FirebaseAuthException catch (err) {
+    } catch (error) {
+      _errorMessage = _toMessage(error);
+      MyDialog().showFailedToast(msg: _errorMessage!, context: context);
+    } finally {
       _isLoading = false;
       notifyListeners();
-      String message = 'An error occurred, please check your credentials!';
-      if (err.code == 'user-not-found') {
-        message = 'No user found for that email.';
-      } else if (err.code == 'wrong-password') {
-        message = 'Wrong password provided for that user.';
-      }
-      MyDialog().showFailedToast(msg: message, context: context);
     }
   }
 
@@ -102,8 +84,8 @@ class SignInProvider with ChangeNotifier {
     if (password.isEmpty) {
       return 'Password is required.';
     }
-    if (password.length < 4) {
-      return 'Password must be at least 8 characters.';
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters.';
     }
     return null;
   }

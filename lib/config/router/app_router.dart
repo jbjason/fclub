@@ -1,3 +1,5 @@
+import 'package:fclub/core/constants/my_color.dart';
+import 'package:fclub/feature/auth/data/model/auth_user.dart';
 import 'package:fclub/feature/auth/data/repository/auth_repository.dart';
 import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:fclub/feature/auth/presentation/screens/auth_screen.dart';
@@ -57,7 +59,7 @@ abstract class AppRouter {
 
       case AppRouteName.authGate:
       default:
-        return _materialRoute(settings: settings, child: const Home());
+        return _materialRoute(settings: settings, child: const _AuthGate());
     }
   }
 
@@ -80,5 +82,53 @@ class _RouteMessageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(body: Center(child: Text(message)));
+  }
+}
+
+/// Decides whether the user lands on [AuthScreen] or [Home].
+///
+/// Subscribes to [AuthRepository.authStateChanges] once and keeps reacting to
+/// it for the lifetime of the app, so both the initial auto-sign-in check and
+/// any later sign-in/sign-out transition are driven by the same stream.
+class _AuthGate extends StatefulWidget {
+  const _AuthGate();
+
+  @override
+  State<_AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<_AuthGate> {
+  late final Stream<AuthUser?> _authStateChanges = context
+      .read<AuthRepository>()
+      .authStateChanges();
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<AuthUser?>(
+      stream: _authStateChanges,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const _AuthGateLoading();
+        }
+        return snapshot.data != null
+            ? const Home()
+            : ChangeNotifierProvider(
+                create: (context) => SignInProvider(context.read<AuthRepository>()),
+                child: const AuthScreen(),
+              );
+      },
+    );
+  }
+}
+
+class _AuthGateLoading extends StatelessWidget {
+  const _AuthGateLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: MyColor.logBackColor,
+      body: Center(child: CircularProgressIndicator(color: Colors.white)),
+    );
   }
 }

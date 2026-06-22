@@ -2,9 +2,9 @@ import 'package:fclub/config/firebase/firebase_initializer.dart';
 import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/config/theme/app_theme.dart';
 import 'package:fclub/core/navigation/app_navigator.dart';
+import 'package:fclub/core/services/auth/firebase_auth_service.dart';
 import 'package:fclub/core/services/global_service.dart';
 import 'package:fclub/feature/auth/data/repository/auth_repository.dart';
-import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -23,8 +23,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => SignInProvider(context.read<AuthRepository>()),
+        Provider<FirebaseAuthService>(create: (_) => FirebaseAuthService()),
+        Provider<AuthRepository>(
+          create: (context) => AuthRepository(
+            firebaseAuthService: context.read<FirebaseAuthService>(),
+            globalService: GlobalService.instance,
+          ),
         ),
       ],
       child: ScreenUtilInit(
@@ -35,9 +39,8 @@ class MyApp extends StatelessWidget {
           title: 'Op Media',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(context),
-          initialRoute: //AppRouteName.dashboard,
-              AppRouteName.authGate,
-          // onGenerateRoute: AppRouter.onGenerateRoute,
+          initialRoute: AppRouteName.authGate,
+          onGenerateRoute: AppRouter.onGenerateRoute,
         ),
       ),
     );

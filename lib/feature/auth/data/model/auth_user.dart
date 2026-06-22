@@ -24,4 +24,24 @@ class AuthUser {
       emailVerified: user.emailVerified,
     );
   }
+
+  factory AuthUser.fromMap(Map<String, dynamic> map) {
+    return AuthUser(
+      uid: map['uid'] as String,
+      email: map['email'] as String?,
+      displayName: map['displayName'] as String?,
+      photoUrl: map['photoUrl'] as String?,
+      emailVerified: map['emailVerified'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'uid': uid,
+      'email': email,
+      'displayName': displayName,
+      'photoUrl': photoUrl,
+      'emailVerified': emailVerified,
+    };
+  }
 }
