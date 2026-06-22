@@ -13,6 +13,7 @@ class MyDialog {
     ElegantNotification.success(
       isDismissable: false,
       position: Alignment.topCenter,
+      width: MediaQuery.of(context).size.width - 32,
       toastDuration: const Duration(milliseconds: 2300),
       animation: AnimationType.fromTop,
       title: Text(
@@ -46,6 +47,7 @@ class MyDialog {
     ElegantNotification.info(
       isDismissable: false,
       position: Alignment.topCenter,
+      width: MediaQuery.of(context).size.width - 32,
       toastDuration: const Duration(milliseconds: 2300),
       animation: AnimationType.fromTop,
       title: Text(
@@ -106,6 +108,7 @@ class MyDialog {
         itemOffset: const Offset(0, 5),
       ),
       position: Alignment.topRight,
+      width: MediaQuery.of(context).size.width * 0.8,
       toastDuration: const Duration(milliseconds: 2300),
       animation: AnimationType.fromRight,
       title: Text(

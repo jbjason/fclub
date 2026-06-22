@@ -21,8 +21,8 @@ class _HomeState extends State<Home> {
     return Scaffold(
       body: IndexedStack(index: _currentPage, children: _pages),
       bottomNavigationBar: HomeNavBar(
-        currentPage: _currentPage,
-        onPageChange: _onPageChange,
+        currentIndex: _currentPage,
+        onTap: _onPageChange,
       ),
     );
   }
