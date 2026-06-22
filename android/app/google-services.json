@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "21742985984",
+    "project_id": "fclub-d4d8a",
+    "storage_bucket": "fclub-d4d8a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:21742985984:android:5f22862afd3a07d30289e5",
+        "android_client_info": {
+          "package_name": "com.thehalalway.fclub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeCOOS-kbPTCh9NMGS5j1k88PnqQ1XwQY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
