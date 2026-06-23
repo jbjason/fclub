@@ -5,6 +5,8 @@ import 'package:fclub/core/navigation/app_navigator.dart';
 import 'package:fclub/core/services/auth/firebase_auth_service.dart';
 import 'package:fclub/core/services/global_service.dart';
 import 'package:fclub/feature/auth/data/repository/auth_repository.dart';
+import 'package:fclub/feature/tour/data/hive_boxes.dart';
+import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +15,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FirebaseInitializer.initialize();
   await GlobalService.instance.initialize();
+  await TourHiveBoxes.openBoxes();
   runApp(const MyApp());
 }
 
@@ -30,6 +33,7 @@ class MyApp extends StatelessWidget {
             globalService: GlobalService.instance,
           ),
         ),
+        ChangeNotifierProvider(create: (_) => TourProvider()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),

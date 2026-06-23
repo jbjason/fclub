@@ -58,7 +58,7 @@ abstract class AppTheme {
   }
 
   // ═══════════════════════════════════════════════════════════
-  //  LIGHT THEME — Aurora Soft
+  //  LIGHT THEME — Violet Reign (Day)
   // ═══════════════════════════════════════════════════════════
   static ThemeData light(BuildContext context) => ThemeData(
     useMaterial3: true,
@@ -93,17 +93,17 @@ abstract class AppTheme {
 
     colorScheme: const ColorScheme(
       brightness: Brightness.light,
-      // Primary — Teal Mint
+      // Primary — Violet Blaze
       primary: MyColor.primary,
       onPrimary: MyColor.onPrimary,
       primaryContainer: MyColor.primaryContainer,
       onPrimaryContainer: MyColor.onPrimaryContainer,
-      // Secondary — Lavender
+      // Secondary — Electric Cyan
       secondary: MyColor.secondary,
       onSecondary: MyColor.onSecondary,
       secondaryContainer: MyColor.secondaryContainer,
       onSecondaryContainer: MyColor.onSecondaryContainer,
-      // Tertiary — Blush Pink
+      // Tertiary — Rose Red
       tertiary: MyColor.tertiary,
       onTertiary: MyColor.onTertiary,
       tertiaryContainer: MyColor.tertiaryContainer,
@@ -176,7 +176,7 @@ abstract class AppTheme {
   );
 
   // ═══════════════════════════════════════════════════════════
-  //  DARK THEME — Aurora Soft Night
+  //  DARK THEME — Violet Reign (Night)
   // ═══════════════════════════════════════════════════════════
   static ThemeData dark(BuildContext context) => ThemeData.dark().copyWith(
     visualDensity: visualDensity,
@@ -209,21 +209,21 @@ abstract class AppTheme {
 
     colorScheme: const ColorScheme(
       brightness: Brightness.dark,
-      // Primary — Teal Mint (same hue, dark-adapted)
+      // Primary — Violet Blaze (dark-adapted)
       primary: MyColor.primary,
-      onPrimary: MyColor.gray900,
-      primaryContainer: MyColor.onPrimaryFixed,   // #00352A deep teal
-      onPrimaryContainer: MyColor.primaryFixed,   // #CCF5EC mint cream
-      // Secondary — Lavender
-      secondary: MyColor.secondaryFixedDim,       // muted lavender
-      onSecondary: MyColor.gray900,
-      secondaryContainer: MyColor.onSecondaryFixed, // #3A1A72 deep purple
-      onSecondaryContainer: MyColor.secondaryFixed, // #F0EAFF
-      // Tertiary — Blush Pink
+      onPrimary: MyColor.onPrimary,
+      primaryContainer: MyColor.onPrimaryFixed,        // #20004A deep violet
+      onPrimaryContainer: MyColor.primaryFixed,        // #F5EEFF pale violet
+      // Secondary — Electric Cyan
+      secondary: MyColor.secondaryFixedDim,            // muted cyan
+      onSecondary: MyColor.onSecondary,
+      secondaryContainer: MyColor.onSecondaryFixed,    // #002A33 deep teal-black
+      onSecondaryContainer: MyColor.secondaryFixed,    // #E0FAFE
+      // Tertiary — Rose Red
       tertiary: MyColor.tertiary,
-      onTertiary: MyColor.gray900,
-      tertiaryContainer: MyColor.onTertiaryContainer, // #3D0020
-      onTertiaryContainer: MyColor.tertiaryContainer, // #FFD6E2
+      onTertiary: MyColor.onTertiary,
+      tertiaryContainer: MyColor.onTertiaryContainer,  // #4A0018
+      onTertiaryContainer: MyColor.tertiaryContainer,  // #FFE4E9
       // Error
       error: MyColor.darkError,
       onError: MyColor.gray900,
@@ -259,7 +259,7 @@ abstract class AppTheme {
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: MyColor.darkSurfaceContainerLow,
-      selectedItemColor: MyColor.primary,
+      selectedItemColor: MyColor.violetOnDark,
       unselectedItemColor: MyColor.darkOutline,
       type: BottomNavigationBarType.fixed,
       elevation: 0,
@@ -276,7 +276,7 @@ abstract class AppTheme {
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
           return const TextStyle(
-            color: MyColor.primary,
+            color: MyColor.violetOnDark,
             fontWeight: FontWeight.w600,
             fontSize: 12,
           );
@@ -286,7 +286,7 @@ abstract class AppTheme {
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: MyColor.primary,
-      foregroundColor: MyColor.gray900,
+      foregroundColor: MyColor.onPrimary,
       elevation: 2,
     ),
   );
@@ -299,9 +299,9 @@ abstract class AppTheme {
     BuildContext context, {
     required bool isDark,
   }) {
-    final Color high  = isDark ? MyColor.darkOnSurface       : MyColor.onSurface;
-    final Color mid   = isDark ? MyColor.darkOnSurfaceVariant: MyColor.onSurfaceVariant;
-    final Color muted = isDark ? MyColor.darkOutline          : MyColor.outline;
+    final Color high  = isDark ? MyColor.darkOnSurface        : MyColor.onSurface;
+    final Color mid   = isDark ? MyColor.darkOnSurfaceVariant : MyColor.onSurfaceVariant;
+    final Color muted = isDark ? MyColor.darkOutline           : MyColor.outline;
     final double ts   = responsiveTextScale(context);
 
     return TextTheme(
@@ -309,11 +309,13 @@ abstract class AppTheme {
         color: high, fontFamily: MyString.poppinsMedium,
         fontSize: getResponsiveTextSize(context, 32.sp, 30.sp, 40.sp) * ts,
         fontWeight: FontWeight.w700,
+        letterSpacing: -0.5,
       ),
       displayMedium: TextStyle(
         color: high, fontFamily: MyString.poppinsMedium,
         fontSize: getResponsiveTextSize(context, 28.sp, 26.sp, 36.sp) * ts,
         fontWeight: FontWeight.w600,
+        letterSpacing: -0.3,
       ),
       displaySmall: TextStyle(
         color: high, fontFamily: MyString.poppinsMedium,
@@ -324,6 +326,7 @@ abstract class AppTheme {
         color: high, fontFamily: MyString.poppinsMedium,
         fontSize: getResponsiveTextSize(context, 20.sp, 19.sp, 24.sp) * ts,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
       ),
       titleMedium: TextStyle(
         color: high, fontFamily: MyString.poppinsMedium,
@@ -339,11 +342,13 @@ abstract class AppTheme {
         color: high, fontFamily: MyString.rubikRegular,
         fontSize: getResponsiveTextSize(context, 16.sp, 15.sp, 18.sp) * ts,
         fontWeight: FontWeight.w400,
+        height: 1.6,
       ),
       bodyMedium: TextStyle(
         color: high, fontFamily: MyString.rubikRegular,
         fontSize: getResponsiveTextSize(context, 14.sp, 13.sp, 16.sp) * ts,
         fontWeight: FontWeight.w400,
+        height: 1.6,
       ),
       bodySmall: TextStyle(
         color: mid, fontFamily: MyString.rubikRegular,
@@ -354,6 +359,7 @@ abstract class AppTheme {
         color: mid, fontFamily: MyString.poppinsMedium,
         fontSize: getResponsiveTextSize(context, 14.sp, 13.sp, 16.sp) * ts,
         fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
       ),
       labelMedium: TextStyle(
         color: mid, fontFamily: MyString.poppinsRegular,
@@ -364,6 +370,7 @@ abstract class AppTheme {
         color: muted, fontFamily: MyString.poppinsRegular,
         fontSize: getResponsiveTextSize(context, 10.sp, 9.5.sp, 12.sp) * ts,
         fontWeight: FontWeight.w400,
+        letterSpacing: 0.4,
       ),
     );
   }
@@ -375,11 +382,11 @@ abstract class AppTheme {
     final double ts  = responsiveTextScale(context);
     final double sp  = responsiveSpacing(context);
     final double tm  = tabletSizeMultiplier(context);
-    final Color hintColor  = isDark ? MyColor.darkOutline       : MyColor.outline;
-    final Color labelColor = isDark ? MyColor.darkOnSurfaceVariant : MyColor.onSurfaceVariant;
-    final Color fillColor  = isDark ? MyColor.darkSurfaceContainerHigh : MyColor.surfaceContainerLowest;
-    final Color borderColor= isDark ? MyColor.darkOutlineVariant: MyColor.outlineVariant;
-    final Color errColor   = isDark ? MyColor.darkError         : MyColor.error;
+    final Color hintColor   = isDark ? MyColor.darkOutline         : MyColor.outline;
+    final Color labelColor  = isDark ? MyColor.darkOnSurfaceVariant: MyColor.onSurfaceVariant;
+    final Color fillColor   = isDark ? MyColor.darkSurfaceContainerHigh : MyColor.surfaceContainerLowest;
+    final Color borderColor = isDark ? MyColor.darkOutlineVariant   : MyColor.outlineVariant;
+    final Color errColor    = isDark ? MyColor.darkError            : MyColor.error;
 
     return InputDecorationTheme(
       isDense: true,
@@ -398,19 +405,19 @@ abstract class AppTheme {
         vertical: 10.h * sp, horizontal: 18.w * sp,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8.r * tm)),
+        borderRadius: BorderRadius.all(Radius.circular(10.r * tm)),
         borderSide: BorderSide(color: MyColor.primary, width: 1.5.w * tm),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8.r * tm)),
+        borderRadius: BorderRadius.all(Radius.circular(10.r * tm)),
         borderSide: BorderSide(color: borderColor, width: 1.0.w * tm),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8.r * tm)),
+        borderRadius: BorderRadius.all(Radius.circular(10.r * tm)),
         borderSide: BorderSide(color: errColor, width: 1.5.w * tm),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8.r * tm)),
+        borderRadius: BorderRadius.all(Radius.circular(10.r * tm)),
         borderSide: BorderSide(color: errColor, width: 1.5.w * tm),
       ),
     );
@@ -424,15 +431,18 @@ abstract class AppTheme {
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) return MyColor.gray300;
+          if (states.contains(WidgetState.pressed))  return MyColor.onPrimaryFixedVariant;
           return MyColor.primary;
         }),
         foregroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) return MyColor.gray500;
           return MyColor.onPrimary;
         }),
-        overlayColor: WidgetStateProperty.all(MyColor.onPrimary.withOpacity(0.12)),
+        overlayColor: WidgetStateProperty.all(
+          MyColor.onPrimary.withOpacity(0.10),
+        ),
         shape: WidgetStateProperty.all(RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.r * tm),
+          borderRadius: BorderRadius.circular(12.r * tm),
         )),
         padding: WidgetStateProperty.all(EdgeInsets.symmetric(
           vertical: 16.h * sp, horizontal: 24.w * sp,
@@ -441,11 +451,15 @@ abstract class AppTheme {
           fontSize: getResponsiveTextSize(context, 16.sp, 15.sp, 18.sp) * ts,
           fontFamily: MyString.poppinsMedium,
           fontWeight: FontWeight.w600,
+          letterSpacing: 0.3,
         )),
-        elevation: WidgetStateProperty.all(0),
+        elevation: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) return 0;
+          return 0;
+        }),
         minimumSize: WidgetStateProperty.all(Size(
           getResponsiveSize(context, 100.w, 85.w, 120.w),
-          getResponsiveSize(context, 44.h, 40.h, 52.h),
+          getResponsiveSize(context, 48.h, 42.h, 56.h),
         )),
       ),
     );
@@ -458,18 +472,24 @@ abstract class AppTheme {
     final double ts = responsiveTextScale(context);
     final double sp = responsiveSpacing(context);
     final double tm = tabletSizeMultiplier(context);
-    final Color borderCol = isDark ? MyColor.darkOutlineVariant : MyColor.outlineVariant;
+    final Color borderCol = isDark ? MyColor.violetOnDark : MyColor.primary;
     return OutlinedButtonThemeData(
       style: ButtonStyle(
-        foregroundColor: WidgetStateProperty.all(MyColor.primary),
+        foregroundColor: WidgetStateProperty.all(
+          isDark ? MyColor.violetOnDark : MyColor.primary,
+        ),
         side: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.focused)) {
+          if (states.contains(WidgetState.focused) ||
+              states.contains(WidgetState.pressed)) {
             return BorderSide(color: MyColor.primary, width: 1.5.w * tm);
           }
-          return BorderSide(color: borderCol, width: 1.0.w * tm);
+          return BorderSide(
+            color: borderCol.withOpacity(0.5),
+            width: 1.0.w * tm,
+          );
         }),
         shape: WidgetStateProperty.all(RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.r * tm),
+          borderRadius: BorderRadius.circular(12.r * tm),
         )),
         padding: WidgetStateProperty.all(EdgeInsets.symmetric(
           vertical: 14.h * sp, horizontal: 22.w * sp,
@@ -478,10 +498,11 @@ abstract class AppTheme {
           fontSize: getResponsiveTextSize(context, 15.sp, 14.sp, 17.sp) * ts,
           fontFamily: MyString.poppinsMedium,
           fontWeight: FontWeight.w500,
+          letterSpacing: 0.2,
         )),
         minimumSize: WidgetStateProperty.all(Size(
           getResponsiveSize(context, 100.w, 85.w, 120.w),
-          getResponsiveSize(context, 44.h, 40.h, 52.h),
+          getResponsiveSize(context, 48.h, 42.h, 56.h),
         )),
       ),
     );
@@ -493,11 +514,14 @@ abstract class AppTheme {
     return TextButtonThemeData(
       style: ButtonStyle(
         foregroundColor: WidgetStateProperty.all(MyColor.secondary),
-        overlayColor: WidgetStateProperty.all(MyColor.secondary.withOpacity(0.08)),
+        overlayColor: WidgetStateProperty.all(
+          MyColor.secondary.withOpacity(0.08),
+        ),
         textStyle: WidgetStateProperty.all(TextStyle(
           fontSize: getResponsiveTextSize(context, 14.sp, 13.sp, 16.sp) * ts,
           fontFamily: MyString.poppinsMedium,
           fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
         )),
         padding: WidgetStateProperty.all(EdgeInsets.symmetric(
           vertical: 8.h * sp, horizontal: 16.w * sp,
@@ -524,14 +548,16 @@ abstract class AppTheme {
       ),
       secondaryLabelStyle: TextStyle(
         fontSize: 12.sp,
-        color: MyColor.onPrimaryContainer,
+        color: isDark ? MyColor.primaryFixed : MyColor.onPrimaryContainer,
         fontFamily: MyString.poppinsRegular,
       ),
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.r),
         side: BorderSide(
-          color: isDark ? MyColor.darkOutlineVariant : MyColor.outlineVariant,
+          color: isDark
+              ? MyColor.primary.withOpacity(0.3)
+              : MyColor.outlineVariant,
           width: 0.5,
         ),
       ),

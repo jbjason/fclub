@@ -10,8 +10,8 @@ class SignInProvider with ChangeNotifier {
   SignInProvider(this._authRepository);
   final AuthRepository _authRepository;
   final formKey = GlobalKey<FormState>();
-  final emailController = TextEditingController();
-  final passController = TextEditingController();
+  final emailController = TextEditingController(text: "jb@gmail.com");
+  final passController = TextEditingController(text: "123456");
 
   AuthUser? _currentUser;
   bool _isSigningOut = false;
