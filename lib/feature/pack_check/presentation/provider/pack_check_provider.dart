@@ -206,6 +206,12 @@ class PackCheckProvider extends ChangeNotifier {
 
   // ── History management ────────────────────────────────────────────────────
 
+  Future<void> deleteSession(String id) async {
+    await _repo.deleteSession(id);
+    _history = _repo.loadCompletedSessions();
+    notifyListeners();
+  }
+
   Future<void> clearHistory() async {
     await _repo.clearHistory();
     _load();

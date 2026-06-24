@@ -141,31 +141,33 @@ class _PackItemCardState extends State<PackItemCard>
                 ),
               ),
               // Content
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 10.h),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Icon or photo
-                    _ItemVisual(item: widget.item, isPacked: packed),
-                    SizedBox(height: 6.h),
-                    // Name label
-                    Text(
-                      widget.item.name,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Poppins_Medium',
-                        fontSize: 10.sp,
-                        height: 1.2,
-                        color: packed
-                            ? Colors.white
-                            : Colors.white.withOpacity(0.55),
-                        letterSpacing: 0.2,
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 10.h),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Icon or photo
+                      _ItemVisual(item: widget.item, isPacked: packed),
+                      SizedBox(height: 6.h),
+                      // Name label
+                      Text(
+                        widget.item.name,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Poppins_Medium',
+                          fontSize: 10.sp,
+                          height: 1.2,
+                          color: packed
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.55),
+                          letterSpacing: 0.2,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               // Packed checkmark badge

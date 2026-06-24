@@ -10,12 +10,18 @@ class PackAddItemDialog extends StatefulWidget {
   const PackAddItemDialog({super.key});
 
   /// Opens the dialog as a modal bottom sheet.
+  /// Captures the provider before the new route is pushed so the sheet's
+  /// isolated widget-tree can still access [PackCheckProvider].
   static Future<void> show(BuildContext context) {
+    final provider = context.read<PackCheckProvider>();
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const PackAddItemDialog(),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: provider,
+        child: const PackAddItemDialog(),
+      ),
     );
   }
 
