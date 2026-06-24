@@ -42,7 +42,7 @@ class AuthTextField extends StatelessWidget {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
-              contentPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 12),
+              contentPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
               errorStyle: TextStyle(color: Colors.white, fontSize: 11),
               errorBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: Colors.grey),

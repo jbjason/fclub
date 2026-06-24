@@ -1,11 +1,12 @@
 import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:fclub/feature/auth/presentation/widgets/auth_buttons.dart';
+import 'package:fclub/feature/auth/presentation/widgets/auth_sign_in_text.dart';
 import 'package:fclub/feature/auth/presentation/widgets/auth_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AuhtBody extends StatelessWidget {
-  const AuhtBody({super.key});
+class AuthBody extends StatelessWidget {
+  const AuthBody({super.key});
   @override
   Widget build(BuildContext context) {
     return Consumer<SignInProvider>(
@@ -15,16 +16,17 @@ class AuhtBody extends StatelessWidget {
           child: Column(
             children: [
               // login text & Image circleAvatar
-              Center(
-                child: Text(
-                  'LOGIN',
-                  style: const TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white70,
-                  ),
-                ),
-              ),
+              // Center(
+              //   child: Text(
+              //     'LOGIN',
+              //     style: const TextStyle(
+              //       fontSize: 25,
+              //       fontWeight: FontWeight.bold,
+              //       color: Colors.white70,
+              //     ),
+              //   ),
+              // ),
+              SignInTextStyle(),
               const SizedBox(height: 36),
               // email textfield
               AuthTextField(

@@ -27,7 +27,11 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.card_travel_rounded, size: 56.r, color: MyColor.primary),
+              Icon(
+                Icons.card_travel_rounded,
+                size: 56.r,
+                color: MyColor.primary,
+              ),
               SizedBox(height: 12.h),
               Text(
                 'Tour Expense Splitter',
@@ -43,6 +47,22 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () => _openTour(context),
                 icon: const Icon(Icons.receipt_long_rounded),
                 label: const Text('Open Tour Dashboard'),
+              ),
+              SizedBox(height: 20.h),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRouteName.kurbani);
+                },
+                icon: const Icon(Icons.receipt_long_rounded),
+                label: const Text('Open Kurbani'),
+              ),
+              SizedBox(height: 20.h),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRouteName.packCheck);
+                },
+                icon: const Icon(Icons.backpack_rounded),
+                label: const Text('Carry Check'),
               ),
             ],
           ),

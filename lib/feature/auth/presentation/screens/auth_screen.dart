@@ -13,8 +13,7 @@ class AuthScreen extends StatelessWidget {
       backgroundColor: MyColor.logBackColor,
       body: Center(
         child: AnimatedContainer(
-          height: context.screenHeight * .45,
-          width: context.screenWidth * .8,
+          width: context.screenWidth * .85,
           duration: const Duration(milliseconds: 300),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(7),
@@ -27,7 +26,7 @@ class AuthScreen extends StatelessWidget {
           child: ClipPath(
             clipper: AuthClipper(),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 35),
+              padding: const EdgeInsets.only(left: 35, right: 35, top: 5, bottom: 40),
               decoration: BoxDecoration(
                 color: MyColor.logBackColor,
                 border: Border.all(color: Colors.black),
@@ -36,7 +35,7 @@ class AuthScreen extends StatelessWidget {
                   bottomRight: Radius.circular(30),
                 ),
               ),
-              child: AuhtBody(),
+              child: AuthBody(),
             ),
           ),
         ),
