@@ -7,6 +7,7 @@ import 'package:fclub/feature/home/presentation/screens/home.dart';
 import 'package:fclub/feature/kurbani/presentation/screens/kurbani_screen.dart';
 import 'package:fclub/feature/pack_check/presentation/screens/pack_check_screen.dart';
 import 'package:fclub/feature/tour/presentation/screens/tour_cost_manage_screen.dart';
+import 'package:fclub/feature/tour/presentation/screens/tour_history_screen.dart';
 import 'package:fclub/feature/tour/presentation/screens/tour_setup_screen.dart';
 import 'package:fclub/feature/tour/presentation/screens/tour_summary_screen.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class AppRouteName {
   static const String kurbani = '/home/kurbani';
   static const String tourSetup = '/home/tour-setup';
   static const String tourCostManage = '/home/tour-cost-manage';
+  static const String tourManage = '/home/tour-cost-manage/session';
   static const String tourSummary = '/home/tour-cost-manage/summary';
   static const String packCheck = '/home/carry-check';
 }
@@ -42,6 +44,11 @@ abstract class AppRouter {
           child: const TourSetupScreen(),
         );
       case AppRouteName.tourCostManage:
+        return _materialRoute(
+          settings: settings,
+          child: const TourHistoryScreen(),
+        );
+      case AppRouteName.tourManage:
         return _materialRoute(
           settings: settings,
           child: const TourCostManageScreen(),

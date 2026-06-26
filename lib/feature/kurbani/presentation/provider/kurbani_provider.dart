@@ -2,7 +2,9 @@ import 'package:fclub/feature/kurbani/data/kurbani_calculator.dart';
 import 'package:fclub/feature/kurbani/data/kurbani_hive_boxes.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_animal_part_model.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_expense_model.dart';
+import 'package:fclub/feature/kurbani/data/model/kurbani_global_contact.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_member_model.dart';
+import 'package:fclub/feature/kurbani/data/model/kurbani_session.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_summary.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -10,42 +12,64 @@ import 'package:uuid/uuid.dart';
 
 class KurbaniProvider with ChangeNotifier {
   KurbaniProvider()
-      : _membersBox =
-            Hive.box<KurbaniMemberModel>(KurbaniHiveBoxes.membersBox),
-        _expensesBox =
-            Hive.box<KurbaniExpenseModel>(KurbaniHiveBoxes.expensesBox),
-        _animalPartsBox = Hive.box<KurbaniAnimalPartModel>(
-          KurbaniHiveBoxes.animalPartsBox,
-        ),
-        _metaBox = Hive.box<dynamic>(KurbaniHiveBoxes.metaBox);
+      : _sessionsBox =
+            Hive.box<KurbaniSession>(KurbaniHiveBoxes.sessionsBox),
+        _contactsBox =
+            Hive.box<KurbaniGlobalContact>(KurbaniHiveBoxes.contactsBox) {
+    _load();
+  }
 
-  static const _budgetPerMemberKey = 'budget_per_member';
-  static const _groupNameKey = 'group_name';
-
-  final Box<KurbaniMemberModel> _membersBox;
-  final Box<KurbaniExpenseModel> _expensesBox;
-  final Box<KurbaniAnimalPartModel> _animalPartsBox;
-  final Box<dynamic> _metaBox;
+  final Box<KurbaniSession> _sessionsBox;
+  final Box<KurbaniGlobalContact> _contactsBox;
   final _uuid = const Uuid();
 
-  // ── Getters ────────────────────────────────────────────────
+  KurbaniSession? _activeSession;
+  List<KurbaniSession> _history = [];
 
-  String get groupName =>
-      (_metaBox.get(_groupNameKey) as String?) ?? 'Kurbani 1446 H';
+  // ── Init ──────────────────────────────────────────────────────────────────
 
-  double get budgetPerMember =>
-      (_metaBox.get(_budgetPerMemberKey) as num?)?.toDouble() ?? 3000.0;
+  void _load() {
+    final all = _sessionsBox.values.toList();
+    final active = all.where((s) => !s.isCompleted).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    _activeSession = active.isNotEmpty ? active.first : null;
+    _history = all.where((s) => s.isCompleted).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    notifyListeners();
+  }
 
-  bool get hasDemoData => _membersBox.isNotEmpty;
+  // ── Public getters ─────────────────────────────────────────────────────────
 
-  List<KurbaniMemberModel> get members => _membersBox.values.toList();
+  bool get hasActiveSession => _activeSession != null;
+  KurbaniSession? get activeSession => _activeSession;
+  List<KurbaniSession> get history => List.unmodifiable(_history);
+  List<KurbaniGlobalContact> get contacts => _contactsBox.values.toList();
+  KurbaniGlobalContact? get meContact =>
+      _contactsBox.values.where((c) => c.isMe).firstOrNull;
+  bool get hasDemoData =>
+      _sessionsBox.isNotEmpty || _contactsBox.isNotEmpty;
 
-  List<KurbaniExpenseModel> get expenses => _expensesBox.values.toList()
-    ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+  // ── Delegated getters for active session ──────────────────────────────────
 
-  List<KurbaniAnimalPartModel> get animalParts =>
-      _animalPartsBox.values.toList()
-        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+  String get groupName => _activeSession?.groupName ?? '';
+  double get budgetPerMember => _activeSession?.budgetPerMember ?? 3000.0;
+
+  List<KurbaniMemberModel> get members =>
+      List<KurbaniMemberModel>.from(_activeSession?.members ?? []);
+
+  List<KurbaniExpenseModel> get expenses {
+    final list =
+        List<KurbaniExpenseModel>.from(_activeSession?.expenses ?? []);
+    list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return list;
+  }
+
+  List<KurbaniAnimalPartModel> get animalParts {
+    final list =
+        List<KurbaniAnimalPartModel>.from(_activeSession?.animalParts ?? []);
+    list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return list;
+  }
 
   KurbaniSummary get summary => KurbaniCalculator.calculate(
         members: members,
@@ -56,144 +80,300 @@ class KurbaniProvider with ChangeNotifier {
   double get totalAnimalWeight =>
       animalParts.fold<double>(0, (s, p) => s + p.weightKg);
 
-  // ── Demo seed ──────────────────────────────────────────────
+  // ── Demo seed ──────────────────────────────────────────────────────────────
 
   Future<void> seedDemoData() async {
     if (hasDemoData) return;
+    await _seedContacts();
+    await _seedHistorySessions();
+    _load();
+  }
 
-    await _metaBox.put(_groupNameKey, 'Kurbani 1446 H');
-    await _metaBox.put(_budgetPerMemberKey, 3000.0);
-
-    final demoMembers = [
-      KurbaniMemberModel(
-          id: 'k1',
-          name: 'Ahmed Hassan',
-          avatarColorIndex: 0,
-          contribution: 3000),
-      KurbaniMemberModel(
-          id: 'k2',
-          name: 'Fatima Ali',
-          avatarColorIndex: 1,
-          contribution: 3000),
-      KurbaniMemberModel(
-          id: 'k3',
-          name: 'Mohammad Reza',
-          avatarColorIndex: 2,
-          contribution: 3000),
-      KurbaniMemberModel(
-          id: 'k4',
-          name: 'Aisha Khan',
-          avatarColorIndex: 3,
-          contribution: 2500),
-      KurbaniMemberModel(
-          id: 'k5',
-          name: 'Ibrahim Siddique',
-          avatarColorIndex: 4,
-          contribution: 3000),
-      KurbaniMemberModel(
-          id: 'k6',
-          name: 'Mariam Yusuf',
-          avatarColorIndex: 5,
-          contribution: 3000),
-      KurbaniMemberModel(
-          id: 'k7',
-          name: 'Omar Abdullah',
-          avatarColorIndex: 6,
-          contribution: 3000),
+  Future<void> _seedContacts() async {
+    final list = [
+      KurbaniGlobalContact(
+          id: 'me', name: 'You', avatarColorIndex: 0, isMe: true),
+      KurbaniGlobalContact(
+          id: 'c1', name: 'Ahmed Hassan', avatarColorIndex: 1),
+      KurbaniGlobalContact(id: 'c2', name: 'Fatima Ali', avatarColorIndex: 2),
+      KurbaniGlobalContact(
+          id: 'c3', name: 'Mohammad Reza', avatarColorIndex: 3),
+      KurbaniGlobalContact(id: 'c4', name: 'Aisha Khan', avatarColorIndex: 4),
+      KurbaniGlobalContact(
+          id: 'c5', name: 'Ibrahim Siddique', avatarColorIndex: 5),
+      KurbaniGlobalContact(
+          id: 'c6', name: 'Mariam Yusuf', avatarColorIndex: 6),
+      KurbaniGlobalContact(
+          id: 'c7', name: 'Omar Abdullah', avatarColorIndex: 0),
+      KurbaniGlobalContact(
+          id: 'c8', name: 'Sara Rahman', avatarColorIndex: 1),
+      KurbaniGlobalContact(
+          id: 'c9', name: 'Yusuf Malik', avatarColorIndex: 2),
+      KurbaniGlobalContact(
+          id: 'c10', name: 'Khadija Hossain', avatarColorIndex: 3),
+      KurbaniGlobalContact(id: 'c11', name: 'Ali Karim', avatarColorIndex: 4),
     ];
-    for (final m in demoMembers) {
-      await _membersBox.put(m.id, m);
+    for (final c in list) {
+      await _contactsBox.put(c.id, c);
     }
+  }
 
-    final now = DateTime.now();
-    final demoExpenses = [
-      KurbaniExpenseModel(
-        id: 'e1',
-        title: 'Cow Purchase',
-        amount: 18000,
-        paidByMemberId: 'k1',
-        timestamp: now.subtract(const Duration(days: 2)),
-        note: 'Local cattle market',
-      ),
-      KurbaniExpenseModel(
-        id: 'e2',
-        title: 'Butcher Fee',
-        amount: 2000,
-        paidByMemberId: 'k3',
-        timestamp: now.subtract(const Duration(days: 1)),
-      ),
-      KurbaniExpenseModel(
-        id: 'e3',
-        title: 'Transport',
-        amount: 500,
-        paidByMemberId: 'k4',
-        timestamp: now.subtract(const Duration(days: 1)),
-        note: 'Pickup truck rental',
-      ),
-      KurbaniExpenseModel(
-        id: 'e4',
-        title: 'Salt & Spices',
-        amount: 300,
-        paidByMemberId: 'k5',
-        timestamp: now,
-      ),
+  Future<void> _seedHistorySessions() async {
+    final s2023 = KurbaniSession(
+      id: 'hist_2023',
+      groupName: 'Kurbani 1444 H',
+      budgetPerMember: 2500,
+      createdAt: DateTime(2023, 6, 28),
+      isCompleted: true,
+      members: [
+        KurbaniMemberModel(
+            id: 'me', name: 'You', avatarColorIndex: 0, contribution: 2500),
+        KurbaniMemberModel(
+            id: 'c1',
+            name: 'Ahmed Hassan',
+            avatarColorIndex: 1,
+            contribution: 2500),
+        KurbaniMemberModel(
+            id: 'c2',
+            name: 'Fatima Ali',
+            avatarColorIndex: 2,
+            contribution: 2500),
+        KurbaniMemberModel(
+            id: 'c3',
+            name: 'Mohammad Reza',
+            avatarColorIndex: 3,
+            contribution: 2500),
+        KurbaniMemberModel(
+            id: 'c4',
+            name: 'Aisha Khan',
+            avatarColorIndex: 4,
+            contribution: 2000),
+        KurbaniMemberModel(
+            id: 'c5',
+            name: 'Ibrahim Siddique',
+            avatarColorIndex: 5,
+            contribution: 2500),
+      ],
+      expenses: [
+        KurbaniExpenseModel(
+            id: 'h23_e1',
+            title: 'Cow Purchase',
+            amount: 13000,
+            paidByMemberId: 'me',
+            timestamp: DateTime(2023, 6, 28),
+            note: 'Local cattle market'),
+        KurbaniExpenseModel(
+            id: 'h23_e2',
+            title: 'Butcher Fee',
+            amount: 1200,
+            paidByMemberId: 'c1',
+            timestamp: DateTime(2023, 6, 28)),
+        KurbaniExpenseModel(
+            id: 'h23_e3',
+            title: 'Transport',
+            amount: 400,
+            paidByMemberId: 'c3',
+            timestamp: DateTime(2023, 6, 28)),
+      ],
+      animalParts: [
+        KurbaniAnimalPartModel(
+            id: 'h23_p1',
+            partName: 'Meat',
+            weightKg: 72.0,
+            timestamp: DateTime(2023, 6, 28)),
+        KurbaniAnimalPartModel(
+            id: 'h23_p2',
+            partName: 'Bone',
+            weightKg: 28.0,
+            timestamp: DateTime(2023, 6, 28)),
+        KurbaniAnimalPartModel(
+            id: 'h23_p3',
+            partName: 'Liver',
+            weightKg: 5.0,
+            timestamp: DateTime(2023, 6, 28)),
+      ],
+    );
+
+    final s2024 = KurbaniSession(
+      id: 'hist_2024',
+      groupName: 'Kurbani 1445 H',
+      budgetPerMember: 3000,
+      createdAt: DateTime(2024, 6, 17),
+      isCompleted: true,
+      members: [
+        KurbaniMemberModel(
+            id: 'me', name: 'You', avatarColorIndex: 0, contribution: 3000),
+        KurbaniMemberModel(
+            id: 'c1',
+            name: 'Ahmed Hassan',
+            avatarColorIndex: 1,
+            contribution: 3000),
+        KurbaniMemberModel(
+            id: 'c2',
+            name: 'Fatima Ali',
+            avatarColorIndex: 2,
+            contribution: 3000),
+        KurbaniMemberModel(
+            id: 'c3',
+            name: 'Mohammad Reza',
+            avatarColorIndex: 3,
+            contribution: 3000),
+        KurbaniMemberModel(
+            id: 'c4',
+            name: 'Aisha Khan',
+            avatarColorIndex: 4,
+            contribution: 2500),
+        KurbaniMemberModel(
+            id: 'c5',
+            name: 'Ibrahim Siddique',
+            avatarColorIndex: 5,
+            contribution: 3000),
+        KurbaniMemberModel(
+            id: 'c6',
+            name: 'Mariam Yusuf',
+            avatarColorIndex: 6,
+            contribution: 3000),
+        KurbaniMemberModel(
+            id: 'c7',
+            name: 'Omar Abdullah',
+            avatarColorIndex: 0,
+            contribution: 3000),
+      ],
+      expenses: [
+        KurbaniExpenseModel(
+            id: 'h24_e1',
+            title: 'Cow Purchase',
+            amount: 20000,
+            paidByMemberId: 'me',
+            timestamp: DateTime(2024, 6, 17),
+            note: 'Local cattle market'),
+        KurbaniExpenseModel(
+            id: 'h24_e2',
+            title: 'Butcher Fee',
+            amount: 2000,
+            paidByMemberId: 'c1',
+            timestamp: DateTime(2024, 6, 17)),
+        KurbaniExpenseModel(
+            id: 'h24_e3',
+            title: 'Transport',
+            amount: 500,
+            paidByMemberId: 'c3',
+            timestamp: DateTime(2024, 6, 17)),
+        KurbaniExpenseModel(
+            id: 'h24_e4',
+            title: 'Salt & Spices',
+            amount: 350,
+            paidByMemberId: 'c5',
+            timestamp: DateTime(2024, 6, 17)),
+      ],
+      animalParts: [
+        KurbaniAnimalPartModel(
+            id: 'h24_p1',
+            partName: 'Meat',
+            weightKg: 90.0,
+            timestamp: DateTime(2024, 6, 17)),
+        KurbaniAnimalPartModel(
+            id: 'h24_p2',
+            partName: 'Bone',
+            weightKg: 38.0,
+            timestamp: DateTime(2024, 6, 17)),
+        KurbaniAnimalPartModel(
+            id: 'h24_p3',
+            partName: 'Liver',
+            weightKg: 6.5,
+            timestamp: DateTime(2024, 6, 17)),
+        KurbaniAnimalPartModel(
+            id: 'h24_p4',
+            partName: 'Ribs',
+            weightKg: 14.0,
+            timestamp: DateTime(2024, 6, 17)),
+      ],
+    );
+
+    await _sessionsBox.put(s2023.id, s2023);
+    await _sessionsBox.put(s2024.id, s2024);
+  }
+
+  // ── Session lifecycle ──────────────────────────────────────────────────────
+
+  Future<void> createSession({
+    required String groupName,
+    required double budgetPerMember,
+    required List<String> selectedContactIds,
+  }) async {
+    final meId = meContact?.id;
+    final ids = [
+      if (meId != null && !selectedContactIds.contains(meId)) meId,
+      ...selectedContactIds,
     ];
-    for (final e in demoExpenses) {
-      await _expensesBox.put(e.id, e);
-    }
 
-    final demoParts = [
-      KurbaniAnimalPartModel(
-          id: 'p1', partName: 'Meat', weightKg: 85.0, timestamp: now),
-      KurbaniAnimalPartModel(
-          id: 'p2', partName: 'Bone', weightKg: 35.0, timestamp: now),
-      KurbaniAnimalPartModel(
-          id: 'p3', partName: 'Liver', weightKg: 6.0, timestamp: now),
-      KurbaniAnimalPartModel(
-          id: 'p4', partName: 'Ribs', weightKg: 12.0, timestamp: now),
-      KurbaniAnimalPartModel(
-          id: 'p5', partName: 'Offal', weightKg: 4.0, timestamp: now),
-      KurbaniAnimalPartModel(
-          id: 'p6', partName: 'Head', weightKg: 8.0, timestamp: now),
-      KurbaniAnimalPartModel(
-          id: 'p7', partName: 'Feet', weightKg: 4.0, timestamp: now),
-    ];
-    for (final p in demoParts) {
-      await _animalPartsBox.put(p.id, p);
-    }
+    final members = ids.map((id) {
+      final contact = _contactsBox.get(id);
+      if (contact == null) return null;
+      return KurbaniMemberModel(
+        id: contact.id,
+        name: contact.isMe ? 'You (${contact.name})' : contact.name,
+        avatarColorIndex: contact.avatarColorIndex,
+        contribution: budgetPerMember,
+      );
+    }).whereType<KurbaniMemberModel>().toList();
 
+    final session = KurbaniSession(
+      id: _uuid.v4(),
+      groupName: groupName,
+      budgetPerMember: budgetPerMember,
+      createdAt: DateTime.now(),
+      members: members,
+      expenses: [],
+      animalParts: [],
+    );
+    await _sessionsBox.put(session.id, session);
+    _activeSession = session;
     notifyListeners();
   }
 
-  // ── Members ────────────────────────────────────────────────
+  Future<void> deleteSession(String sessionId) async {
+    await _sessionsBox.delete(sessionId);
+    _history.removeWhere((s) => s.id == sessionId);
+    if (_activeSession?.id == sessionId) _activeSession = null;
+    notifyListeners();
+  }
+
+  // ── Members in active session ──────────────────────────────────────────────
 
   Future<void> addMember(String name) async {
-    final id = _uuid.v4();
-    final colorIndex = _membersBox.length % _avatarGradientCount;
-    final member = KurbaniMemberModel(
-      id: id,
+    final session = _activeSession;
+    if (session == null) return;
+    final colorIndex = session.members.length % _avatarGradientCount;
+    session.members.add(KurbaniMemberModel(
+      id: _uuid.v4(),
       name: name,
       avatarColorIndex: colorIndex,
-      contribution: budgetPerMember,
-    );
-    await _membersBox.put(id, member);
+      contribution: session.budgetPerMember,
+    ));
+    await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
 
   Future<void> updateContribution(String memberId, double amount) async {
-    final member = _membersBox.get(memberId);
-    if (member == null) return;
-    member.contribution = amount;
-    await member.save();
+    final session = _activeSession;
+    if (session == null) return;
+    final idx = session.members.indexWhere((m) => m.id == memberId);
+    if (idx == -1) return;
+    session.members[idx].contribution = amount;
+    await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
 
   Future<void> deleteMember(String memberId) async {
-    await _membersBox.delete(memberId);
+    final session = _activeSession;
+    if (session == null) return;
+    session.members.removeWhere((m) => m.id == memberId);
+    await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
 
-  // ── Expenses ───────────────────────────────────────────────
+  // ── Expenses ───────────────────────────────────────────────────────────────
 
   Future<void> addExpense({
     required String title,
@@ -201,57 +381,71 @@ class KurbaniProvider with ChangeNotifier {
     required String paidByMemberId,
     String? note,
   }) async {
-    final id = _uuid.v4();
-    final expense = KurbaniExpenseModel(
-      id: id,
+    final session = _activeSession;
+    if (session == null) return;
+    session.expenses.add(KurbaniExpenseModel(
+      id: _uuid.v4(),
       title: title,
       amount: amount,
       paidByMemberId: paidByMemberId,
       timestamp: DateTime.now(),
       note: note,
-    );
-    await _expensesBox.put(id, expense);
+    ));
+    await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
 
   Future<void> deleteExpense(String expenseId) async {
-    await _expensesBox.delete(expenseId);
+    final session = _activeSession;
+    if (session == null) return;
+    session.expenses.removeWhere((e) => e.id == expenseId);
+    await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
 
-  // ── Animal Parts ───────────────────────────────────────────
+  // ── Animal parts ───────────────────────────────────────────────────────────
 
   Future<void> addAnimalPart({
     required String partName,
     required double weightKg,
     String? note,
   }) async {
-    final id = _uuid.v4();
-    final part = KurbaniAnimalPartModel(
-      id: id,
+    final session = _activeSession;
+    if (session == null) return;
+    session.animalParts.add(KurbaniAnimalPartModel(
+      id: _uuid.v4(),
       partName: partName,
       weightKg: weightKg,
       timestamp: DateTime.now(),
       note: note,
-    );
-    await _animalPartsBox.put(id, part);
+    ));
+    await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
 
   Future<void> deleteAnimalPart(String partId) async {
-    await _animalPartsBox.delete(partId);
+    final session = _activeSession;
+    if (session == null) return;
+    session.animalParts.removeWhere((p) => p.id == partId);
+    await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
 
-  // ── Settings ───────────────────────────────────────────────
+  // ── Settings on active session ─────────────────────────────────────────────
 
   Future<void> updateBudgetPerMember(double amount) async {
-    await _metaBox.put(_budgetPerMemberKey, amount);
+    final session = _activeSession;
+    if (session == null) return;
+    session.budgetPerMember = amount;
+    await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
 
   Future<void> updateGroupName(String name) async {
-    await _metaBox.put(_groupNameKey, name);
+    final session = _activeSession;
+    if (session == null) return;
+    session.groupName = name;
+    await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
 }
