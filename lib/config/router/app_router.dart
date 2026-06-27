@@ -6,6 +6,7 @@ import 'package:fclub/feature/auth/presentation/screens/auth_screen.dart';
 import 'package:fclub/feature/club/presentation/screens/club_history_screen.dart';
 import 'package:fclub/feature/home/presentation/screens/home.dart';
 import 'package:fclub/feature/kurbani/presentation/screens/kurbani_screen.dart';
+import 'package:fclub/feature/locker/presentation/screens/locker_screen.dart';
 import 'package:fclub/feature/pack_check/presentation/screens/pack_check_screen.dart';
 import 'package:fclub/feature/tour/presentation/screens/tour_cost_manage_screen.dart';
 import 'package:fclub/feature/tour/presentation/screens/tour_history_screen.dart';
@@ -20,6 +21,7 @@ class AppRouteName {
   static const String profileDetails = '/settings/profile-details';
   static const String home = '/home';
   static const String club = '/home/club';
+  static const String locker = '/home/locker';
   static const String kurbani = '/home/kurbani';
   static const String tourCostManage = '/home/tour-cost-manage';
   static const String tourManage = '/home/tour-cost-manage/session';
@@ -56,6 +58,8 @@ abstract class AppRouter {
 
       case AppRouteName.club:
         return _materialRoute(settings: settings, child: const ClubHistoryScreen());
+      case AppRouteName.locker:
+        return _materialRoute(settings: settings, child: const LockerScreen());
       case AppRouteName.kurbani:
         return _materialRoute(settings: settings, child: const KurbaniScreen());
       case AppRouteName.packCheck:

@@ -27,6 +27,14 @@ class HomeScreen extends StatelessWidget {
               SizedBox(height: 12.h),
               ElevatedButton.icon(
                 onPressed: () {
+                  Navigator.pushNamed(context, AppRouteName.locker);
+                },
+                icon: const Icon(Icons.lock_outline_rounded),
+                label: const Text('Locker'),
+              ),
+              SizedBox(height: 20.h),
+              ElevatedButton.icon(
+                onPressed: () {
                   Navigator.pushNamed(context, AppRouteName.club);
                 },
                 icon: const Icon(Icons.savings_rounded),

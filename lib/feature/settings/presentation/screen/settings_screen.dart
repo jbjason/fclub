@@ -6,7 +6,9 @@ import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/services/global_service.dart';
 import 'package:fclub/core/util/my_dialog.dart';
 import 'package:fclub/feature/auth/presentation/provider/auth_session_provider.dart';
+import 'package:fclub/feature/settings/presentation/provider/settings_provider.dart';
 import 'package:fclub/feature/settings/presentation/widget/settings_section.dart';
+import 'package:fclub/feature/settings/presentation/widget/settings_theme_sheet.dart';
 import 'package:fclub/feature/settings/presentation/widget/settings_tile.dart';
 import 'package:provider/provider.dart';
 
@@ -26,6 +28,7 @@ class SettingsScreen extends StatelessWidget {
             final rawPhotoUrl = user?.photoUrl?.trim() ?? '';
             final email = rawEmail.isNotEmpty ? rawEmail : 'user@opmedia.com';
             final emailVerified = user?.emailVerified ?? false;
+            final themeMode = context.watch<SettingsProvider>().settings.themeMode;
 
             return SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 22.h),
@@ -96,11 +99,8 @@ class SettingsScreen extends StatelessWidget {
                             icon: Icons.palette_outlined,
                             iconColor: const Color(0xFFDB2777),
                             title: 'Appearance',
-                            subtitle: 'Theme & display options',
-                            onTap: () => MyDialog().showComingSoonDialog(
-                              context: context,
-                              featureName: 'Appearance',
-                            ),
+                            subtitle: themeModeLabel(themeMode),
+                            onTap: () => showThemeModeSheet(context),
                           ),
                           SettingsTile(
                             icon: Icons.language_rounded,

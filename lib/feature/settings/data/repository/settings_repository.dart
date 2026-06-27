@@ -3,9 +3,28 @@ import 'package:fclub/core/base/api_request_options.dart';
 import 'package:fclub/core/base/base_client.dart';
 import 'package:fclub/core/constants/my_api_url.dart';
 import 'package:fclub/core/util/json_reader.dart';
+import 'package:fclub/feature/settings/data/model/app_settings.dart';
 import 'package:fclub/feature/settings/data/model/employee_profile_model.dart';
+import 'package:fclub/feature/settings/data/settings_hive_box.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-class ProfileRepository {
+class SettingsRepository {
+  static const String _settingsKey = 'settings';
+
+  Box<dynamic> get _box => Hive.box<dynamic>(SettingsHiveBox.boxName);
+
+  AppSettings loadSettings() {
+    final raw = _box.get(_settingsKey);
+    if (raw is Map) {
+      return AppSettings.fromMap(Map<String, dynamic>.from(raw));
+    }
+    return AppSettings.defaults();
+  }
+
+  Future<void> saveSettings(AppSettings settings) async {
+    await _box.put(_settingsKey, settings.toMap());
+  }
+
   Future<EmployeeProfileModel> updateEmployee(
     BuildContext context, {
     required String uid,

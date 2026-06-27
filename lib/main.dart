@@ -11,8 +11,13 @@ import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/club/data/club_hive_box.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/kurbani/data/kurbani_hive_boxes.dart';
+import 'package:fclub/feature/locker/data/locker_hive_box.dart';
+import 'package:fclub/feature/locker/presentation/provider/locker_provider.dart';
 import 'package:fclub/feature/pack_check/data/pack_check_hive_boxes.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
+import 'package:fclub/feature/settings/data/repository/settings_repository.dart';
+import 'package:fclub/feature/settings/data/settings_hive_box.dart';
+import 'package:fclub/feature/settings/presentation/provider/settings_provider.dart';
 import 'package:fclub/feature/tour/data/hive_boxes.dart';
 import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +33,8 @@ void main() async {
   await KurbaniHiveBoxes.openBoxes();
   await PackCheckHiveBoxes.openBoxes();
   await ClubHiveBox.openBox();
+  await LockerHiveBox.openBoxes();
+  await SettingsHiveBox.openBox();
   runApp(const MyApp());
 }
 
@@ -58,19 +65,28 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => ClubProvider(context.read<GlobalContactsProvider>()),
         ),
+        ChangeNotifierProvider(
+          create: (context) => LockerProvider(context.read<ClubProvider>()),
+        ),
+        Provider<SettingsRepository>(create: (_) => SettingsRepository()),
+        ChangeNotifierProvider(
+          create: (context) => SettingsProvider(context.read<SettingsRepository>()),
+        ),
       ],
-      child: ScreenUtilInit(
-        designSize: const Size(375, 812),
-        minTextAdapt: true,
-        builder: (context, child) => MaterialApp(
-          navigatorKey: appNavigatorKey,
-          title: 'Fundora Club',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light(context),
-          darkTheme: AppTheme.dark(context),
-          themeMode: ThemeMode.system,
-          initialRoute: AppRouteName.authGate,
-          onGenerateRoute: AppRouter.onGenerateRoute,
+      child: Consumer<SettingsProvider>(
+        builder: (context, settingsViewModel, _) => ScreenUtilInit(
+          designSize: const Size(375, 812),
+          minTextAdapt: true,
+          builder: (context, child) => MaterialApp(
+            navigatorKey: appNavigatorKey,
+            title: 'F Club',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light(context),
+            darkTheme: AppTheme.dark(context),
+            themeMode: settingsViewModel.settings.themeMode,
+            initialRoute: AppRouteName.authGate,
+            onGenerateRoute: AppRouter.onGenerateRoute,
+          ),
         ),
       ),
     );
