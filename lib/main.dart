@@ -8,6 +8,8 @@ import 'package:fclub/feature/auth/data/repository/auth_repository.dart';
 import 'package:fclub/feature/auth/presentation/provider/auth_session_provider.dart';
 import 'package:fclub/core/services/contacts/global_contacts_hive_box.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
+import 'package:fclub/feature/club/data/club_hive_box.dart';
+import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/kurbani/data/kurbani_hive_boxes.dart';
 import 'package:fclub/feature/pack_check/data/pack_check_hive_boxes.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
@@ -25,6 +27,7 @@ void main() async {
   await TourHiveBoxes.openBoxes();
   await KurbaniHiveBoxes.openBoxes();
   await PackCheckHiveBoxes.openBoxes();
+  await ClubHiveBox.openBox();
   runApp(const MyApp());
 }
 
@@ -52,15 +55,20 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => KurbaniProvider(context.read<GlobalContactsProvider>()),
         ),
+        ChangeNotifierProvider(
+          create: (context) => ClubProvider(context.read<GlobalContactsProvider>()),
+        ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),
         minTextAdapt: true,
         builder: (context, child) => MaterialApp(
           navigatorKey: appNavigatorKey,
-          title: 'Op Media',
+          title: 'Fundora Club',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(context),
+          darkTheme: AppTheme.dark(context),
+          themeMode: ThemeMode.system,
           initialRoute: AppRouteName.authGate,
           onGenerateRoute: AppRouter.onGenerateRoute,
         ),

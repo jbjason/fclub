@@ -26,9 +26,11 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: 12.h),
               ElevatedButton.icon(
-                onPressed: (){},
-                icon: const Icon(Icons.receipt_long_rounded),
-                label: const Text('Open '),
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRouteName.club);
+                },
+                icon: const Icon(Icons.savings_rounded),
+                label: const Text('Open Fundora Club'),
               ),
               SizedBox(height: 20.h),
               ElevatedButton.icon(
