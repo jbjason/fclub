@@ -26,6 +26,12 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: 12.h),
               ElevatedButton.icon(
+                onPressed: (){},
+                icon: const Icon(Icons.receipt_long_rounded),
+                label: const Text('Open '),
+              ),
+              SizedBox(height: 20.h),
+              ElevatedButton.icon(
                 onPressed: () => _openTour(context),
                 icon: const Icon(Icons.receipt_long_rounded),
                 label: const Text('Open Tour Dashboard'),

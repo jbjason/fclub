@@ -48,7 +48,8 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
       backgroundColor: MyColor.surface,
       body: NestedScrollView(
         headerSliverBuilder: (context, _) => [
-          _buildSliverAppBar(tourProvider, summary),
+          _buildSliverAppBar(tourProvider),
+          _buildBudgetHeader(summary),
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
@@ -113,12 +114,30 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
     );
   }
 
-  SliverAppBar _buildSliverAppBar(TourProvider tourProvider, TourSummary summary) {
+  SliverAppBar _buildSliverAppBar(TourProvider tourProvider) {
     return SliverAppBar(
       pinned: true,
-      expandedHeight: 160.h,
       backgroundColor: MyColor.primary,
       foregroundColor: MyColor.onPrimary,
+      title: Text(
+        tourProvider.tourName,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontFamily: MyString.poppinsBold,
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [MyColor.primary, MyColor.secondary, MyColor.tertiary],
+          ),
+        ),
+      ),
       actions: [
         IconButton(
           tooltip: 'Settlement summary',
@@ -127,42 +146,27 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
               Navigator.pushNamed(context, AppRouteName.tourSummary),
         ),
       ],
-      flexibleSpace: FlexibleSpaceBar(
-        titlePadding: EdgeInsets.only(left: 16.w, bottom: 12.h, right: 16.w),
-        title: Text(
-          tourProvider.tourName,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontFamily: MyString.poppinsBold,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [MyColor.primary, MyColor.secondary, MyColor.tertiary],
+    );
+  }
+
+  SliverToBoxAdapter _buildBudgetHeader(TourSummary summary) {
+    return SliverToBoxAdapter(
+      child: Container(
+        color: MyColor.primary,
+        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${CurrencyFormatter.format(summary.totalSpent)} of ${CurrencyFormatter.format(summary.totalDecidedBudget)} spent',
+              style: TextStyle(color: MyColor.white, fontSize: 12.sp),
             ),
-          ),
-          padding: EdgeInsets.fromLTRB(16.w, 56.h, 16.w, 48.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                '${CurrencyFormatter.format(summary.totalSpent)} of ${CurrencyFormatter.format(summary.totalDecidedBudget)} spent',
-                style: TextStyle(color: MyColor.white, fontSize: 12.sp),
-              ),
-              SizedBox(height: 8.h),
-              TourBudgetProgressBar(
-                progress: summary.budgetProgress,
-                isOverBudget: summary.isOverBudget,
-              ),
-            ],
-          ),
+            SizedBox(height: 8.h),
+            TourBudgetProgressBar(
+              progress: summary.budgetProgress,
+              isOverBudget: summary.isOverBudget,
+            ),
+          ],
         ),
       ),
     );

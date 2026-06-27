@@ -1,11 +1,12 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
-part 'kurbani_global_contact.g.dart';
+part 'app_contact.g.dart';
 
-/// A person in the global contacts pool — reused across multiple Kurbani years.
-@HiveType(typeId: 23)
-class KurbaniGlobalContact {
-  KurbaniGlobalContact({
+/// A person in the shared contacts pool — reused across features (Tour,
+/// Kurbani, ...) wherever a "choose member" picker is needed.
+@HiveType(typeId: 40)
+class AppContact {
+  AppContact({
     required this.id,
     required this.name,
     required this.avatarColorIndex,
@@ -18,7 +19,7 @@ class KurbaniGlobalContact {
   @HiveField(1)
   String name;
 
-  /// Index into the kurbaniAvatarGradients palette.
+  /// Index into an avatar color palette.
   @HiveField(2)
   int avatarColorIndex;
 

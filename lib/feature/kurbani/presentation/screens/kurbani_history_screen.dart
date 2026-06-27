@@ -1,6 +1,7 @@
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
-import 'package:fclub/feature/kurbani/data/model/kurbani_global_contact.dart';
+import 'package:fclub/core/services/contacts/app_contact.dart';
+import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_session.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
 import 'package:fclub/feature/kurbani/presentation/screens/kurbani_management_screen.dart';
@@ -29,6 +30,7 @@ class _KurbaniHistoryScreenState extends State<KurbaniHistoryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<GlobalContactsProvider>().seedDemoData();
       context.read<KurbaniProvider>().seedDemoData();
     });
   }
@@ -1014,8 +1016,8 @@ class _NewKurbaniSheetState extends State<_NewKurbaniSheet> {
               )
             else
               _StepTwoContent(
-                contacts: widget.provider.contacts,
-                meId: widget.provider.meContact?.id,
+                contacts: context.watch<GlobalContactsProvider>().contacts,
+                meId: context.watch<GlobalContactsProvider>().meContact?.id,
                 selectedIds: _selectedIds,
                 onToggle: (id) =>
                     setState(() => _selectedIds.contains(id)
@@ -1187,7 +1189,7 @@ class _StepTwoContent extends StatelessWidget {
     required this.onToggle,
     required this.onSubmit,
   });
-  final List<KurbaniGlobalContact> contacts;
+  final List<AppContact> contacts;
   final String? meId;
   final Set<String> selectedIds;
   final void Function(String id) onToggle;

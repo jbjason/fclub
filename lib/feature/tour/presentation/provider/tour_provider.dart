@@ -1,5 +1,5 @@
-import 'package:fclub/core/services/global_service.dart';
-import 'package:fclub/feature/auth/data/model/auth_user.dart';
+import 'package:fclub/core/services/contacts/app_contact.dart';
+import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/tour/data/expense_category.dart';
 import 'package:fclub/feature/tour/data/hive_boxes.dart';
 import 'package:fclub/feature/tour/data/model/extra_payment_model.dart';
@@ -13,12 +13,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 class TourProvider with ChangeNotifier {
-  TourProvider()
+  TourProvider(this._globalContacts)
       : _sessionsBox = Hive.box<TourSession>(TourHiveBoxes.sessionsBox) {
     _load();
   }
 
   final Box<TourSession> _sessionsBox;
+  final GlobalContactsProvider _globalContacts;
   final Uuid _uuid = const Uuid();
 
   TourSession? _activeSession;
@@ -55,8 +56,7 @@ class TourProvider with ChangeNotifier {
       List<TourMemberModel>.from(_activeSession?.members ?? []);
 
   List<TourExpenseModel> get expenses {
-    final list =
-        List<TourExpenseModel>.from(_activeSession?.expenses ?? []);
+    final list = List<TourExpenseModel>.from(_activeSession?.expenses ?? []);
     list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     return list;
   }
@@ -88,14 +88,28 @@ class TourProvider with ChangeNotifier {
   Future<void> createSession({
     required String tourName,
     required double decidedBudget,
-    required List<String> memberNames,
+    required List<String> selectedContactIds,
   }) async {
-    final sessionMembers = memberNames.asMap().entries.map((entry) {
+    final meId = _globalContacts.meContact?.id;
+    final ids = [
+      if (meId != null && !selectedContactIds.contains(meId)) meId,
+      ...selectedContactIds,
+    ];
+
+    final contacts = ids
+        .map((id) => _globalContacts.contactById(id))
+        .whereType<AppContact>()
+        .toList();
+
+    final memberShare =
+        contacts.isEmpty ? 0.0 : decidedBudget / contacts.length;
+
+    final sessionMembers = contacts.map((contact) {
       return TourMemberModel(
-        id: _uuid.v4(),
-        name: entry.value,
-        avatarColorIndex: entry.key,
-        paidToManager: 0,
+        id: contact.id,
+        name: contact.isMe ? 'You (${contact.name})' : contact.name,
+        avatarColorIndex: contact.avatarColorIndex,
+        paidToManager: memberShare,
       );
     }).toList();
 
@@ -119,18 +133,6 @@ class TourProvider with ChangeNotifier {
     if (_activeSession?.id == sessionId) _activeSession = null;
     notifyListeners();
   }
-
-  // ── Legacy compat — kept for TourSetupScreen ──────────────────────────────
-
-  Future<void> setupTour({
-    required String tourName,
-    required double decidedBudget,
-    required List<String> memberNames,
-  }) => createSession(
-        tourName: tourName,
-        decidedBudget: decidedBudget,
-        memberNames: memberNames,
-      );
 
   // ── Members in active session ──────────────────────────────────────────────
 
@@ -193,20 +195,21 @@ class TourProvider with ChangeNotifier {
 
   // ── Demo seed ──────────────────────────────────────────────────────────────
 
+  /// Seeds two completed historical sessions, reusing the shared demo
+  /// contacts (same ids/names Kurbani's history uses) so both features show
+  /// consistent people.
   Future<void> seedDemoData() async {
     if (hasDemoData) return;
 
-    final youName =
-        _resolveDisplayName(GlobalService.instance.currentUser);
+    final youName = _globalContacts.meContact?.name ?? 'You';
 
-    // ── 2023 session ──────────────────────────────────────────────────────────
     final m23 = [
       TourMemberModel(
-          id: 'me23', name: youName, avatarColorIndex: 0, paidToManager: 4000),
+          id: 'me', name: youName, avatarColorIndex: 0, paidToManager: 4000),
       TourMemberModel(
-          id: 'rafiq23', name: 'Rafiq', avatarColorIndex: 1, paidToManager: 4000),
+          id: 'c1', name: 'Ahmed Hassan', avatarColorIndex: 1, paidToManager: 4000),
       TourMemberModel(
-          id: 'tania23', name: 'Tania', avatarColorIndex: 2, paidToManager: 4000),
+          id: 'c2', name: 'Fatima Ali', avatarColorIndex: 2, paidToManager: 4000),
     ];
     final d2023 = DateTime(2023, 10, 6);
     final s2023 = TourSession(
@@ -221,7 +224,7 @@ class TourProvider with ChangeNotifier {
             id: 's23_e1',
             title: 'Boat Charter',
             amount: 4500,
-            paidByMemberId: 'me23',
+            paidByMemberId: 'me',
             beneficiaryMemberIds: const [],
             categoryIndex: ExpenseCategory.transport.index,
             timestamp: d2023),
@@ -229,7 +232,7 @@ class TourProvider with ChangeNotifier {
             id: 's23_e2',
             title: 'Forest Lodge',
             amount: 3000,
-            paidByMemberId: 'rafiq23',
+            paidByMemberId: 'c1',
             beneficiaryMemberIds: const [],
             categoryIndex: ExpenseCategory.accommodation.index,
             timestamp: d2023),
@@ -237,7 +240,7 @@ class TourProvider with ChangeNotifier {
             id: 's23_e3',
             title: 'Food & Meals',
             amount: 1700,
-            paidByMemberId: 'tania23',
+            paidByMemberId: 'c2',
             beneficiaryMemberIds: const [],
             categoryIndex: ExpenseCategory.food.index,
             timestamp: d2023),
@@ -245,16 +248,15 @@ class TourProvider with ChangeNotifier {
       extraPayments: [],
     );
 
-    // ── 2024 session ──────────────────────────────────────────────────────────
     final m24 = [
       TourMemberModel(
-          id: 'me24', name: youName, avatarColorIndex: 0, paidToManager: 5000),
+          id: 'me', name: youName, avatarColorIndex: 0, paidToManager: 5000),
       TourMemberModel(
-          id: 'rafiq24', name: 'Rafiq', avatarColorIndex: 1, paidToManager: 5000),
+          id: 'c1', name: 'Ahmed Hassan', avatarColorIndex: 1, paidToManager: 5000),
       TourMemberModel(
-          id: 'tania24', name: 'Tania', avatarColorIndex: 2, paidToManager: 5000),
+          id: 'c2', name: 'Fatima Ali', avatarColorIndex: 2, paidToManager: 5000),
       TourMemberModel(
-          id: 'imran24', name: 'Imran', avatarColorIndex: 3, paidToManager: 5000),
+          id: 'c3', name: 'Mohammad Reza', avatarColorIndex: 3, paidToManager: 5000),
     ];
     final d2024 = DateTime(2024, 6, 14);
     final s2024 = TourSession(
@@ -269,7 +271,7 @@ class TourProvider with ChangeNotifier {
             id: 's24_e1',
             title: 'Hotel Booking',
             amount: 8000,
-            paidByMemberId: 'me24',
+            paidByMemberId: 'me',
             beneficiaryMemberIds: const [],
             categoryIndex: ExpenseCategory.accommodation.index,
             timestamp: d2024,
@@ -278,7 +280,7 @@ class TourProvider with ChangeNotifier {
             id: 's24_e2',
             title: 'Bus Tickets',
             amount: 3200,
-            paidByMemberId: 'rafiq24',
+            paidByMemberId: 'c1',
             beneficiaryMemberIds: const [],
             categoryIndex: ExpenseCategory.transport.index,
             timestamp: d2024),
@@ -286,7 +288,7 @@ class TourProvider with ChangeNotifier {
             id: 's24_e3',
             title: 'Seafood Dinner',
             amount: 2400,
-            paidByMemberId: 'tania24',
+            paidByMemberId: 'c2',
             beneficiaryMemberIds: const [],
             categoryIndex: ExpenseCategory.food.index,
             timestamp: d2024),
@@ -294,15 +296,15 @@ class TourProvider with ChangeNotifier {
             id: 's24_e4',
             title: 'Beach Snacks',
             amount: 650,
-            paidByMemberId: 'imran24',
-            beneficiaryMemberIds: ['imran24', 'tania24'],
+            paidByMemberId: 'c3',
+            beneficiaryMemberIds: ['c3', 'c2'],
             categoryIndex: ExpenseCategory.snacks.index,
             timestamp: d2024),
         TourExpenseModel(
             id: 's24_e5',
             title: 'SIM Cards',
             amount: 400,
-            paidByMemberId: 'me24',
+            paidByMemberId: 'me',
             beneficiaryMemberIds: const [],
             categoryIndex: ExpenseCategory.misc.index,
             timestamp: d2024),
@@ -310,13 +312,13 @@ class TourProvider with ChangeNotifier {
       extraPayments: [
         ExtraPaymentModel(
             id: 's24_p1',
-            memberId: 'rafiq24',
+            memberId: 'c1',
             amount: 1000,
             timestamp: d2024,
             note: 'Forgot to pay earlier'),
         ExtraPaymentModel(
             id: 's24_p2',
-            memberId: 'tania24',
+            memberId: 'c2',
             amount: 500,
             timestamp: d2024),
       ],
@@ -325,14 +327,5 @@ class TourProvider with ChangeNotifier {
     await _sessionsBox.put(s2023.id, s2023);
     await _sessionsBox.put(s2024.id, s2024);
     _load();
-  }
-
-  String _resolveDisplayName(AuthUser? user) {
-    if (user == null) return 'You';
-    final displayName = user.displayName?.trim();
-    if (displayName != null && displayName.isNotEmpty) return displayName;
-    final email = user.email;
-    if (email != null && email.contains('@')) return email.split('@').first;
-    return 'You';
   }
 }

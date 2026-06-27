@@ -8,7 +8,6 @@ import 'package:fclub/feature/kurbani/presentation/screens/kurbani_screen.dart';
 import 'package:fclub/feature/pack_check/presentation/screens/pack_check_screen.dart';
 import 'package:fclub/feature/tour/presentation/screens/tour_cost_manage_screen.dart';
 import 'package:fclub/feature/tour/presentation/screens/tour_history_screen.dart';
-import 'package:fclub/feature/tour/presentation/screens/tour_setup_screen.dart';
 import 'package:fclub/feature/tour/presentation/screens/tour_summary_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +19,6 @@ class AppRouteName {
   static const String profileDetails = '/settings/profile-details';
   static const String home = '/home';
   static const String kurbani = '/home/kurbani';
-  static const String tourSetup = '/home/tour-setup';
   static const String tourCostManage = '/home/tour-cost-manage';
   static const String tourManage = '/home/tour-cost-manage/session';
   static const String tourSummary = '/home/tour-cost-manage/summary';
@@ -37,11 +35,6 @@ abstract class AppRouter {
             create: (context) => SignInProvider(context.read<AuthRepository>()),
             child: const AuthScreen(),
           ),
-        );
-      case AppRouteName.tourSetup:
-        return _materialRoute(
-          settings: settings,
-          child: const TourSetupScreen(),
         );
       case AppRouteName.tourCostManage:
         return _materialRoute(

@@ -1,8 +1,8 @@
+import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/kurbani/data/kurbani_calculator.dart';
 import 'package:fclub/feature/kurbani/data/kurbani_hive_boxes.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_animal_part_model.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_expense_model.dart';
-import 'package:fclub/feature/kurbani/data/model/kurbani_global_contact.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_member_model.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_session.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_summary.dart';
@@ -11,16 +11,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 class KurbaniProvider with ChangeNotifier {
-  KurbaniProvider()
-      : _sessionsBox =
-            Hive.box<KurbaniSession>(KurbaniHiveBoxes.sessionsBox),
-        _contactsBox =
-            Hive.box<KurbaniGlobalContact>(KurbaniHiveBoxes.contactsBox) {
+  KurbaniProvider(this._globalContacts)
+      : _sessionsBox = Hive.box<KurbaniSession>(KurbaniHiveBoxes.sessionsBox) {
     _load();
   }
 
   final Box<KurbaniSession> _sessionsBox;
-  final Box<KurbaniGlobalContact> _contactsBox;
+  final GlobalContactsProvider _globalContacts;
   final _uuid = const Uuid();
 
   KurbaniSession? _activeSession;
@@ -43,11 +40,7 @@ class KurbaniProvider with ChangeNotifier {
   bool get hasActiveSession => _activeSession != null;
   KurbaniSession? get activeSession => _activeSession;
   List<KurbaniSession> get history => List.unmodifiable(_history);
-  List<KurbaniGlobalContact> get contacts => _contactsBox.values.toList();
-  KurbaniGlobalContact? get meContact =>
-      _contactsBox.values.where((c) => c.isMe).firstOrNull;
-  bool get hasDemoData =>
-      _sessionsBox.isNotEmpty || _contactsBox.isNotEmpty;
+  bool get hasDemoData => _sessionsBox.isNotEmpty;
 
   // ── Delegated getters for active session ──────────────────────────────────
 
@@ -84,38 +77,8 @@ class KurbaniProvider with ChangeNotifier {
 
   Future<void> seedDemoData() async {
     if (hasDemoData) return;
-    await _seedContacts();
     await _seedHistorySessions();
     _load();
-  }
-
-  Future<void> _seedContacts() async {
-    final list = [
-      KurbaniGlobalContact(
-          id: 'me', name: 'You', avatarColorIndex: 0, isMe: true),
-      KurbaniGlobalContact(
-          id: 'c1', name: 'Ahmed Hassan', avatarColorIndex: 1),
-      KurbaniGlobalContact(id: 'c2', name: 'Fatima Ali', avatarColorIndex: 2),
-      KurbaniGlobalContact(
-          id: 'c3', name: 'Mohammad Reza', avatarColorIndex: 3),
-      KurbaniGlobalContact(id: 'c4', name: 'Aisha Khan', avatarColorIndex: 4),
-      KurbaniGlobalContact(
-          id: 'c5', name: 'Ibrahim Siddique', avatarColorIndex: 5),
-      KurbaniGlobalContact(
-          id: 'c6', name: 'Mariam Yusuf', avatarColorIndex: 6),
-      KurbaniGlobalContact(
-          id: 'c7', name: 'Omar Abdullah', avatarColorIndex: 0),
-      KurbaniGlobalContact(
-          id: 'c8', name: 'Sara Rahman', avatarColorIndex: 1),
-      KurbaniGlobalContact(
-          id: 'c9', name: 'Yusuf Malik', avatarColorIndex: 2),
-      KurbaniGlobalContact(
-          id: 'c10', name: 'Khadija Hossain', avatarColorIndex: 3),
-      KurbaniGlobalContact(id: 'c11', name: 'Ali Karim', avatarColorIndex: 4),
-    ];
-    for (final c in list) {
-      await _contactsBox.put(c.id, c);
-    }
   }
 
   Future<void> _seedHistorySessions() async {
@@ -301,14 +264,14 @@ class KurbaniProvider with ChangeNotifier {
     required double budgetPerMember,
     required List<String> selectedContactIds,
   }) async {
-    final meId = meContact?.id;
+    final meId = _globalContacts.meContact?.id;
     final ids = [
       if (meId != null && !selectedContactIds.contains(meId)) meId,
       ...selectedContactIds,
     ];
 
     final members = ids.map((id) {
-      final contact = _contactsBox.get(id);
+      final contact = _globalContacts.contactById(id);
       if (contact == null) return null;
       return KurbaniMemberModel(
         id: contact.id,

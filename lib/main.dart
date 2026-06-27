@@ -6,6 +6,8 @@ import 'package:fclub/core/services/auth/firebase_auth_service.dart';
 import 'package:fclub/core/services/global_service.dart';
 import 'package:fclub/feature/auth/data/repository/auth_repository.dart';
 import 'package:fclub/feature/auth/presentation/provider/auth_session_provider.dart';
+import 'package:fclub/core/services/contacts/global_contacts_hive_box.dart';
+import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/kurbani/data/kurbani_hive_boxes.dart';
 import 'package:fclub/feature/pack_check/data/pack_check_hive_boxes.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
@@ -19,6 +21,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FirebaseInitializer.initialize();
   await GlobalService.instance.initialize();
+  await GlobalContactsHiveBox.openBox();
   await TourHiveBoxes.openBoxes();
   await KurbaniHiveBoxes.openBoxes();
   await PackCheckHiveBoxes.openBoxes();
@@ -42,8 +45,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => AuthSessionProvider(context.read<AuthRepository>()),
         ),
-        ChangeNotifierProvider(create: (_) => TourProvider()),
-        ChangeNotifierProvider(create: (_) => KurbaniProvider()),
+        ChangeNotifierProvider(create: (_) => GlobalContactsProvider()),
+        ChangeNotifierProvider(
+          create: (context) => TourProvider(context.read<GlobalContactsProvider>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => KurbaniProvider(context.read<GlobalContactsProvider>()),
+        ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),
