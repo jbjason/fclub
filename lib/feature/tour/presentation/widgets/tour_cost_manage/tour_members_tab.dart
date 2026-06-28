@@ -1,7 +1,7 @@
 import 'package:fclub/feature/tour/data/model/tour_member_model.dart';
 import 'package:fclub/feature/tour/data/model/tour_summary.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_empty_state.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_member_card.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_empty_state.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_member_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 

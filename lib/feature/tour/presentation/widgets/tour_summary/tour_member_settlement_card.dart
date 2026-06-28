@@ -3,7 +3,7 @@ import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/tour/data/model/member_balance.dart';
 import 'package:fclub/feature/tour/data/model/tour_member_model.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_breakdown_row.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_summary/tour_breakdown_row.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_member_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

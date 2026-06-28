@@ -28,17 +28,17 @@ class GlobalContactsProvider with ChangeNotifier {
 
     final list = [
       AppContact(id: 'me', name: youName, avatarColorIndex: 0, isMe: true),
-      AppContact(id: 'c1', name: 'Ahmed Hassan', avatarColorIndex: 1),
-      AppContact(id: 'c2', name: 'Fatima Ali', avatarColorIndex: 2),
-      AppContact(id: 'c3', name: 'Mohammad Reza', avatarColorIndex: 3),
-      AppContact(id: 'c4', name: 'Aisha Khan', avatarColorIndex: 4),
-      AppContact(id: 'c5', name: 'Ibrahim Siddique', avatarColorIndex: 5),
-      AppContact(id: 'c6', name: 'Mariam Yusuf', avatarColorIndex: 6),
-      AppContact(id: 'c7', name: 'Omar Abdullah', avatarColorIndex: 0),
-      AppContact(id: 'c8', name: 'Sara Rahman', avatarColorIndex: 1),
-      AppContact(id: 'c9', name: 'Yusuf Malik', avatarColorIndex: 2),
-      AppContact(id: 'c10', name: 'Khadija Hossain', avatarColorIndex: 3),
-      AppContact(id: 'c11', name: 'Ali Karim', avatarColorIndex: 4),
+      AppContact(id: 'c1', name: 'Belaak Noyon', avatarColorIndex: 1),
+      AppContact(id: 'c2', name: 'Bolod Alamin', avatarColorIndex: 2),
+      AppContact(id: 'c3', name: 'Rasel Paada', avatarColorIndex: 3),
+      AppContact(id: 'c4', name: 'Taaut Rumi', avatarColorIndex: 4),
+      AppContact(id: 'c5', name: 'Sesra Joynal', avatarColorIndex: 5),
+      AppContact(id: 'c6', name: 'Gaanja Monir', avatarColorIndex: 6),
+      AppContact(id: 'c7', name: 'Tank Nazmul', avatarColorIndex: 0),
+      AppContact(id: 'c8', name: 'Baatu Miraj', avatarColorIndex: 1),
+      AppContact(id: 'c9', name: 'Kaatbaaj Ashraful', avatarColorIndex: 2),
+      AppContact(id: 'c10', name: 'Demo User1', avatarColorIndex: 3),
+      AppContact(id: 'c11', name: 'Demo User2', avatarColorIndex: 4),
     ];
 
     for (final contact in list) {

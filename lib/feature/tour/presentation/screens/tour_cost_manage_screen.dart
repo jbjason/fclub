@@ -1,18 +1,16 @@
 import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
-import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/tour/data/model/tour_member_model.dart';
-import 'package:fclub/feature/tour/data/model/tour_summary.dart';
 import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_add_expense_sheet.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_add_extra_payment_sheet.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_expenses_tab.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_members_tab.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_payments_tab.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_speed_dial_option.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_stat_card.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_tab_bar_header_delegate.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_cost_manage_fab.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_expenses_tab.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_members_tab.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_payments_tab.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_stat_card.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_add_expense_sheet.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_add_extra_payment_sheet.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_tab_bar_header_delegate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +28,6 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
     length: 3,
     vsync: this,
   );
-  bool _isFabOpen = false;
 
   @override
   void dispose() {
@@ -108,7 +105,10 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
           ],
         ),
       ),
-      floatingActionButton: _buildFab(context),
+      floatingActionButton: TourCostManageFab(
+        onAddExpense: () => showAddExpenseSheet(context),
+        onAddExtraPayment: () => showAddExtraPaymentSheet(context),
+      ),
     );
   }
 
@@ -142,45 +142,6 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
           icon: const Icon(Icons.receipt_long_rounded),
           onPressed: () =>
               Navigator.pushNamed(context, AppRouteName.tourSummary),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFab(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        TourSpeedDialOption(
-          label: 'Add Extra Payment',
-          icon: Icons.payments_rounded,
-          isVisible: _isFabOpen,
-          animationDelay: const Duration(milliseconds: 40),
-          onTap: () {
-            setState(() => _isFabOpen = false);
-            showAddExtraPaymentSheet(context);
-          },
-        ),
-        SizedBox(height: 12.h),
-        TourSpeedDialOption(
-          label: 'Add Expense',
-          icon: Icons.receipt_long_rounded,
-          isVisible: _isFabOpen,
-          onTap: () {
-            setState(() => _isFabOpen = false);
-            showAddExpenseSheet(context);
-          },
-        ),
-        SizedBox(height: 12.h),
-        FloatingActionButton(
-          onPressed: () => setState(() => _isFabOpen = !_isFabOpen),
-          backgroundColor: MyColor.primary,
-          child: AnimatedRotation(
-            turns: _isFabOpen ? 0.125 : 0,
-            duration: const Duration(milliseconds: 200),
-            child: const Icon(Icons.add),
-          ),
         ),
       ],
     );

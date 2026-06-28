@@ -1,8 +1,8 @@
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_new_tour_step_one.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_new_tour_step_two.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_sheet_header.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_new_tour_step_one.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_new_tour_step_two.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_sheet_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';

@@ -13,6 +13,7 @@ class TourSpeedDialOption extends StatefulWidget {
     required this.icon,
     required this.onTap,
     required this.isVisible,
+    this.accentColor,
     this.animationDelay = Duration.zero,
   });
 
@@ -20,6 +21,7 @@ class TourSpeedDialOption extends StatefulWidget {
   final IconData icon;
   final VoidCallback onTap;
   final bool isVisible;
+  final Color? accentColor;
   final Duration animationDelay;
 
   @override
@@ -78,7 +80,7 @@ class _TourSpeedDialOptionState extends State<TourSpeedDialOption> {
             FloatingActionButton.small(
               heroTag: widget.label,
               onPressed: widget.onTap,
-              backgroundColor: MyColor.secondary,
+              backgroundColor: widget.accentColor ?? MyColor.secondary,
               child: Icon(widget.icon, size: 18.r),
             ),
           ],

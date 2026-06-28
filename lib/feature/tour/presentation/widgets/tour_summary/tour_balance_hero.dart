@@ -1,7 +1,7 @@
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_glass_card.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_summary/tour_glass_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
