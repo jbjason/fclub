@@ -9,6 +9,7 @@ class TourEmptyHistoryState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -21,7 +22,7 @@ class TourEmptyHistoryState extends StatelessWidget {
               style: TextStyle(
                   fontFamily: MyString.poppinsBold,
                   fontSize: 16.sp,
-                  color: MyColor.onSurface)),
+                  color: colorScheme.onSurface)),
           SizedBox(height: 6.h),
           Text(
             'Tap the button below to start your\nfirst trip management.',
@@ -29,7 +30,7 @@ class TourEmptyHistoryState extends StatelessWidget {
             style: TextStyle(
                 fontFamily: MyString.rubikRegular,
                 fontSize: 13.sp,
-                color: MyColor.gray400,
+                color: colorScheme.onSurfaceVariant,
                 height: 1.5),
           ),
           SizedBox(height: 24.h),

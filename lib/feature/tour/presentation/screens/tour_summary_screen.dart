@@ -1,4 +1,3 @@
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/core/util/my_dialog.dart';
@@ -56,7 +55,7 @@ class TourSummaryScreen extends StatelessWidget {
     final summary = tourProvider.summary;
 
     return Scaffold(
-      backgroundColor: MyColor.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(title: const Text('Settlement Summary')),
       body: ListView(
         padding: EdgeInsets.all(16.w),
@@ -89,7 +88,7 @@ class TourSummaryScreen extends StatelessWidget {
               fontFamily: MyString.poppinsBold,
               fontWeight: FontWeight.w700,
               fontSize: 15.sp,
-              color: MyColor.onSurface,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           SizedBox(height: 12.h),

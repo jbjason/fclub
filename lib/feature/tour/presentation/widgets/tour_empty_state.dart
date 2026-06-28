@@ -1,4 +1,3 @@
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -10,6 +9,7 @@ class TourEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -22,15 +22,15 @@ class TourEmptyState extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  MyColor.primaryContainer,
-                  MyColor.secondaryContainer,
+                  colorScheme.primaryContainer,
+                  colorScheme.secondaryContainer,
                 ],
               ),
             ),
-            child: Icon(icon, size: 40.r, color: MyColor.primary),
+            child: Icon(icon, size: 40.r, color: colorScheme.primary),
           ),
           SizedBox(height: 14.h),
-          Text(message, style: TextStyle(color: MyColor.outline)),
+          Text(message, style: TextStyle(color: colorScheme.outline)),
         ],
       ),
     );

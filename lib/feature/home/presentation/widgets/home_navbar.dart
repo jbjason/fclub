@@ -17,10 +17,10 @@ class HomeNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: MyColor.surfaceContainerLowest,
+        color: Theme.of(context).cardColor,
         border: Border(
           top: BorderSide(
-            color: MyColor.outlineVariant.withValues(alpha: 0.5),
+            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
             width: 0.5,
           ),
         ),
@@ -100,7 +100,9 @@ class _NavItem extends StatelessWidget {
               curve: Curves.easeOutCubic,
               child: Icon(
                 icon,
-                color: isSelected ? color : MyColor.gray400,
+                color: isSelected
+                    ? color
+                    : Theme.of(context).colorScheme.outline,
                 size: isSelected ? 24.r : 22.r,
               ),
             ),

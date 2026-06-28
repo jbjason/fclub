@@ -10,6 +10,7 @@ class TourSheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
       child: Row(
@@ -31,7 +32,7 @@ class TourSheetHeader extends StatelessWidget {
                   style: TextStyle(
                       fontFamily: MyString.poppinsBold,
                       fontSize: 17.sp,
-                      color: MyColor.onSurface),
+                      color: colorScheme.onSurface),
                 ),
                 Text(
                   step == 0
@@ -40,7 +41,7 @@ class TourSheetHeader extends StatelessWidget {
                   style: TextStyle(
                       fontFamily: MyString.rubikRegular,
                       fontSize: 11.sp,
-                      color: MyColor.gray400),
+                      color: colorScheme.onSurfaceVariant),
                 ),
               ],
             ),

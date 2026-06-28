@@ -1,4 +1,3 @@
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/my_dialog.dart';
 import 'package:fclub/feature/tour/data/expense_category.dart';
@@ -109,6 +108,8 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final members = context.watch<TourProvider>().members;
     _paidByMemberId ??= members.isNotEmpty ? members.first.id : null;
 
@@ -116,7 +117,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
         decoration: BoxDecoration(
-          color: MyColor.surfaceContainerLowest,
+          color: theme.cardColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         ),
         padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
@@ -129,7 +130,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                   width: 40.w,
                   height: 4.h,
                   decoration: BoxDecoration(
-                    color: MyColor.outlineVariant,
+                    color: colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
@@ -228,13 +229,13 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
     fontFamily: MyString.poppinsBold,
     fontWeight: FontWeight.w700,
     fontSize: 18.sp,
-    color: MyColor.onSurface,
+    color: Theme.of(context).colorScheme.onSurface,
   );
 
   TextStyle get _labelStyle => TextStyle(
     fontFamily: MyString.poppinsMedium,
     fontWeight: FontWeight.w600,
     fontSize: 13.sp,
-    color: MyColor.onSurfaceVariant,
+    color: Theme.of(context).colorScheme.onSurfaceVariant,
   );
 }

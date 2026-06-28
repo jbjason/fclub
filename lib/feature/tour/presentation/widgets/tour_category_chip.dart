@@ -19,6 +19,7 @@ class TourCategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = category.color;
+    final colorScheme = Theme.of(context).colorScheme;
     return Semantics(
       label: category.label,
       selected: isSelected,
@@ -37,10 +38,10 @@ class TourCategoryChip extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: isSelected
                   ? [color, color.withValues(alpha: 0.7)]
-                  : [MyColor.surfaceContainerLow, MyColor.surfaceContainerLow],
+                  : [colorScheme.surfaceContainerHighest, colorScheme.surfaceContainerHighest],
             ),
             border: Border.all(
-              color: isSelected ? color : MyColor.outlineVariant,
+              color: isSelected ? color : colorScheme.outlineVariant,
             ),
             boxShadow: isSelected
                 ? [
@@ -66,7 +67,7 @@ class TourCategoryChip extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: MyString.poppinsMedium,
                   fontSize: 11.sp,
-                  color: isSelected ? MyColor.white : MyColor.onSurfaceVariant,
+                  color: isSelected ? MyColor.white : colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

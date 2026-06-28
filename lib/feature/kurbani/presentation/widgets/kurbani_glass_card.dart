@@ -23,6 +23,8 @@ class KurbaniGlassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = borderRadius ?? BorderRadius.circular(20.r);
     final accent = accentColor ?? const Color(0xFF10B981);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final glassTint = isDark ? Colors.black : Colors.white;
 
     return ClipRRect(
       borderRadius: radius,
@@ -37,8 +39,8 @@ class KurbaniGlassCard extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Colors.white.withValues(alpha: 0.55),
-                    Colors.white.withValues(alpha: 0.2),
+                    glassTint.withValues(alpha: isDark ? 0.3 : 0.55),
+                    glassTint.withValues(alpha: isDark ? 0.1 : 0.2),
                   ],
                 ),
             border: Border.all(

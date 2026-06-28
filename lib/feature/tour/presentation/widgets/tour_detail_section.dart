@@ -10,6 +10,7 @@ class TourDetailSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -23,7 +24,7 @@ class TourDetailSection extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(14.r),
           decoration: BoxDecoration(
-              color: MyColor.surfaceContainerLow,
+              color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(14.r)),
           child: child,
         ),

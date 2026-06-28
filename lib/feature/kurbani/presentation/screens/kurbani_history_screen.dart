@@ -89,7 +89,7 @@ class _KurbaniHistoryScreenState extends State<KurbaniHistoryScreen> {
           style: TextStyle(
               fontFamily: MyString.rubikRegular,
               fontSize: 13.sp,
-              color: Colors.black54,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.5),
         ),
         actions: [
@@ -120,7 +120,7 @@ class _KurbaniHistoryScreenState extends State<KurbaniHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3FF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Consumer<KurbaniProvider>(
         builder: (ctx, provider, _) {
           return Column(
@@ -376,6 +376,8 @@ class _HistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final spent = session.totalSpent;
     final budget = session.totalBudget;
     final progress =
@@ -386,7 +388,7 @@ class _HistoryCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(
@@ -429,7 +431,7 @@ class _HistoryCard extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: MyString.poppinsBold,
                               fontSize: 14.sp,
-                              color: const Color(0xFF0F172A),
+                              color: colorScheme.onSurface,
                             ),
                           ),
                           Text(
@@ -437,7 +439,7 @@ class _HistoryCard extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: MyString.rubikRegular,
                               fontSize: 11.sp,
-                              color: Colors.black38,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -447,7 +449,7 @@ class _HistoryCard extends StatelessWidget {
                     IconButton(
                       onPressed: onDelete,
                       icon: Icon(Icons.delete_outline_rounded,
-                          color: Colors.black26, size: 20.r),
+                          color: colorScheme.onSurfaceVariant, size: 20.r),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
@@ -470,7 +472,7 @@ class _HistoryCard extends StatelessWidget {
                                 style: TextStyle(
                                   fontFamily: MyString.rubikRegular,
                                   fontSize: 11.sp,
-                                  color: Colors.black45,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               Text(
@@ -490,7 +492,7 @@ class _HistoryCard extends StatelessWidget {
                               value: progress,
                               minHeight: 6.h,
                               backgroundColor:
-                                  Colors.black.withValues(alpha: 0.06),
+                                  colorScheme.surfaceContainerHighest,
                               valueColor: AlwaysStoppedAnimation<Color>(
                                   progressColor),
                             ),
@@ -580,6 +582,7 @@ class _EmptyHistoryState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -592,7 +595,7 @@ class _EmptyHistoryState extends StatelessWidget {
             style: TextStyle(
               fontFamily: MyString.poppinsBold,
               fontSize: 16.sp,
-              color: const Color(0xFF0F172A),
+              color: colorScheme.onSurface,
             ),
           ),
           SizedBox(height: 6.h),
@@ -602,7 +605,7 @@ class _EmptyHistoryState extends StatelessWidget {
             style: TextStyle(
               fontFamily: MyString.rubikRegular,
               fontSize: 13.sp,
-              color: Colors.black45,
+              color: colorScheme.onSurfaceVariant,
               height: 1.5,
             ),
           ),
@@ -650,6 +653,8 @@ class _HistoryDetailSheetContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final spent = session.totalSpent;
     final budget = session.totalBudget;
     final progress =
@@ -662,7 +667,7 @@ class _HistoryDetailSheetContent extends StatelessWidget {
       minChildSize: 0.4,
       builder: (_, controller) => Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius:
               BorderRadius.vertical(top: Radius.circular(28.r)),
         ),
@@ -677,7 +682,7 @@ class _HistoryDetailSheetContent extends StatelessWidget {
                 width: 40.w,
                 height: 4.h,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
@@ -705,7 +710,7 @@ class _HistoryDetailSheetContent extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: MyString.poppinsBold,
                           fontSize: 16.sp,
-                          color: const Color(0xFF0F172A),
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       Text(
@@ -714,7 +719,7 @@ class _HistoryDetailSheetContent extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: MyString.rubikRegular,
                           fontSize: 11.sp,
-                          color: Colors.black38,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -748,8 +753,7 @@ class _HistoryDetailSheetContent extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: progress,
                       minHeight: 8.h,
-                      backgroundColor:
-                          Colors.black.withValues(alpha: 0.06),
+                      backgroundColor: colorScheme.surfaceContainerHighest,
                       valueColor: AlwaysStoppedAnimation<Color>(
                           isOver ? _kRose : _kEmerald),
                     ),
@@ -806,7 +810,7 @@ class _HistoryDetailSheetContent extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: MyString.rubikRegular,
                               fontSize: 13.sp,
-                              color: const Color(0xFF0F172A),
+                              color: colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -842,7 +846,7 @@ class _HistoryDetailSheetContent extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: MyString.rubikRegular,
                               fontSize: 13.sp,
-                              color: const Color(0xFF0F172A),
+                              color: colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -874,6 +878,7 @@ class _DetailSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -890,7 +895,7 @@ class _DetailSection extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(14.r),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8F7FC),
+            color: colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(14.r),
           ),
           child: child,
@@ -909,6 +914,7 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(bottom: 6.h),
       child: Row(
@@ -918,12 +924,12 @@ class _SummaryRow extends StatelessWidget {
               style: TextStyle(
                   fontFamily: MyString.rubikRegular,
                   fontSize: 12.sp,
-                  color: Colors.black45)),
+                  color: colorScheme.onSurfaceVariant)),
           Text(value,
               style: TextStyle(
                   fontFamily: MyString.poppinsBold,
                   fontSize: 12.sp,
-                  color: valueColor ?? const Color(0xFF0F172A))),
+                  color: valueColor ?? colorScheme.onSurface)),
         ],
       ),
     );
@@ -975,7 +981,7 @@ class _NewKurbaniSheetState extends State<_NewKurbaniSheet> {
           bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius:
               BorderRadius.vertical(top: Radius.circular(28.r)),
         ),
@@ -989,7 +995,7 @@ class _NewKurbaniSheetState extends State<_NewKurbaniSheet> {
                 width: 40.w,
                 height: 4.h,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: Theme.of(context).colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
@@ -1041,6 +1047,7 @@ class _SheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
       child: Row(
@@ -1062,7 +1069,7 @@ class _SheetHeader extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: MyString.poppinsBold,
                     fontSize: 17.sp,
-                    color: const Color(0xFF0F172A),
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 Text(
@@ -1072,7 +1079,7 @@ class _SheetHeader extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: MyString.rubikRegular,
                     fontSize: 11.sp,
-                    color: Colors.black38,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -1129,7 +1136,7 @@ class _StepOneContent extends StatelessWidget {
               controller: groupNameCtrl,
               style: TextStyle(
                   fontFamily: MyString.poppinsRegular, fontSize: 14.sp),
-              decoration: _inputDeco(
+              decoration: _inputDeco(context,
                   hint: 'e.g. Kurbani 1447 H',
                   icon: Icons.nightlight_round),
               validator: (v) =>
@@ -1143,7 +1150,7 @@ class _StepOneContent extends StatelessWidget {
               keyboardType: TextInputType.number,
               style: TextStyle(
                   fontFamily: MyString.poppinsRegular, fontSize: 14.sp),
-              decoration: _inputDeco(
+              decoration: _inputDeco(context,
                   hint: '3000', icon: Icons.savings_rounded),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';
@@ -1197,6 +1204,7 @@ class _StepTwoContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final selectedCount =
         selectedIds.length + 1; // +1 for "me" (always included)
 
@@ -1272,7 +1280,7 @@ class _StepTwoContent extends StatelessWidget {
                               style: TextStyle(
                                 fontFamily: MyString.poppinsBold,
                                 fontSize: 13.sp,
-                                color: const Color(0xFF0F172A),
+                                color: colorScheme.onSurface,
                               ),
                             ),
                             if (isMe)
@@ -1295,7 +1303,7 @@ class _StepTwoContent extends StatelessWidget {
                             color: _kDeepEmerald, size: 20.r)
                       else
                         Icon(Icons.radio_button_unchecked_rounded,
-                            color: Colors.black26, size: 20.r),
+                            color: colorScheme.outlineVariant, size: 20.r),
                     ],
                   ),
                 ),
@@ -1331,24 +1339,26 @@ class _StepTwoContent extends StatelessWidget {
   }
 }
 
-InputDecoration _inputDeco({required String hint, required IconData icon}) {
+InputDecoration _inputDeco(BuildContext context,
+    {required String hint, required IconData icon}) {
+  final colorScheme = Theme.of(context).colorScheme;
   return InputDecoration(
     hintText: hint,
     prefixIcon: Icon(icon, size: 18, color: _kDeepEmerald),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      borderSide: BorderSide(color: colorScheme.outlineVariant),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      borderSide: BorderSide(color: colorScheme.outlineVariant),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: const BorderSide(color: _kDeepEmerald, width: 1.5),
     ),
     filled: true,
-    fillColor: const Color(0xFFF8F9FA),
+    fillColor: colorScheme.surfaceContainerHighest,
     contentPadding:
         const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
   );
@@ -1365,7 +1375,7 @@ class _FieldLabel extends StatelessWidget {
       style: TextStyle(
         fontFamily: MyString.poppinsBold,
         fontSize: 12.sp,
-        color: const Color(0xFF334155),
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
   }

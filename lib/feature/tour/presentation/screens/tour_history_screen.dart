@@ -67,7 +67,7 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
           style: TextStyle(
               fontFamily: MyString.rubikRegular,
               fontSize: 13.sp,
-              color: Colors.black54,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.5),
         ),
         actions: [
@@ -78,7 +78,7 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: MyColor.error,
+              backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r)),
@@ -96,7 +96,7 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: MyColor.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Consumer<TourProvider>(
         builder: (ctx, provider, _) {
           return Column(

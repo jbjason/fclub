@@ -1,4 +1,3 @@
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,6 +12,6 @@ class TourFieldLabel extends StatelessWidget {
         style: TextStyle(
             fontFamily: MyString.poppinsBold,
             fontSize: 12.sp,
-            color: MyColor.onSurfaceVariant));
+            color: Theme.of(context).colorScheme.onSurfaceVariant));
   }
 }

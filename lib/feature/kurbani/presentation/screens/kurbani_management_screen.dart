@@ -84,7 +84,7 @@ class _KurbaniManagementScreenState extends State<KurbaniManagementScreen>
     final summary = provider.summary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F7FC),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: NestedScrollView(
         headerSliverBuilder: (context, _) => [
           // ── Hero app bar ──────────────────────────────────
@@ -172,7 +172,7 @@ class _KurbaniManagementScreenState extends State<KurbaniManagementScreen>
               TabBar(
                 controller: _tabController,
                 labelColor: _kDeepEmerald,
-                unselectedLabelColor: Colors.black38,
+                unselectedLabelColor: Theme.of(context).colorScheme.outline,
                 indicatorColor: _kDeepEmerald,
                 indicatorWeight: 2.5,
                 labelStyle: TextStyle(

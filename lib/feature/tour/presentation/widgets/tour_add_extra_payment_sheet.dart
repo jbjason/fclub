@@ -68,6 +68,8 @@ class _AddExtraPaymentBottomSheetState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final members = context.watch<TourProvider>().members;
     _memberId ??= members.isNotEmpty ? members.first.id : null;
 
@@ -75,7 +77,7 @@ class _AddExtraPaymentBottomSheetState
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
         decoration: BoxDecoration(
-          color: MyColor.surfaceContainerLowest,
+          color: theme.cardColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         ),
         padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
@@ -88,7 +90,7 @@ class _AddExtraPaymentBottomSheetState
                   width: 40.w,
                   height: 4.h,
                   decoration: BoxDecoration(
-                    color: MyColor.outlineVariant,
+                    color: colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
@@ -100,7 +102,7 @@ class _AddExtraPaymentBottomSheetState
                   fontFamily: MyString.poppinsBold,
                   fontWeight: FontWeight.w700,
                   fontSize: 18.sp,
-                  color: MyColor.onSurface,
+                  color: colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 16.h),
@@ -183,6 +185,6 @@ class _AddExtraPaymentBottomSheetState
     fontFamily: MyString.poppinsMedium,
     fontWeight: FontWeight.w600,
     fontSize: 13.sp,
-    color: MyColor.onSurfaceVariant,
+    color: Theme.of(context).colorScheme.onSurfaceVariant,
   );
 }

@@ -23,6 +23,8 @@ class KurbaniExpenseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final payer = members.firstWhere(
       (m) => m.id == expense.paidByMemberId,
       orElse: () => KurbaniMemberModel(
@@ -50,7 +52,7 @@ class KurbaniExpenseTile extends StatelessWidget {
         margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
         padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(14.r),
           boxShadow: [
             BoxShadow(
@@ -94,7 +96,7 @@ class KurbaniExpenseTile extends StatelessWidget {
                       fontFamily: MyString.poppinsBold,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1A1A2E),
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   SizedBox(height: 2.h),
@@ -105,7 +107,7 @@ class KurbaniExpenseTile extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: MyString.rubikRegular,
                           fontSize: 10.sp,
-                          color: Colors.black45,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       if (expense.note != null) ...[
@@ -114,7 +116,7 @@ class KurbaniExpenseTile extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: MyString.rubikRegular,
                             fontSize: 10.sp,
-                            color: Colors.black38,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -128,7 +130,7 @@ class KurbaniExpenseTile extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: MyString.rubikRegular,
                       fontSize: 9.sp,
-                      color: Colors.black26,
+                      color: colorScheme.outline,
                     ),
                   ),
                 ],

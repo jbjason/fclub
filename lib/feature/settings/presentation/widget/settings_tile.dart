@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 
 class SettingsTile extends StatelessWidget {
@@ -23,6 +22,7 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -54,7 +54,7 @@ class SettingsTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: MyColor.gray900,
+                        color: colorScheme.onSurface,
                         fontFamily: MyString.poppinsMedium,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -66,7 +66,7 @@ class SettingsTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: MyColor.gray500,
+                        color: colorScheme.onSurfaceVariant,
                         fontFamily: MyString.rubikRegular,
                         fontSize: 12.sp,
                       ),
@@ -77,7 +77,7 @@ class SettingsTile extends StatelessWidget {
               trailing ??
                   Icon(
                     Icons.chevron_right_rounded,
-                    color: MyColor.gray400,
+                    color: colorScheme.onSurfaceVariant,
                     size: 20.r,
                   ),
             ],

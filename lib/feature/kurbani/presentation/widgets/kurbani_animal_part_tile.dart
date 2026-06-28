@@ -37,6 +37,8 @@ class KurbaniAnimalPartTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final icon = _partIcons[part.partName] ?? Icons.inventory_2_rounded;
     final color = _partColors[part.partName] ?? const Color(0xFF6D28D9);
     final pct = totalWeight > 0 ? (part.weightKg / totalWeight) * 100 : 0.0;
@@ -61,7 +63,7 @@ class KurbaniAnimalPartTile extends StatelessWidget {
         margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
         padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(14.r),
           boxShadow: [
             BoxShadow(
@@ -96,7 +98,7 @@ class KurbaniAnimalPartTile extends StatelessWidget {
                           fontFamily: MyString.poppinsBold,
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1A1A2E),
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       if (part.note != null)
@@ -105,7 +107,7 @@ class KurbaniAnimalPartTile extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: MyString.rubikRegular,
                             fontSize: 10.sp,
-                            color: Colors.black38,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                     ],
@@ -128,7 +130,7 @@ class KurbaniAnimalPartTile extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: MyString.rubikRegular,
                         fontSize: 10.sp,
-                        color: Colors.black38,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

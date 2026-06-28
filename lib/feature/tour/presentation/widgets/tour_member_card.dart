@@ -21,10 +21,12 @@ class TourMemberCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final net = balance.netBalance;
     final isSettled = net.abs() < 0.5;
     final badgeColor = isSettled
-        ? MyColor.gray400
+        ? colorScheme.onSurfaceVariant
         : net > 0
         ? MyColor.success
         : MyColor.error;
@@ -35,7 +37,7 @@ class TourMemberCard extends StatelessWidget {
         : 'Owes ${CurrencyFormatter.format(net.abs())}';
 
     return Material(
-      color: MyColor.surfaceContainerLowest,
+      color: theme.cardColor,
       borderRadius: BorderRadius.circular(14.r),
       child: InkWell(
         onTap: onTap,
@@ -46,7 +48,7 @@ class TourMemberCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14.r),
             border: Border.all(
-              color: MyColor.outlineVariant.withValues(alpha: 0.5),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
             ),
           ),
           child: Row(
@@ -67,7 +69,7 @@ class TourMemberCard extends StatelessWidget {
                         fontFamily: MyString.poppinsMedium,
                         fontWeight: FontWeight.w600,
                         fontSize: 14.sp,
-                        color: MyColor.onSurface,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     SizedBox(height: 2.h),
@@ -76,7 +78,7 @@ class TourMemberCard extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: MyString.poppinsRegular,
                         fontSize: 11.sp,
-                        color: MyColor.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

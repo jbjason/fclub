@@ -26,6 +26,8 @@ class TourGlassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = borderRadius ?? BorderRadius.circular(20.r);
     final accent = accentColor ?? MyColor.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final glassTint = isDark ? MyColor.black : MyColor.white;
     return ClipRRect(
       borderRadius: radius,
       child: BackdropFilter(
@@ -38,8 +40,8 @@ class TourGlassCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                MyColor.white.withValues(alpha: 0.6),
-                MyColor.white.withValues(alpha: 0.22),
+                glassTint.withValues(alpha: isDark ? 0.32 : 0.6),
+                glassTint.withValues(alpha: isDark ? 0.12 : 0.22),
               ],
             ),
             border: Border.all(

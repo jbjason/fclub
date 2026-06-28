@@ -15,6 +15,8 @@ class SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -23,7 +25,7 @@ class SettingsSection extends StatelessWidget {
           child: Text(
             title.toUpperCase(),
             style: TextStyle(
-              color: MyColor.gray500,
+              color: colorScheme.onSurfaceVariant,
               fontFamily: MyString.poppinsBold,
               fontSize: 11.sp,
               fontWeight: FontWeight.w700,
@@ -33,9 +35,9 @@ class SettingsSection extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: MyColor.surfaceContainerLowest,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(18.r),
-            border: Border.all(color: MyColor.outlineVariant),
+            border: Border.all(color: colorScheme.outlineVariant),
             boxShadow: [
               BoxShadow(
                 color: MyColor.black.withValues(alpha: 0.03),
@@ -47,7 +49,7 @@ class SettingsSection extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(18.r),
             child: Column(
-              children: _buildChildren(),
+              children: _buildChildren(colorScheme),
             ),
           ),
         ),
@@ -55,7 +57,7 @@ class SettingsSection extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildChildren() {
+  List<Widget> _buildChildren(ColorScheme colorScheme) {
     final items = <Widget>[];
     for (var i = 0; i < children.length; i++) {
       items.add(children[i]);
@@ -66,7 +68,7 @@ class SettingsSection extends StatelessWidget {
             child: Divider(
               height: 0.5,
               thickness: 0.5,
-              color: MyColor.outlineVariant.withValues(alpha: 0.7),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.7),
             ),
           ),
         );

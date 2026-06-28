@@ -19,6 +19,7 @@ class TourMemberSelectChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -30,7 +31,7 @@ class TourMemberSelectChip extends StatelessWidget {
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-            color: isSelected ? MyColor.primary : MyColor.outlineVariant,
+            color: isSelected ? MyColor.primary : colorScheme.outlineVariant,
           ),
         ),
         child: Row(
@@ -47,7 +48,7 @@ class TourMemberSelectChip extends StatelessWidget {
               style: TextStyle(
                 fontFamily: MyString.poppinsRegular,
                 fontSize: 12.sp,
-                color: isSelected ? MyColor.primary : MyColor.onSurfaceVariant,
+                color: isSelected ? MyColor.primary : colorScheme.onSurfaceVariant,
               ),
             ),
           ],

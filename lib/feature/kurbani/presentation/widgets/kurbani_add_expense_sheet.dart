@@ -57,10 +57,11 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
   @override
   Widget build(BuildContext context) {
     final members = context.read<KurbaniProvider>().members;
+    final theme = Theme.of(context);
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
       ),
       padding: EdgeInsets.only(
@@ -76,7 +77,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: theme.colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -200,7 +201,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
         hintText: hint,
         prefixIcon: Icon(icon, size: 18.r),
         filled: true,
-        fillColor: const Color(0xFFF8F7FC),
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
           borderSide: BorderSide.none,
@@ -208,7 +209,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
           borderSide: BorderSide(
-            color: Colors.grey.withValues(alpha: 0.2),
+            color: Theme.of(context).colorScheme.outlineVariant,
           ),
         ),
         focusedBorder: OutlineInputBorder(
@@ -236,14 +237,14 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
         labelText: 'Paid By',
         prefixIcon: Icon(Icons.person_outline_rounded, size: 18.r),
         filled: true,
-        fillColor: const Color(0xFFF8F7FC),
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),

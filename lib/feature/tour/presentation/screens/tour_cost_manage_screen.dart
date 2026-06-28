@@ -7,7 +7,6 @@ import 'package:fclub/feature/tour/data/model/tour_summary.dart';
 import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_add_expense_sheet.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_add_extra_payment_sheet.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_budget_progress_bar.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_expenses_tab.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_members_tab.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_payments_tab.dart';
@@ -45,11 +44,10 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
     final summary = tourProvider.summary;
 
     return Scaffold(
-      backgroundColor: MyColor.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: NestedScrollView(
         headerSliverBuilder: (context, _) => [
           _buildSliverAppBar(tourProvider),
-          _buildBudgetHeader(summary),
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
@@ -85,7 +83,7 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
               TabBar(
                 controller: _tabController,
                 labelColor: MyColor.primary,
-                unselectedLabelColor: MyColor.outline,
+                unselectedLabelColor: Theme.of(context).colorScheme.outline,
                 indicatorColor: MyColor.primary,
                 tabs: const [
                   Tab(text: 'Expenses'),
@@ -146,29 +144,6 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
               Navigator.pushNamed(context, AppRouteName.tourSummary),
         ),
       ],
-    );
-  }
-
-  SliverToBoxAdapter _buildBudgetHeader(TourSummary summary) {
-    return SliverToBoxAdapter(
-      child: Container(
-        color: MyColor.primary,
-        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${CurrencyFormatter.format(summary.totalSpent)} of ${CurrencyFormatter.format(summary.totalDecidedBudget)} spent',
-              style: TextStyle(color: MyColor.white, fontSize: 12.sp),
-            ),
-            SizedBox(height: 8.h),
-            TourBudgetProgressBar(
-              progress: summary.budgetProgress,
-              isOverBudget: summary.isOverBudget,
-            ),
-          ],
-        ),
-      ),
     );
   }
 

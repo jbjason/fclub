@@ -147,6 +147,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
       child: Row(
@@ -169,7 +170,7 @@ class _SectionHeader extends StatelessWidget {
                   fontFamily: MyString.poppinsBold,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1A1A2E),
+                  color: colorScheme.onSurface,
                 ),
               ),
               Text(
@@ -177,7 +178,7 @@ class _SectionHeader extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: MyString.rubikRegular,
                   fontSize: 10.sp,
-                  color: Colors.black38,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -196,11 +197,12 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 40.h),
       child: Column(
         children: [
-          Icon(icon, size: 48.r, color: Colors.black12),
+          Icon(icon, size: 48.r, color: colorScheme.outlineVariant),
           SizedBox(height: 12.h),
           Text(
             message,
@@ -208,7 +210,7 @@ class _EmptyState extends StatelessWidget {
             style: TextStyle(
               fontFamily: MyString.rubikRegular,
               fontSize: 13.sp,
-              color: Colors.black38,
+              color: colorScheme.onSurfaceVariant,
               height: 1.6,
             ),
           ),

@@ -34,6 +34,7 @@ class TourNewTourStepOne extends StatelessWidget {
               style: TextStyle(
                   fontFamily: MyString.poppinsRegular, fontSize: 14.sp),
               decoration: tourInputDecoration(
+                  context,
                   hint: "e.g. Cox's Bazar Trip",
                   icon: Icons.card_travel_rounded),
               validator: (v) =>
@@ -48,6 +49,7 @@ class TourNewTourStepOne extends StatelessWidget {
               style: TextStyle(
                   fontFamily: MyString.poppinsRegular, fontSize: 14.sp),
               decoration: tourInputDecoration(
+                  context,
                   hint: '20000', icon: Icons.savings_rounded),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';

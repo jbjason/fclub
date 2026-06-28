@@ -118,7 +118,7 @@ class KurbaniSettlementHero extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: MyString.rubikRegular,
                     fontSize: 11.sp,
-                    color: Colors.black54,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.4,
                   ),
                 ),

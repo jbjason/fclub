@@ -22,10 +22,12 @@ class TourMemberSettlementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final net = balance.netBalance;
     final isSettled = net.abs() < 0.5;
     final badgeColor = isSettled
-        ? MyColor.gray400
+        ? colorScheme.onSurfaceVariant
         : net > 0
         ? MyColor.success
         : MyColor.error;
@@ -38,9 +40,9 @@ class TourMemberSettlementCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 10.h),
       decoration: BoxDecoration(
-        color: MyColor.surfaceContainerLowest,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: MyColor.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: ExpansionTile(
         leading: TourMemberAvatar(

@@ -1,4 +1,3 @@
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +21,7 @@ class TourBreakdownRow extends StatelessWidget {
       fontFamily: isTotal ? MyString.poppinsBold : MyString.poppinsRegular,
       fontWeight: isTotal ? FontWeight.w700 : FontWeight.w400,
       fontSize: 12.sp,
-      color: MyColor.onSurfaceVariant,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),

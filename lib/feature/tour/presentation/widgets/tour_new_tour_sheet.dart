@@ -1,4 +1,3 @@
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_new_tour_step_one.dart';
@@ -56,6 +55,7 @@ class _TourNewTourSheetState extends State<TourNewTourSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final globalContacts = context.watch<GlobalContactsProvider>();
 
     return Padding(
@@ -63,7 +63,7 @@ class _TourNewTourSheetState extends State<TourNewTourSheet> {
           bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius:
               BorderRadius.vertical(top: Radius.circular(28.r)),
         ),
@@ -76,7 +76,7 @@ class _TourNewTourSheetState extends State<TourNewTourSheet> {
                 width: 40.w,
                 height: 4.h,
                 decoration: BoxDecoration(
-                    color: MyColor.gray200,
+                    color: theme.colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2.r)),
               ),
             ),

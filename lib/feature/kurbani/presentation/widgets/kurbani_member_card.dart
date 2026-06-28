@@ -44,6 +44,7 @@ class KurbaniMemberCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final gradients = kurbaniAvatarGradients[
         balance.avatarColorIndex % kurbaniAvatarGradients.length];
     final initials = _initials(balance.memberName);
@@ -53,7 +54,7 @@ class KurbaniMemberCard extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -101,7 +102,7 @@ class KurbaniMemberCard extends StatelessWidget {
                     fontFamily: MyString.poppinsBold,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
+                    color: colorScheme.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -112,7 +113,7 @@ class KurbaniMemberCard extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: MyString.rubikRegular,
                     fontSize: 10.sp,
-                    color: Colors.black45,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

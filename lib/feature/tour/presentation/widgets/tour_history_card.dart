@@ -15,6 +15,8 @@ class TourHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final spent = session.totalSpent;
     final budget = session.decidedBudget;
     final progress =
@@ -25,7 +27,7 @@ class TourHistoryCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(
@@ -68,7 +70,7 @@ class TourHistoryCard extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: MyString.poppinsBold,
                               fontSize: 14.sp,
-                              color: MyColor.onSurface,
+                              color: colorScheme.onSurface,
                             ),
                           ),
                           Text(
@@ -77,7 +79,7 @@ class TourHistoryCard extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: MyString.rubikRegular,
                               fontSize: 11.sp,
-                              color: MyColor.gray400,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -86,7 +88,7 @@ class TourHistoryCard extends StatelessWidget {
                     IconButton(
                       onPressed: onDelete,
                       icon: Icon(Icons.delete_outline_rounded,
-                          color: MyColor.gray300, size: 20.r),
+                          color: colorScheme.onSurfaceVariant, size: 20.r),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
@@ -103,7 +105,7 @@ class TourHistoryCard extends StatelessWidget {
                         style: TextStyle(
                             fontFamily: MyString.rubikRegular,
                             fontSize: 11.sp,
-                            color: MyColor.gray400)),
+                            color: colorScheme.onSurfaceVariant)),
                     Text(
                       '${CurrencyFormatter.format(spent)} / ${CurrencyFormatter.format(budget)}',
                       style: TextStyle(
@@ -122,8 +124,7 @@ class TourHistoryCard extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 6.h,
-                    backgroundColor:
-                        MyColor.gray100,
+                    backgroundColor: colorScheme.surfaceContainerHighest,
                     valueColor: AlwaysStoppedAnimation<Color>(
                         progressColor),
                   ),

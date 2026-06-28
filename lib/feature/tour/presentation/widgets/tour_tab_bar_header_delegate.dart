@@ -1,4 +1,3 @@
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:flutter/material.dart';
 
 class TourTabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
@@ -14,7 +13,7 @@ class TourTabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(color: MyColor.surfaceContainerLowest, child: tabBar);
+    return Container(color: Theme.of(context).cardColor, child: tabBar);
   }
 
   @override

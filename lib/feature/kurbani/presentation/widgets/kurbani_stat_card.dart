@@ -55,7 +55,7 @@ class KurbaniStatCard extends StatelessWidget {
               style: TextStyle(
                 fontFamily: MyString.rubikRegular,
                 fontSize: 10.sp,
-                color: Colors.black54,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],

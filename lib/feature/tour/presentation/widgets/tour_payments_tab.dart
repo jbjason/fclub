@@ -24,6 +24,9 @@ class TourPaymentsTab extends StatelessWidget {
       );
     }
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return ListView.builder(
       padding: EdgeInsets.all(16.w),
       itemCount: payments.length,
@@ -34,9 +37,9 @@ class TourPaymentsTab extends StatelessWidget {
           margin: EdgeInsets.only(bottom: 10.h),
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
-            color: MyColor.surfaceContainerLowest,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(color: MyColor.outlineVariant.withValues(alpha: 0.5)),
+            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
           ),
           child: Row(
             children: [
@@ -61,7 +64,7 @@ class TourPaymentsTab extends StatelessWidget {
                     if (payment.note != null && payment.note!.isNotEmpty)
                       Text(
                         payment.note!,
-                        style: TextStyle(fontSize: 11.sp, color: MyColor.onSurfaceVariant),
+                        style: TextStyle(fontSize: 11.sp, color: colorScheme.onSurfaceVariant),
                       ),
                   ],
                 ),

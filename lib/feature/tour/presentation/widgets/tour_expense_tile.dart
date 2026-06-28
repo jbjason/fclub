@@ -1,4 +1,3 @@
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/tour/data/expense_category.dart';
@@ -30,14 +29,16 @@ class TourExpenseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final category = ExpenseCategory.values[expense.categoryIndex];
     return Container(
       margin: EdgeInsets.only(bottom: 10.h),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: MyColor.surfaceContainerLowest,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: MyColor.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
@@ -59,7 +60,7 @@ class TourExpenseTile extends StatelessWidget {
                     fontFamily: MyString.poppinsMedium,
                     fontWeight: FontWeight.w600,
                     fontSize: 14.sp,
-                    color: MyColor.onSurface,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -72,7 +73,7 @@ class TourExpenseTile extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: MyString.poppinsRegular,
                         fontSize: 11.sp,
-                        color: MyColor.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -90,14 +91,14 @@ class TourExpenseTile extends StatelessWidget {
                   fontFamily: MyString.poppinsBold,
                   fontWeight: FontWeight.w700,
                   fontSize: 14.sp,
-                  color: MyColor.onSurface,
+                  color: colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 4.h),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                 decoration: BoxDecoration(
-                  color: MyColor.secondaryContainer,
+                  color: colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
@@ -105,7 +106,7 @@ class TourExpenseTile extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: MyString.poppinsRegular,
                     fontSize: 10.sp,
-                    color: MyColor.onSecondaryContainer,
+                    color: colorScheme.onSecondaryContainer,
                   ),
                 ),
               ),

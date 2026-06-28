@@ -25,6 +25,7 @@ class TourNewTourStepTwo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final selectedCount = selectedIds.length + 1; // +1 for "me" (always included)
 
     return Column(
@@ -75,7 +76,7 @@ class TourNewTourStepTwo extends StatelessWidget {
                               style: TextStyle(
                                 fontFamily: MyString.poppinsBold,
                                 fontSize: 13.sp,
-                                color: MyColor.onSurface,
+                                color: colorScheme.onSurface,
                               ),
                             ),
                             if (isMe)
@@ -98,7 +99,7 @@ class TourNewTourStepTwo extends StatelessWidget {
                             color: MyColor.primary, size: 20.r)
                       else
                         Icon(Icons.radio_button_unchecked_rounded,
-                            color: MyColor.gray300, size: 20.r),
+                            color: colorScheme.outlineVariant, size: 20.r),
                     ],
                   ),
                 ),

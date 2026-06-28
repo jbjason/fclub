@@ -19,6 +19,7 @@ class TourBalanceHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isSurplus = balance >= 0;
     final color = isSurplus ? MyColor.success : MyColor.error;
     final progress = totalCollected <= 0
@@ -62,7 +63,7 @@ class TourBalanceHero extends StatelessWidget {
                         value: value,
                         strokeWidth: 10.w,
                         strokeCap: StrokeCap.round,
-                        backgroundColor: MyColor.outlineVariant.withValues(alpha: 0.3),
+                        backgroundColor: colorScheme.outlineVariant.withValues(alpha: 0.3),
                         valueColor: AlwaysStoppedAnimation<Color>(color),
                       ),
                     ),

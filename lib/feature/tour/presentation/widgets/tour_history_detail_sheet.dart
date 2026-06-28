@@ -27,6 +27,8 @@ class TourHistoryDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final spent = session.totalSpent;
     final budget = session.decidedBudget;
     final collected = session.totalCollected;
@@ -40,7 +42,7 @@ class TourHistoryDetailContent extends StatelessWidget {
       minChildSize: 0.4,
       builder: (_, controller) => Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius:
               BorderRadius.vertical(top: Radius.circular(28.r)),
         ),
@@ -54,7 +56,7 @@ class TourHistoryDetailContent extends StatelessWidget {
                 width: 40.w,
                 height: 4.h,
                 decoration: BoxDecoration(
-                    color: MyColor.gray200,
+                    color: colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2.r)),
               ),
             ),
@@ -81,7 +83,7 @@ class TourHistoryDetailContent extends StatelessWidget {
                         style: TextStyle(
                             fontFamily: MyString.poppinsBold,
                             fontSize: 16.sp,
-                            color: MyColor.onSurface),
+                            color: colorScheme.onSurface),
                       ),
                       Text(
                         DateFormat('EEEE, d MMMM y')
@@ -89,7 +91,7 @@ class TourHistoryDetailContent extends StatelessWidget {
                         style: TextStyle(
                             fontFamily: MyString.rubikRegular,
                             fontSize: 11.sp,
-                            color: MyColor.gray400),
+                            color: colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -121,7 +123,7 @@ class TourHistoryDetailContent extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: progress,
                       minHeight: 8.h,
-                      backgroundColor: MyColor.gray100,
+                      backgroundColor: colorScheme.surfaceContainerHighest,
                       valueColor: AlwaysStoppedAnimation<Color>(
                           isOver ? MyColor.error : MyColor.success),
                     ),
@@ -151,7 +153,7 @@ class TourHistoryDetailContent extends StatelessWidget {
                               style: TextStyle(
                                   fontFamily: MyString.rubikRegular,
                                   fontSize: 13.sp,
-                                  color: MyColor.onSurface)),
+                                  color: colorScheme.onSurface)),
                         ),
                         Text(
                           CurrencyFormatter.format(m.paidToManager),
@@ -186,7 +188,7 @@ class TourHistoryDetailContent extends StatelessWidget {
                               style: TextStyle(
                                   fontFamily: MyString.rubikRegular,
                                   fontSize: 13.sp,
-                                  color: MyColor.onSurface)),
+                                  color: colorScheme.onSurface)),
                         ),
                         Text(
                           CurrencyFormatter.format(e.amount),

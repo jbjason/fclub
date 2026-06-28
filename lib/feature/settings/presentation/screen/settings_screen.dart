@@ -168,39 +168,36 @@ class SettingsScreen extends StatelessWidget {
 class _SettingsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Builder(
-      builder: (context) {
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Settings',
-                    style: TextStyle(
-                      color: MyColor.gray900,
-                      fontFamily: MyString.poppinsBold,
-                      fontSize: 29.sp,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    'Manage your account & preferences.',
-                    style: TextStyle(
-                      color: MyColor.gray600,
-                      fontFamily: MyString.rubikRegular,
-                      fontSize: 15.sp,
-                    ),
-                  ),
-                ],
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Settings',
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontFamily: MyString.poppinsBold,
+                  fontSize: 29.sp,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-            ),
-          ],
-        );
-      },
+              SizedBox(height: 4.h),
+              Text(
+                'Manage your account & preferences.',
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontFamily: MyString.rubikRegular,
+                  fontSize: 15.sp,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -367,8 +364,9 @@ class _SignOutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: MyColor.errorContainer,
+      color: colorScheme.errorContainer,
       borderRadius: BorderRadius.circular(18.r),
       child: InkWell(
         onTap: session.isSigningOut
@@ -397,7 +395,7 @@ class _SignOutButton extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18.r),
-            border: Border.all(color: MyColor.error.withValues(alpha: 0.12)),
+            border: Border.all(color: colorScheme.error.withValues(alpha: 0.12)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -408,19 +406,19 @@ class _SignOutButton extends StatelessWidget {
                       height: 20.r,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.w,
-                        color: MyColor.error,
+                        color: colorScheme.error,
                       ),
                     )
                   : Icon(
                       Icons.logout_rounded,
-                      color: MyColor.error,
+                      color: colorScheme.error,
                       size: 20.r,
                     ),
               SizedBox(width: 12.w),
               Text(
                 session.isSigningOut ? 'Signing Out...' : 'Sign Out',
                 style: TextStyle(
-                  color: MyColor.error,
+                  color: colorScheme.error,
                   fontFamily: MyString.poppinsBold,
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700,

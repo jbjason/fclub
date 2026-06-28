@@ -1,4 +1,3 @@
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/list_extensions.dart';
 import 'package:fclub/feature/tour/data/model/tour_expense_model.dart';
@@ -34,6 +33,7 @@ class TourExpensesTab extends StatelessWidget {
     }
 
     final grouped = _grouped;
+    final colorScheme = Theme.of(context).colorScheme;
     return ListView(
       padding: EdgeInsets.all(16.w),
       children: grouped.entries.expand((entry) {
@@ -46,7 +46,7 @@ class TourExpensesTab extends StatelessWidget {
                 fontFamily: MyString.poppinsMedium,
                 fontWeight: FontWeight.w600,
                 fontSize: 12.sp,
-                color: MyColor.outline,
+                color: colorScheme.outline,
               ),
             ),
           ),

@@ -20,10 +20,10 @@ class KurbaniTabHeaderDelegate extends SliverPersistentHeaderDelegate {
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         border: Border(
           bottom: BorderSide(
-            color: Colors.grey.withValues(alpha: 0.15),
+            color: Theme.of(context).colorScheme.outlineVariant,
             width: 1,
           ),
         ),

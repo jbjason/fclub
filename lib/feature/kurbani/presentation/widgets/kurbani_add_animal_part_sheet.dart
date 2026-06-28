@@ -67,9 +67,11 @@ class _KurbaniAddAnimalPartSheetState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
       ),
       padding: EdgeInsets.only(
@@ -84,7 +86,7 @@ class _KurbaniAddAnimalPartSheetState
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -125,7 +127,7 @@ class _KurbaniAddAnimalPartSheetState
                     style: TextStyle(
                       fontFamily: MyString.poppinsBold,
                       fontSize: 12.sp,
-                      color: Colors.black54,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -145,7 +147,7 @@ class _KurbaniAddAnimalPartSheetState
                           decoration: BoxDecoration(
                             color: selected
                                 ? const Color(0xFF7C2D12)
-                                : const Color(0xFFF3F4F6),
+                                : colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(20.r),
                             border: Border.all(
                               color: selected
@@ -158,7 +160,7 @@ class _KurbaniAddAnimalPartSheetState
                             style: TextStyle(
                               fontFamily: MyString.rubikRegular,
                               fontSize: 12.sp,
-                              color: selected ? Colors.white : Colors.black54,
+                              color: selected ? Colors.white : colorScheme.onSurfaceVariant,
                               fontWeight: selected
                                   ? FontWeight.w600
                                   : FontWeight.normal,
@@ -187,7 +189,7 @@ class _KurbaniAddAnimalPartSheetState
                           Icon(Icons.scale_rounded, size: 18.r),
                       suffixText: 'kg',
                       filled: true,
-                      fillColor: const Color(0xFFF8F7FC),
+                      fillColor: colorScheme.surfaceContainerHighest,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                         borderSide: BorderSide.none,
@@ -195,7 +197,7 @@ class _KurbaniAddAnimalPartSheetState
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                         borderSide: BorderSide(
-                          color: Colors.grey.withValues(alpha: 0.2),
+                          color: colorScheme.outlineVariant,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
@@ -214,7 +216,7 @@ class _KurbaniAddAnimalPartSheetState
                       labelText: 'Note (optional)',
                       prefixIcon: Icon(Icons.notes_rounded, size: 18.r),
                       filled: true,
-                      fillColor: const Color(0xFFF8F7FC),
+                      fillColor: colorScheme.surfaceContainerHighest,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                         borderSide: BorderSide.none,
@@ -222,7 +224,7 @@ class _KurbaniAddAnimalPartSheetState
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                         borderSide: BorderSide(
-                          color: Colors.grey.withValues(alpha: 0.2),
+                          color: colorScheme.outlineVariant,
                         ),
                       ),
                     ),
