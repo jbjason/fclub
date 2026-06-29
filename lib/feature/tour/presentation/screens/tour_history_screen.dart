@@ -25,8 +25,7 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<GlobalContactsProvider>().seedDemoData();
-      context.read<TourProvider>().seedDemoData();
+      context.read<GlobalContactsProvider>().loadContacts();
     });
   }
 

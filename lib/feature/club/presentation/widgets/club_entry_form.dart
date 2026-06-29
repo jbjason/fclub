@@ -1,4 +1,3 @@
-import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/club/data/model/payment_entry.dart';
 import 'package:fclub/feature/club/data/model/payment_status.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
@@ -109,7 +108,7 @@ class _ClubEntryFormState extends State<ClubEntryForm> {
 
   @override
   Widget build(BuildContext context) {
-    final contacts = context.watch<GlobalContactsProvider>().contacts;
+    final contacts = context.watch<ClubProvider>().clubMembers;
     final textTheme = Theme.of(context).textTheme;
 
     return Form(

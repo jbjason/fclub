@@ -1,11 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fclub/core/services/contacts/app_contact.dart';
 import 'package:fclub/core/services/contacts/global_contacts_hive_box.dart';
 import 'package:fclub/core/services/global_service.dart';
-import 'package:fclub/feature/auth/data/model/auth_user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-/// Shared "choose member" pool used by both the Tour and Kurbani features.
+/// Shared "choose member" pool used by Tour, Kurbani, and Club — backed by
+/// the real `users` collection in Firestore, cached locally in Hive so the
+/// last-known list is still available offline.
 class GlobalContactsProvider with ChangeNotifier {
   GlobalContactsProvider()
     : _contactsBox = Hive.box<AppContact>(GlobalContactsHiveBox.boxName);
@@ -14,45 +16,45 @@ class GlobalContactsProvider with ChangeNotifier {
 
   List<AppContact> get contacts => _contactsBox.values.toList();
 
-  AppContact? get meContact =>
-      _contactsBox.values.where((c) => c.isMe).firstOrNull;
-
-  bool get hasDemoData => _contactsBox.isNotEmpty;
+  bool get hasContacts => _contactsBox.isNotEmpty;
 
   AppContact? contactById(String id) => _contactsBox.get(id);
 
-  Future<void> seedDemoData() async {
-    if (hasDemoData) return;
+  AppContact? get meContact =>
+      _contactsBox.values.where((c) => c.isMe).firstOrNull;
 
-    final youName = _resolveDisplayName(GlobalService.instance.currentUser);
+  /// Fetches every user from the Firestore `users` collection and replaces
+  /// the local cache. The signed-in user's email is matched against each
+  /// doc's `email` field to flag the corresponding contact as "me". On
+  /// failure, the previously cached contacts are left untouched so the app
+  /// still works offline.
+  Future<void> loadContacts() async {
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+      final myEmail =
+          GlobalService.instance.currentUser?.email?.trim().toLowerCase();
 
-    final list = [
-      AppContact(id: 'me', name: youName, avatarColorIndex: 0, isMe: true),
-      AppContact(id: 'c1', name: 'Belaak Noyon', avatarColorIndex: 1),
-      AppContact(id: 'c2', name: 'Bolod Alamin', avatarColorIndex: 2),
-      AppContact(id: 'c3', name: 'Rasel Paada', avatarColorIndex: 3),
-      AppContact(id: 'c4', name: 'Taaut Rumi', avatarColorIndex: 4),
-      AppContact(id: 'c5', name: 'Sesra Joynal', avatarColorIndex: 5),
-      AppContact(id: 'c6', name: 'Gaanja Monir', avatarColorIndex: 6),
-      AppContact(id: 'c7', name: 'Tank Nazmul', avatarColorIndex: 0),
-      AppContact(id: 'c8', name: 'Baatu Miraj', avatarColorIndex: 1),
-      AppContact(id: 'c9', name: 'Kaatbaaj Ashraful', avatarColorIndex: 2),
-      AppContact(id: 'c10', name: 'Demo User1', avatarColorIndex: 3),
-      AppContact(id: 'c11', name: 'Demo User2', avatarColorIndex: 4),
-    ];
+      final fetched = <AppContact>[];
+      for (var i = 0; i < snapshot.docs.length; i++) {
+        final data = snapshot.docs[i].data();
+        final name = (data['name'] as String?)?.trim();
+        final email = (data['email'] as String?)?.trim().toLowerCase();
+        fetched.add(AppContact(
+          id: snapshot.docs[i].id,
+          name: name?.isNotEmpty == true ? name! : 'Unknown',
+          avatarColorIndex: i,
+          isMe: myEmail != null && email != null && email == myEmail,
+        ));
+      }
 
-    for (final contact in list) {
-      await _contactsBox.put(contact.id, contact);
+      await _contactsBox.clear();
+      for (final contact in fetched) {
+        await _contactsBox.put(contact.id, contact);
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('GlobalContactsProvider.loadContacts failed: $e');
     }
-    notifyListeners();
-  }
-
-  String _resolveDisplayName(AuthUser? user) {
-    if (user == null) return 'You';
-    final displayName = user.displayName?.trim();
-    if (displayName != null && displayName.isNotEmpty) return displayName;
-    final email = user.email;
-    if (email != null && email.contains('@')) return email.split('@').first;
-    return 'You';
   }
 }

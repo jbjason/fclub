@@ -37,7 +37,7 @@ class _ClubHistoryScreenState extends State<ClubHistoryScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final globalContacts = context.read<GlobalContactsProvider>();
       final clubProvider = context.read<ClubProvider>();
-      await globalContacts.seedDemoData();
+      await globalContacts.loadContacts();
       await clubProvider.seedDemoData();
     });
   }
@@ -79,8 +79,9 @@ class _ClubHistoryScreenState extends State<ClubHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final entries = context.watch<ClubProvider>().entries;
-    final contacts = context.watch<GlobalContactsProvider>().contacts;
+    final clubProvider = context.watch<ClubProvider>();
+    final entries = clubProvider.entries;
+    final contacts = clubProvider.clubMembers;
     final contactsById = {for (final contact in contacts) contact.id: contact};
 
     final filtered = _applyFilters(entries, contactsById);

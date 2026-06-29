@@ -30,8 +30,7 @@ class _KurbaniHistoryScreenState extends State<KurbaniHistoryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<GlobalContactsProvider>().seedDemoData();
-      context.read<KurbaniProvider>().seedDemoData();
+      context.read<GlobalContactsProvider>().loadContacts();
     });
   }
 

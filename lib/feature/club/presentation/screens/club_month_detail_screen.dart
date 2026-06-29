@@ -1,5 +1,4 @@
 import 'package:fclub/core/services/contacts/app_contact.dart';
-import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/club/data/model/payment_entry.dart';
 import 'package:fclub/feature/club/data/model/payment_status.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
@@ -70,8 +69,9 @@ class _ClubMonthDetailScreenState extends State<ClubMonthDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final entries = context.watch<ClubProvider>().entries;
-    final contacts = context.watch<GlobalContactsProvider>().contacts;
+    final clubProvider = context.watch<ClubProvider>();
+    final entries = clubProvider.entries;
+    final contacts = clubProvider.clubMembers;
     final contactsById = {for (final contact in contacts) contact.id: contact};
 
     final monthEntries = entries.where((e) => e.month == widget.month).toList();

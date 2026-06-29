@@ -23,7 +23,7 @@ class AppContact {
   @HiveField(2)
   int avatarColorIndex;
 
-  /// True for the current app user ("Me" — always selected as creator).
+  /// True for the current app user, matched by email against Firestore.
   @HiveField(3)
   bool isMe;
 }

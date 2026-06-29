@@ -1,3 +1,4 @@
+import 'package:fclub/core/services/contacts/app_contact.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/club/data/club_hive_box.dart';
 import 'package:fclub/feature/club/data/model/payment_entry.dart';
@@ -21,8 +22,25 @@ class ClubProvider with ChangeNotifier {
   static const double monthlyContribution = 5000;
   static final DateTime clubStartMonth = DateTime(2025, 6, 1);
 
+  /// Only these real users are Fundora Club members — the club is a subset
+  /// of the full shared contacts pool, not everyone in it.
+  static const Set<String> _clubMemberIds = {
+    '4f3tRdRx0Q5h9vKigqRm',
+    '7dkX7S5BdEScw5OMPTaN',
+    '9EzfhVCdHXwORYQ8oT2I',
+    'EvsQcqzTCi6lt6zGMn9A',
+    'eVtwuJndDDz8Mru0QOBW',
+    'nI53VyGowRNiy35IpP3v',
+    'opFqEgAQUxULOwZbBBRK',
+    'wnKj8Zz9vnTlVrU5OvYI',
+  };
+
   List<PaymentEntry> get entries =>
       _entriesBox.values.toList()..sort((a, b) => b.date.compareTo(a.date));
+
+  List<AppContact> get clubMembers => _globalContacts.contacts
+      .where((c) => _clubMemberIds.contains(c.id))
+      .toList();
 
   bool get hasDemoData => _entriesBox.isNotEmpty;
 
@@ -81,7 +99,7 @@ class ClubProvider with ChangeNotifier {
   Future<void> seedDemoData() async {
     if (hasDemoData) return;
 
-    final contacts = _globalContacts.contacts;
+    final contacts = clubMembers;
     if (contacts.isEmpty) return;
 
     final now = DateTime.now();
