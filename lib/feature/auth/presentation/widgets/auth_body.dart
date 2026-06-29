@@ -15,40 +15,43 @@ class AuthBody extends StatelessWidget {
           key: viewModel.formKey,
           child: Column(
             children: [
-              // login text & Image circleAvatar
-              // Center(
-              //   child: Text(
-              //     'LOGIN',
-              //     style: const TextStyle(
-              //       fontSize: 25,
-              //       fontWeight: FontWeight.bold,
-              //       color: Colors.white70,
-              //     ),
-              //   ),
-              // ),
+              // sign in text
               SignInTextStyle(),
-              const SizedBox(height: 36),
-              // email textfield
-              AuthTextField(
-                controller: viewModel.emailController,
-                title: 'Email',
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: 56,
+                  right: 16,
+                  top: 10,
+                  bottom: 16,
+                ),
+                child: Column(
+                  children: [
+                    // email textfield
+                    AuthTextField(
+                      controller: viewModel.emailController,
+                      title: 'Email Address',
+                      prefixIcon: Icons.email_outlined,
+                    ),
+                    const SizedBox(height: 10),
+                    // pass textfield
+                    AuthTextField(
+                      controller: viewModel.passController,
+                      title: 'Password',
+                      prefixIcon: Icons.lock_outline,
+                      isPassword: true,
+                    ),
+                    const SizedBox(height: 10),
+                    // submit, signup & sigin buttons
+                    AuthButtons(isLoading: viewModel.isLoading),
+                  ],
+                ),
               ),
-              // pass textfield
-              AuthTextField(
-                controller: viewModel.passController,
-                title: 'Password',
-              ),
-              const SizedBox(height: 20),
-              // submit, signup & sigin buttons
-              AuthButtons(
-                isLoading: viewModel.isLoading,
-              ),
+
+              const SizedBox(height: 0),
             ],
           ),
         ),
       ),
     );
   }
-
-
 }

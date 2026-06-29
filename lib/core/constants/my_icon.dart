@@ -12,4 +12,7 @@ class MyIcon {
 
   static const String settings = "assets/icons/settings.png";
   static const String notification = "assets/icons/notification.png";
+
+  static const String email = "assets/icons/email.json";
+  static const String password = "assets/icons/password.json";
 }

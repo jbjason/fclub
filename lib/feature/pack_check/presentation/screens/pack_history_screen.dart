@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../data/model/pack_item.dart';
 import '../../data/model/pack_session.dart';
+import '../../data/pack_item_icons.dart';
 import '../provider/pack_check_provider.dart';
 import '../widgets/pack_history_view.dart';
 import 'pack_session_screen.dart';
@@ -574,10 +575,7 @@ class _DetailItemCell extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              IconData(
-                item.iconCodePoint,
-                fontFamily: 'MaterialIcons',
-              ),
+              PackItemIcons.resolve(item.iconCodePoint),
               color: const Color(0xFFA855F7),
               size: 26.r,
             ),

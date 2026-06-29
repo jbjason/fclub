@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../data/model/pack_item.dart';
+import '../../data/pack_item_icons.dart';
 
 /// A single checklist row used in check (return-verify) mode.
 ///
@@ -126,7 +127,7 @@ class _TileVisual extends StatelessWidget {
             : [Colors.white38, Colors.white24],
       ).createShader(b),
       child: Icon(
-        IconData(item.iconCodePoint, fontFamily: 'MaterialIcons'),
+        PackItemIcons.resolve(item.iconCodePoint),
         size: 26.r,
         color: Colors.white,
       ),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../data/model/pack_item.dart';
+import '../../data/pack_item_icons.dart';
 
 /// A tappable icon card representing a single packable item.
 ///
@@ -226,7 +227,7 @@ class _ItemVisual extends StatelessWidget {
             : [Colors.white38, Colors.white24],
       ).createShader(bounds),
       child: Icon(
-        IconData(item.iconCodePoint, fontFamily: 'MaterialIcons'),
+        PackItemIcons.resolve(item.iconCodePoint),
         size: 30.r,
         color: Colors.white,
       ),

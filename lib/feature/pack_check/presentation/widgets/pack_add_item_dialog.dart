@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../data/pack_item_icons.dart';
 import '../provider/pack_check_provider.dart';
 
 /// Bottom-sheet dialog to add a custom item — either icon-based or photo-based.
@@ -33,20 +34,7 @@ class _PackAddItemDialogState extends State<PackAddItemDialog> {
   final _nameCtrl = TextEditingController();
   IconData _selectedIcon = Icons.star_rounded;
 
-  static const _iconChoices = [
-    Icons.star_rounded,
-    Icons.favorite_rounded,
-    Icons.bolt_rounded,
-    Icons.local_fire_department_rounded,
-    Icons.emoji_objects_rounded,
-    Icons.music_note_rounded,
-    Icons.sports_soccer_rounded,
-    Icons.color_lens_rounded,
-    Icons.eco_rounded,
-    Icons.pets_rounded,
-    Icons.card_giftcard_rounded,
-    Icons.devices_other_rounded,
-  ];
+  static const _iconChoices = PackItemIcons.choices;
 
   @override
   void dispose() {
