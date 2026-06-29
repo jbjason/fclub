@@ -1,11 +1,9 @@
 import 'package:fclub/core/services/contacts/app_contact.dart';
-import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/club/data/model/payment_entry.dart';
 import 'package:fclub/feature/club/data/model/payment_status.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/club/presentation/screens/club_add_entry_screen.dart';
 import 'package:fclub/feature/club/presentation/screens/club_edit_entry_screen.dart';
-import 'package:fclub/feature/club/presentation/screens/club_monthly_overview_screen.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_empty_state.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_filter_bar.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_history_tile.dart';
@@ -30,17 +28,6 @@ class _ClubHistoryScreenState extends State<ClubHistoryScreen> {
   String _searchQuery = '';
   DateTime? _selectedMonth;
   PaymentStatus? _selectedStatus;
-
-  @override
-  void initState() {
-    super.initState(); 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final globalContacts = context.read<GlobalContactsProvider>();
-      final clubProvider = context.read<ClubProvider>();
-      await globalContacts.loadContacts();
-      await clubProvider.seedDemoData();
-    });
-  }
 
   @override
   void dispose() {
@@ -102,16 +89,6 @@ class _ClubHistoryScreenState extends State<ClubHistoryScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text('Fundora Club'),
-        actions: [
-          IconButton(
-            tooltip: 'Monthly overview',
-            icon: const Icon(Icons.calendar_view_month_rounded),
-            onPressed: () => Navigator.push<void>(
-              context,
-              MaterialPageRoute(builder: (_) => const ClubMonthlyOverviewScreen()),
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: Column(

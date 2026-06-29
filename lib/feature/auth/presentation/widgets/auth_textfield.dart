@@ -1,7 +1,5 @@
-import 'package:fclub/core/constants/my_icon.dart';
 import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 class AuthTextField extends StatefulWidget {
@@ -33,13 +31,8 @@ class _AuthTextFieldState extends State<AuthTextField> {
         hintText: widget.title,
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
         prefixIcon: Padding(
-          padding: const EdgeInsets.only(bottom:  8.0),
-          child: Lottie.asset(
-            widget.isPassword ? MyIcon.password : MyIcon.email,
-            width: 15,
-            height: 10,
-            fit: BoxFit.contain,
-          ),
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Icon(widget.prefixIcon, color: Colors.grey, size: 20),
         ),
         suffixIcon: widget.isPassword
             ? IconButton(

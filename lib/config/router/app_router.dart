@@ -3,7 +3,7 @@ import 'package:fclub/feature/auth/data/model/auth_user.dart';
 import 'package:fclub/feature/auth/data/repository/auth_repository.dart';
 import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:fclub/feature/auth/presentation/screens/auth_screen.dart';
-import 'package:fclub/feature/club/presentation/screens/club_history_screen.dart';
+import 'package:fclub/feature/club/presentation/screens/club_monthly_overview_screen.dart';
 import 'package:fclub/feature/home/presentation/screens/home.dart';
 import 'package:fclub/feature/kurbani/presentation/screens/kurbani_screen.dart';
 import 'package:fclub/feature/locker/presentation/screens/locker_screen.dart';
@@ -57,7 +57,7 @@ abstract class AppRouter {
         );
 
       case AppRouteName.club:
-        return _materialRoute(settings: settings, child: const ClubHistoryScreen());
+        return _materialRoute(settings: settings, child: const ClubMonthlyOverviewScreen());
       case AppRouteName.locker:
         return _materialRoute(settings: settings, child: const LockerScreen());
       case AppRouteName.kurbani:
