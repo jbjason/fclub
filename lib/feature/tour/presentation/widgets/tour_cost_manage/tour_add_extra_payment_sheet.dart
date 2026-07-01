@@ -95,15 +95,27 @@ class _AddExtraPaymentBottomSheetState
                   ),
                 ),
               ),
-              SizedBox(height: 16.h),
-              Text(
-                'Add Extra Payment',
-                style: TextStyle(
-                  fontFamily: MyString.poppinsBold,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18.sp,
-                  color: colorScheme.onSurface,
-                ),
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  Text(
+                    'Add Extra Payment',
+                    style: TextStyle(
+                      fontFamily: MyString.poppinsBold,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18.sp,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded,
+                        color: colorScheme.onSurfaceVariant, size: 22.r),
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
               ),
               SizedBox(height: 16.h),
               Text('Member', style: _labelStyle),

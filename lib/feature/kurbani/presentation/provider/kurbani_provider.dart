@@ -110,6 +110,14 @@ class KurbaniProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> finishSession() async {
+    final session = _activeSession;
+    if (session == null) return;
+    session.isCompleted = true;
+    await _sessionsBox.put(session.id, session);
+    _load();
+  }
+
   Future<void> deleteSession(String sessionId) async {
     await _sessionsBox.delete(sessionId);
     _history.removeWhere((s) => s.id == sessionId);
@@ -139,6 +147,23 @@ class KurbaniProvider with ChangeNotifier {
     final idx = session.members.indexWhere((m) => m.id == memberId);
     if (idx == -1) return;
     session.members[idx].contribution = amount;
+    await _sessionsBox.put(session.id, session);
+    notifyListeners();
+  }
+
+  Future<void> addMemberFromContact(String contactId) async {
+    final session = _activeSession;
+    if (session == null) return;
+    if (session.members.any((m) => m.id == contactId)) return;
+    final contact = _globalContacts.contactById(contactId);
+    if (contact == null) return;
+    final colorIndex = session.members.length % _avatarGradientCount;
+    session.members.add(KurbaniMemberModel(
+      id: contact.id,
+      name: contact.isMe ? 'You (${contact.name})' : contact.name,
+      avatarColorIndex: colorIndex,
+      contribution: session.budgetPerMember,
+    ));
     await _sessionsBox.put(session.id, session);
     notifyListeners();
   }

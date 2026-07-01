@@ -26,8 +26,17 @@ abstract class KurbaniCalculator {
 
     final paidByMember = <String, double>{};
     for (final expense in expenses) {
-      paidByMember[expense.paidByMemberId] =
-          (paidByMember[expense.paidByMemberId] ?? 0) + expense.amount;
+      if (expense.paidByMemberId == KurbaniExpenseModel.allMembersSentinel) {
+        if (memberCount > 0) {
+          final share = expense.amount / memberCount;
+          for (final m in members) {
+            paidByMember[m.id] = (paidByMember[m.id] ?? 0) + share;
+          }
+        }
+      } else {
+        paidByMember[expense.paidByMemberId] =
+            (paidByMember[expense.paidByMemberId] ?? 0) + expense.amount;
+      }
     }
 
     final memberBalances = members.map((m) {

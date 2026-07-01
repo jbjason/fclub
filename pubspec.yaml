@@ -43,6 +43,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/fonts/
+    - assets/translations/
 
   fonts:
     - family: Rubik_Regular

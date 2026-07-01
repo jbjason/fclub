@@ -126,6 +126,14 @@ class TourProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> finishSession() async {
+    final session = _activeSession;
+    if (session == null) return;
+    session.isCompleted = true;
+    await _sessionsBox.put(session.id, session);
+    _load();
+  }
+
   Future<void> deleteSession(String sessionId) async {
     await _sessionsBox.delete(sessionId);
     _history.removeWhere((s) => s.id == sessionId);
@@ -134,6 +142,39 @@ class TourProvider with ChangeNotifier {
   }
 
   // ── Members in active session ──────────────────────────────────────────────
+
+  Future<void> addMemberFromContact(String contactId) async {
+    final session = _activeSession;
+    if (session == null) return;
+    if (session.members.any((m) => m.id == contactId)) return;
+    final contact = _globalContacts.contactById(contactId);
+    if (contact == null) return;
+    final colorIndex = session.members.length % 8;
+    session.members.add(TourMemberModel(
+      id: contact.id,
+      name: contact.isMe ? 'You (${contact.name})' : contact.name,
+      avatarColorIndex: colorIndex,
+      paidToManager: 0.0,
+    ));
+    await _sessionsBox.put(session.id, session);
+    notifyListeners();
+  }
+
+  Future<void> deleteMember(String memberId) async {
+    final session = _activeSession;
+    if (session == null) return;
+    session.members.removeWhere((m) => m.id == memberId);
+    await _sessionsBox.put(session.id, session);
+    notifyListeners();
+  }
+
+  Future<void> updateDecidedBudget(double amount) async {
+    final session = _activeSession;
+    if (session == null) return;
+    session.decidedBudget = amount;
+    await _sessionsBox.put(session.id, session);
+    notifyListeners();
+  }
 
   Future<void> updateMemberPaidToManager(
       String memberId, double amount) async {

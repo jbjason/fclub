@@ -4,6 +4,8 @@ part 'kurbani_expense_model.g.dart';
 
 @HiveType(typeId: 21)
 class KurbaniExpenseModel extends HiveObject {
+  static const String allMembersSentinel = '__all__';
+
   KurbaniExpenseModel({
     required this.id,
     required this.title,

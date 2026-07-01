@@ -135,8 +135,20 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                   ),
                 ),
               ),
-              SizedBox(height: 16.h),
-              Text('Add Expense', style: _titleStyle),
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  Text('Add Expense', style: _titleStyle),
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded,
+                        color: colorScheme.onSurfaceVariant, size: 22.r),
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
               SizedBox(height: 16.h),
               TextField(
                 controller: _titleController,

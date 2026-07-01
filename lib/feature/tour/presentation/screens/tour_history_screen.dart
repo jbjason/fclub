@@ -50,6 +50,46 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
     }
   }
 
+  // ── Finish confirm ─────────────────────────────────────────────────────────
+
+  Future<void> _confirmFinish(TourProvider provider) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r)),
+        title: Text('Finish this tour?',
+            style: TextStyle(
+                fontFamily: MyString.poppinsBold, fontSize: 16.sp)),
+        content: Text(
+          'The session will be moved to history. You can still view it later.',
+          style: TextStyle(
+              fontFamily: MyString.rubikRegular,
+              fontSize: 13.sp,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: MyColor.success,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r)),
+            ),
+            child: const Text('Finish'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await provider.finishSession();
+  }
+
   // ── Delete confirm ─────────────────────────────────────────────────────────
 
   Future<void> _confirmDelete(TourProvider provider, String id) async {
@@ -110,6 +150,9 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
                   child: TourActiveSessionCard(
                     session: provider.activeSession!,
                     onResume: () => goToManagement(ctx),
+                    onFinish: () => _confirmFinish(provider),
+                    onDelete: () =>
+                        _confirmDelete(provider, provider.activeSession!.id),
                   ),
                 ),
                 SizedBox(height: 12.h),

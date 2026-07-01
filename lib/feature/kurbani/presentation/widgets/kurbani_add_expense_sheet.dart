@@ -1,4 +1,5 @@
 import 'package:fclub/core/constants/my_string.dart';
+import 'package:fclub/feature/kurbani/data/model/kurbani_expense_model.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_member_model.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
 import 'package:flutter/material.dart';
@@ -224,14 +225,21 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
     return DropdownButtonFormField<String>(
       initialValue: _selectedMemberId,
       hint: const Text('Who paid?'),
-      items: members
-          .map(
-            (m) => DropdownMenuItem(
-              value: m.id,
-              child: Text(m.name),
-            ),
-          )
-          .toList(),
+      items: [
+        DropdownMenuItem(
+          value: KurbaniExpenseModel.allMembersSentinel,
+          child: Row(
+            children: [
+              Icon(Icons.group_rounded, size: 16.r, color: const Color(0xFF6D28D9)),
+              SizedBox(width: 8.w),
+              const Text('All Members (Shared)'),
+            ],
+          ),
+        ),
+        ...members.map(
+          (m) => DropdownMenuItem(value: m.id, child: Text(m.name)),
+        ),
+      ],
       onChanged: (v) => setState(() => _selectedMemberId = v),
       decoration: InputDecoration(
         labelText: 'Paid By',

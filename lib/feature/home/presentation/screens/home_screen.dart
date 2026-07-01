@@ -11,18 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-/// Home dashboard — the primary landing screen shown after sign-in.
-///
-/// Layout (top → bottom):
-///   1. [HomeHeader]          — Fundora brand card with gradient & tagline
-///   2. "Highlights" section  — Live [HomeClubStatsCard] & [HomeLockerStatCard]
-///   3. "Quick Access" section — [HomeFeatureGrid] — all feature nav cards
-///
-/// A [Scrollbar] is attached so the list is accessible on all platforms.
-/// The [ScrollController] is owned here and properly disposed on unmount.
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }

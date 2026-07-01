@@ -35,18 +35,6 @@ class KurbaniCostTab extends StatelessWidget {
           // Settlement summary hero
           KurbaniSettlementHero(summary: summary),
 
-          // Member balances section
-          _SectionHeader(
-            icon: Icons.people_rounded,
-            title: 'Member Balances',
-            subtitle: '${summary.memberBalances.length} members',
-            color: const Color(0xFF6D28D9),
-          ),
-          ...summary.memberBalances.map(
-            (b) => KurbaniMemberCard(balance: b),
-          ),
-          SizedBox(height: 16.h),
-
           // Expenses section
           _SectionHeader(
             icon: Icons.receipt_long_rounded,
@@ -67,6 +55,18 @@ class KurbaniCostTab extends StatelessWidget {
                 onDelete: () => provider.deleteExpense(e.id),
               ),
             ),
+          SizedBox(height: 16.h),
+
+          // Member balances section
+          _SectionHeader(
+            icon: Icons.people_rounded,
+            title: 'Member Balances',
+            subtitle: '${summary.memberBalances.length} members',
+            color: const Color(0xFF6D28D9),
+          ),
+          ...summary.memberBalances.map(
+            (b) => KurbaniMemberCard(balance: b),
+          ),
           SizedBox(height: 8.h),
         ],
       ),

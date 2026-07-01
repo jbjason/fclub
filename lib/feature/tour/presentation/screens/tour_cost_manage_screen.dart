@@ -5,6 +5,7 @@ import 'package:fclub/feature/tour/data/model/tour_member_model.dart';
 import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_cost_manage_fab.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_expenses_tab.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_member_manage_sheet.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_members_tab.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_payments_tab.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_stat_card.dart';
@@ -138,12 +139,81 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
       ),
       actions: [
         IconButton(
+          tooltip: 'Manage Members',
+          icon: const Icon(Icons.people_alt_rounded),
+          onPressed: _showMemberManageSheet,
+        ),
+        IconButton(
+          tooltip: 'Edit Budget',
+          icon: const Icon(Icons.tune_rounded),
+          onPressed: () => _showBudgetDialog(tourProvider),
+        ),
+        IconButton(
           tooltip: 'Settlement summary',
           icon: const Icon(Icons.receipt_long_rounded),
           onPressed: () =>
               Navigator.pushNamed(context, AppRouteName.tourSummary),
         ),
       ],
+    );
+  }
+
+  void _showMemberManageSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const TourMemberManageSheet(),
+    );
+  }
+
+  void _showBudgetDialog(TourProvider tourProvider) {
+    final controller = TextEditingController(
+      text: tourProvider.decidedBudget.toStringAsFixed(0),
+    );
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        title: Text(
+          'Total Budget',
+          style: TextStyle(
+              fontFamily: MyString.poppinsBold, fontSize: 16.sp),
+        ),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            prefixText: '৳ ',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final v = double.tryParse(controller.text.trim());
+              if (v != null) tourProvider.updateDecidedBudget(v);
+              Navigator.pop(dialogContext);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: MyColor.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+            ),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
     );
   }
 

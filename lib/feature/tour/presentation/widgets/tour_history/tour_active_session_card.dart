@@ -7,10 +7,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TourActiveSessionCard extends StatelessWidget {
-  const TourActiveSessionCard(
-      {super.key, required this.session, required this.onResume});
+  const TourActiveSessionCard({
+    super.key,
+    required this.session,
+    required this.onResume,
+    this.onFinish,
+    this.onDelete,
+  });
   final TourSession session;
   final VoidCallback onResume;
+  final VoidCallback? onFinish;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +92,40 @@ class TourActiveSessionCard extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
+          ),
+          SizedBox(width: 4.w),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded,
+                color: colorScheme.onSurfaceVariant, size: 18.r),
+            padding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14.r)),
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'finish',
+                child: Row(children: [
+                  Icon(Icons.done_all_rounded,
+                      color: MyColor.success, size: 18.r),
+                  SizedBox(width: 10.w),
+                  Text('Finish Session',
+                      style: TextStyle(color: MyColor.success)),
+                ]),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(children: [
+                  Icon(Icons.delete_outline_rounded,
+                      color: MyColor.error, size: 18.r),
+                  SizedBox(width: 10.w),
+                  Text('Delete Session',
+                      style: TextStyle(color: MyColor.error)),
+                ]),
+              ),
+            ],
+            onSelected: (v) {
+              if (v == 'finish') onFinish?.call();
+              if (v == 'delete') onDelete?.call();
+            },
           ),
         ],
       ),

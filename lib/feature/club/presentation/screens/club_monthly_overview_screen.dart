@@ -1,5 +1,6 @@
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/club/data/model/payment_status.dart';
+import 'package:fclub/feature/club/presentation/screens/club_add_entry_screen.dart';
 import 'package:fclub/feature/club/presentation/screens/club_history_screen.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/club/presentation/screens/club_month_detail_screen.dart';
@@ -41,6 +42,13 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen> {
     super.dispose();
   }
 
+  Future<void> _openAddEntry() async {
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(builder: (_) => const ClubAddEntryScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final entries = context.watch<ClubProvider>().entries;
@@ -67,6 +75,11 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openAddEntry,
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Add Entry'),
       ),
       body: SafeArea(
         child: months.isEmpty

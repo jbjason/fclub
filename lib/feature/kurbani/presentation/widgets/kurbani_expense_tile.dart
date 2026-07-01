@@ -25,13 +25,19 @@ class KurbaniExpenseTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final payer = members.firstWhere(
-      (m) => m.id == expense.paidByMemberId,
-      orElse: () => KurbaniMemberModel(
-          id: '', name: 'Unknown', avatarColorIndex: 0, contribution: 0),
-    );
-    final gradients = kurbaniAvatarGradients[
-        payer.avatarColorIndex % kurbaniAvatarGradients.length];
+    final isAllMembers =
+        expense.paidByMemberId == KurbaniExpenseModel.allMembersSentinel;
+    final payer = isAllMembers
+        ? null
+        : members.firstWhere(
+            (m) => m.id == expense.paidByMemberId,
+            orElse: () => KurbaniMemberModel(
+                id: '', name: 'Unknown', avatarColorIndex: 0, contribution: 0),
+          );
+    final gradients = isAllMembers
+        ? [const Color(0xFF6D28D9), const Color(0xFF0891B2)]
+        : kurbaniAvatarGradients[
+            payer!.avatarColorIndex % kurbaniAvatarGradients.length];
 
     return Dismissible(
       key: Key(expense.id),
@@ -93,7 +99,7 @@ class KurbaniExpenseTile extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'Paid by ${payer.name}',
+                        isAllMembers ? 'Shared by all' : 'Paid by ${payer!.name}',
                         style: TextStyle(
                           fontFamily: MyString.rubikRegular,
                           fontSize: 10.sp,
