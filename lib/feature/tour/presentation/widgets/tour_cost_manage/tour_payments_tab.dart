@@ -4,6 +4,7 @@ import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/core/util/list_extensions.dart';
 import 'package:fclub/feature/tour/data/model/extra_payment_model.dart';
 import 'package:fclub/feature/tour/data/model/tour_member_model.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_card_shell.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_empty_state.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_member_avatar.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +25,7 @@ class TourPaymentsTab extends StatelessWidget {
       );
     }
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return ListView.builder(
       padding: EdgeInsets.all(16.w),
@@ -33,14 +33,10 @@ class TourPaymentsTab extends StatelessWidget {
       itemBuilder: (context, index) {
         final payment = payments[index];
         final member = members.firstWhereOrNull((m) => m.id == payment.memberId);
-        return Container(
+        return TourCardShell(
+          accent: MyColor.success,
           margin: EdgeInsets.only(bottom: 10.h),
-          padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-          ),
+          borderRadius: BorderRadius.circular(14.r),
           child: Row(
             children: [
               TourMemberAvatar(

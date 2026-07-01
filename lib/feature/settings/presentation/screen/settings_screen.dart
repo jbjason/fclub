@@ -213,24 +213,28 @@ class _ProfileCard extends StatelessWidget {
   final bool emailVerified;
 
 
+  static const _accent = Color(0xFFDB2777);
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22.r),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
+          colors: [
+            _accent.withValues(alpha: isDark ? 0.22 : 0.10),
+            const Color(0xFFEC4899).withValues(alpha: isDark ? 0.10 : 0.04),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF4C0519), Color(0xFFEC4899), Color(0xFFDB2777)],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFEC4899).withValues(alpha: 0.25),
-            offset: Offset(0, 12.h),
-            blurRadius: 28.r,
-          ),
-        ],
+        border: Border.all(
+          color: _accent.withValues(alpha: isDark ? 0.35 : 0.18),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -239,9 +243,9 @@ class _ProfileCard extends StatelessWidget {
             height: 62.r,
             padding: EdgeInsets.all(3.r),
             decoration: BoxDecoration(
-              color: MyColor.white.withValues(alpha: 0.22),
+              color: _accent.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: MyColor.white.withValues(alpha: 0.35)),
+              border: Border.all(color: _accent.withValues(alpha: 0.30)),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(17.r),
@@ -265,7 +269,7 @@ class _ProfileCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: MyColor.white,
+                    color: colorScheme.onSurface,
                     fontFamily: MyString.poppinsBold,
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
@@ -277,7 +281,7 @@ class _ProfileCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: MyColor.white.withValues(alpha: 0.78),
+                    color: colorScheme.onSurfaceVariant,
                     fontFamily: MyString.rubikRegular,
                     fontSize: 13.sp,
                   ),
@@ -289,10 +293,10 @@ class _ProfileCard extends StatelessWidget {
                     vertical: 5.h,
                   ),
                   decoration: BoxDecoration(
-                    color: MyColor.white.withValues(alpha: 0.16),
+                    color: _accent.withValues(alpha: isDark ? 0.18 : 0.10),
                     borderRadius: BorderRadius.circular(10.r),
                     border: Border.all(
-                      color: MyColor.white.withValues(alpha: 0.22),
+                      color: _accent.withValues(alpha: isDark ? 0.30 : 0.20),
                     ),
                   ),
                   child: Row(
@@ -303,15 +307,15 @@ class _ProfileCard extends StatelessWidget {
                             ? Icons.verified_rounded
                             : Icons.error_outline_rounded,
                         color: emailVerified
-                            ? const Color(0xFF34D399)
-                            : const Color(0xFFFBBF24),
+                            ? MyColor.success
+                            : MyColor.warning,
                         size: 14.r,
                       ),
                       SizedBox(width: 6.w),
                       Text(
                         emailVerified ? 'Verified Account' : 'Unverified Email',
                         style: TextStyle(
-                          color: MyColor.white.withValues(alpha: 0.9),
+                          color: colorScheme.onSurface,
                           fontFamily: MyString.poppinsMedium,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
@@ -325,7 +329,7 @@ class _ProfileCard extends StatelessWidget {
           ),
           Icon(
             Icons.chevron_right_rounded,
-            color: MyColor.white.withValues(alpha: 0.6),
+            color: colorScheme.onSurfaceVariant,
             size: 24.r,
           ),
         ],
@@ -343,11 +347,11 @@ class _InitialsAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      color: MyColor.white.withValues(alpha: 0.12),
+      color: _ProfileCard._accent.withValues(alpha: 0.12),
       child: Text(
         initials,
         style: TextStyle(
-          color: MyColor.white,
+          color: _ProfileCard._accent,
           fontFamily: MyString.poppinsBold,
           fontWeight: FontWeight.w700,
           fontSize: 22.sp,

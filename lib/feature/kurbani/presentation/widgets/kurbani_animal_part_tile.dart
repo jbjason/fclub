@@ -1,5 +1,6 @@
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_animal_part_model.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_card_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -37,8 +38,7 @@ class KurbaniAnimalPartTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final icon = _partIcons[part.partName] ?? Icons.inventory_2_rounded;
     final color = _partColors[part.partName] ?? const Color(0xFF6D28D9);
     final pct = totalWeight > 0 ? (part.weightKg / totalWeight) * 100 : 0.0;
@@ -59,20 +59,10 @@ class KurbaniAnimalPartTile extends StatelessWidget {
             color: Colors.white, size: 22.r),
       ),
       onDismissed: (_) => onDelete?.call(),
-      child: Container(
+      child: KurbaniCardShell(
+        accent: color,
         margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-        padding: EdgeInsets.all(14.w),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(14.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8.r,
-              offset: Offset(0, 2.h),
-            ),
-          ],
-        ),
+        borderRadius: BorderRadius.circular(14.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

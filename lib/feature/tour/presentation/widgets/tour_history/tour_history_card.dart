@@ -2,6 +2,7 @@ import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/tour/data/model/tour_session.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_card_shell.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_history_detail_sheet.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_info_chip.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +16,7 @@ class TourHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final spent = session.totalSpent;
     final budget = session.decidedBudget;
     final progress =
@@ -24,41 +24,22 @@ class TourHistoryCard extends StatelessWidget {
     final isOver = spent > budget;
     final progressColor = isOver ? MyColor.error : MyColor.success;
 
-    return Container(
+    return TourCardShell(
+      accent: MyColor.primary,
       margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(18.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18.r),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18.r),
-          onTap: () => TourHistoryDetailSheet.show(context, session),
-          child: Padding(
-            padding: EdgeInsets.all(16.r),
-            child: Column(
+      borderRadius: BorderRadius.circular(18.r),
+      padding: EdgeInsets.all(16.r),
+      onTap: () => TourHistoryDetailSheet.show(context, session),
+      child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ── Header row ─────────────────────────────────
                 Row(
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(8.r),
-                      decoration: BoxDecoration(
-                        color: MyColor.primary.withValues(alpha: 0.08),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.card_travel_rounded,
-                          color: MyColor.primary, size: 18.r),
+                    TourCardIcon(
+                      icon: Icons.card_travel_rounded,
+                      accent: MyColor.primary,
+                      size: 36,
                     ),
                     SizedBox(width: 10.w),
                     Expanded(
@@ -158,9 +139,8 @@ class TourHistoryCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ),
-      ),
     );
   }
 }
+
+

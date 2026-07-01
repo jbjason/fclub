@@ -1,6 +1,6 @@
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
-import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_glass_card.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_card_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -20,21 +20,15 @@ class KurbaniStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Expanded(
-      child: KurbaniGlassCard(
-        accentColor: color,
+      child: KurbaniCardShell(
+        accent: color,
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: EdgeInsets.all(6.r),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Icon(icon, size: 14.r, color: color),
-            ),
+            KurbaniCardIcon(icon: icon, accent: color, size: 28),
             SizedBox(height: 8.h),
             FittedBox(
               fit: BoxFit.scaleDown,
@@ -45,7 +39,7 @@ class KurbaniStatCard extends StatelessWidget {
                   fontFamily: MyString.poppinsBold,
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
-                  color: color,
+                  color: colorScheme.onSurface,
                 ),
               ),
             ),
@@ -55,7 +49,7 @@ class KurbaniStatCard extends StatelessWidget {
               style: TextStyle(
                 fontFamily: MyString.rubikRegular,
                 fontSize: 10.sp,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ],

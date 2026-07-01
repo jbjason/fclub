@@ -2,6 +2,7 @@ import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_expense_model.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_member_model.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_card_shell.dart';
 import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_member_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,8 +24,7 @@ class KurbaniExpenseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final payer = members.firstWhere(
       (m) => m.id == expense.paidByMemberId,
       orElse: () => KurbaniMemberModel(
@@ -48,20 +48,10 @@ class KurbaniExpenseTile extends StatelessWidget {
             color: Colors.white, size: 22.r),
       ),
       onDismissed: (_) => onDelete?.call(),
-      child: Container(
+      child: KurbaniCardShell(
+        accent: const Color(0xFF6D28D9),
         margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-        padding: EdgeInsets.all(14.w),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(14.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8.r,
-              offset: Offset(0, 2.h),
-            ),
-          ],
-        ),
+        borderRadius: BorderRadius.circular(14.r),
         child: Row(
           children: [
             // Mini avatar

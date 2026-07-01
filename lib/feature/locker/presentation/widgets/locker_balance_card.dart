@@ -23,6 +23,8 @@ class LockerBalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isNegative = currentCash < 0;
     final progress = collected <= 0 ? 0.0 : (spent / collected).clamp(0, 1).toDouble();
     final progressColor = isNegative ? MyColor.error : MyColor.success;
@@ -32,17 +34,17 @@ class LockerBalanceCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22.r),
         gradient: LinearGradient(
+          colors: [
+            MyColor.primary.withValues(alpha: isDark ? 0.22 : 0.10),
+            MyColor.secondary.withValues(alpha: isDark ? 0.10 : 0.04),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [MyColor.primary, MyColor.secondary, MyColor.tertiary],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: MyColor.primary.withValues(alpha: 0.3),
-            blurRadius: 20.r,
-            offset: Offset(0, 10.h),
-          ),
-        ],
+        border: Border.all(
+          color: MyColor.primary.withValues(alpha: isDark ? 0.35 : 0.18),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +57,7 @@ class LockerBalanceCard extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: MyString.poppinsMedium,
                   fontSize: 12.sp,
-                  color: Colors.white.withValues(alpha: 0.85),
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               GestureDetector(
@@ -63,10 +65,10 @@ class LockerBalanceCard extends StatelessWidget {
                 child: Container(
                   padding: EdgeInsets.all(6.r),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
+                    color: MyColor.primary.withValues(alpha: 0.14),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.edit_rounded, size: 14.r, color: Colors.white),
+                  child: Icon(Icons.edit_rounded, size: 14.r, color: MyColor.primary),
                 ),
               ),
             ],
@@ -78,14 +80,14 @@ class LockerBalanceCard extends StatelessWidget {
               fontFamily: MyString.poppinsBold,
               fontWeight: FontWeight.w800,
               fontSize: 30.sp,
-              color: Colors.white,
+              color: colorScheme.onSurface,
             ),
           ),
           if (isNegative) ...[
             SizedBox(height: 2.h),
             Text(
               'Spending has exceeded total collected',
-              style: TextStyle(fontSize: 11.sp, color: Colors.white.withValues(alpha: 0.85)),
+              style: TextStyle(fontSize: 11.sp, color: colorScheme.onSurfaceVariant),
             ),
           ],
           SizedBox(height: 16.h),
@@ -99,7 +101,7 @@ class LockerBalanceCard extends StatelessWidget {
                 return LinearProgressIndicator(
                   value: value,
                   minHeight: 8.h,
-                  backgroundColor: Colors.white.withValues(alpha: 0.25),
+                  backgroundColor: colorScheme.surfaceContainerHighest,
                   valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                 );
               },
@@ -127,6 +129,7 @@ class _MiniStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -136,12 +139,12 @@ class _MiniStat extends StatelessWidget {
             fontFamily: MyString.poppinsBold,
             fontWeight: FontWeight.w700,
             fontSize: 14.sp,
-            color: Colors.white,
+            color: colorScheme.onSurface,
           ),
         ),
         Text(
           label,
-          style: TextStyle(fontSize: 10.sp, color: Colors.white.withValues(alpha: 0.8)),
+          style: TextStyle(fontSize: 10.sp, color: colorScheme.onSurfaceVariant),
         ),
       ],
     );

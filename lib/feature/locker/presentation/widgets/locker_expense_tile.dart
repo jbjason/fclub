@@ -2,6 +2,7 @@ import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/locker/data/model/locker_expense.dart';
+import 'package:fclub/feature/locker/presentation/widgets/locker_card_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -17,28 +18,16 @@ class LockerExpenseTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Material(
-      color: colorScheme.surfaceContainerLowest,
-      borderRadius: BorderRadius.circular(16.r),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16.r),
-        child: Container(
-          margin: EdgeInsets.only(bottom: 10.h),
-          padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-          ),
-          child: Row(
+    return LockerCardShell(
+      accent: MyColor.error,
+      onTap: onTap,
+      margin: EdgeInsets.only(bottom: 10.h),
+      child: Row(
             children: [
-              Container(
-                padding: EdgeInsets.all(10.r),
-                decoration: BoxDecoration(
-                  color: MyColor.error.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.arrow_upward_rounded, color: MyColor.error, size: 18.r),
+              LockerCardIcon(
+                icon: Icons.arrow_upward_rounded,
+                accent: MyColor.error,
+                size: 38,
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -92,8 +81,6 @@ class LockerExpenseTile extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
     );
   }
 }

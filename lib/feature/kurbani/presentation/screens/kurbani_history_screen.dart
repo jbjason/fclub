@@ -5,6 +5,7 @@ import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_session.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
 import 'package:fclub/feature/kurbani/presentation/screens/kurbani_management_screen.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_card_shell.dart';
 import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_member_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -268,98 +269,79 @@ class _ActiveSessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final colorScheme = Theme.of(context).colorScheme;
+    return KurbaniCardShell(
+      accent: _kDeepEmerald,
+      glow: true,
       onTap: onResume,
-      child: Container(
-        padding: EdgeInsets.all(14.r),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF064E3B), Color(0xFF1A3A6B)],
+      borderRadius: BorderRadius.circular(18.r),
+      padding: EdgeInsets.all(14.r),
+      child: Row(
+        children: [
+          KurbaniCardIcon(
+            icon: Icons.nightlight_round,
+            accent: _kDeepEmerald,
+            size: 44,
           ),
-          borderRadius: BorderRadius.circular(18.r),
-          boxShadow: [
-            BoxShadow(
-              color: _kDeepEmerald.withValues(alpha: 0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10.r),
-              decoration: BoxDecoration(
-                color: _kGold.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child:
-                  Icon(Icons.nightlight_round, color: _kGold, size: 22.r),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 7.w, vertical: 2.h),
-                        decoration: BoxDecoration(
-                          color: _kGold.withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(6.r),
-                        ),
-                        child: Text(
-                          'IN PROGRESS',
-                          style: TextStyle(
-                            fontFamily: MyString.poppinsBold,
-                            fontSize: 9.sp,
-                            color: _kGold,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ),
-                    ],
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 7.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: _kGold.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(6.r),
                   ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    session.groupName,
+                  child: Text(
+                    'IN PROGRESS',
                     style: TextStyle(
                       fontFamily: MyString.poppinsBold,
-                      fontSize: 14.sp,
-                      color: Colors.white,
+                      fontSize: 9.sp,
+                      color: _kGold,
+                      letterSpacing: 0.8,
                     ),
                   ),
-                  Text(
-                    '${session.members.length} members · ${CurrencyFormatter.format(session.totalSpent)} spent',
-                    style: TextStyle(
-                      fontFamily: MyString.rubikRegular,
-                      fontSize: 11.sp,
-                      color: Colors.white60,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: _kGold,
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Text(
-                'Resume',
-                style: TextStyle(
-                  fontFamily: MyString.poppinsBold,
-                  fontSize: 12.sp,
-                  color: Colors.black87,
                 ),
+                SizedBox(height: 4.h),
+                Text(
+                  session.groupName,
+                  style: TextStyle(
+                    fontFamily: MyString.poppinsBold,
+                    fontSize: 14.sp,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                Text(
+                  '${session.members.length} members · ${CurrencyFormatter.format(session.totalSpent)} spent',
+                  style: TextStyle(
+                    fontFamily: MyString.rubikRegular,
+                    fontSize: 11.sp,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding:
+                EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: _kDeepEmerald,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Text(
+              'Resume',
+              style: TextStyle(
+                fontFamily: MyString.poppinsBold,
+                fontSize: 12.sp,
+                color: Colors.white,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -375,8 +357,7 @@ class _HistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final spent = session.totalSpent;
     final budget = session.totalBudget;
     final progress =
@@ -384,41 +365,22 @@ class _HistoryCard extends StatelessWidget {
     final isOver = spent > budget;
     final progressColor = isOver ? _kRose : _kEmerald;
 
-    return Container(
+    return KurbaniCardShell(
+      accent: _kDeepEmerald,
       margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(18.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18.r),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18.r),
-          onTap: () => _KurbaniHistoryDetailSheet.show(context, session),
-          child: Padding(
-            padding: EdgeInsets.all(16.r),
-            child: Column(
+      borderRadius: BorderRadius.circular(18.r),
+      padding: EdgeInsets.all(16.r),
+      onTap: () => _KurbaniHistoryDetailSheet.show(context, session),
+      child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ── Header row ───────────────────────────────
                 Row(
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(8.r),
-                      decoration: BoxDecoration(
-                        color: _kDeepEmerald.withValues(alpha: 0.08),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.nightlight_round,
-                          color: _kDeepEmerald, size: 18.r),
+                    KurbaniCardIcon(
+                      icon: Icons.nightlight_round,
+                      accent: _kDeepEmerald,
+                      size: 36,
                     ),
                     SizedBox(width: 10.w),
                     Expanded(
@@ -530,9 +492,6 @@ class _HistoryCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ),
-      ),
     );
   }
 }

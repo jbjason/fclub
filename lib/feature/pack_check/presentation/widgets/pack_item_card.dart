@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,10 +6,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../data/model/pack_item.dart';
 import '../../data/pack_item_icons.dart';
 
+/// Pack Check's signature dual-accent — violet to cyan — used to mark
+/// packed/checked state across the feature.
+const packCheckAccentStart = Color(0xFFA855F7);
+const packCheckAccentEnd = Color(0xFF06B6D4);
+
 /// A tappable icon card representing a single packable item.
 ///
-/// When [isPacked] is true the card glows with a neon gradient border.
-/// Long-press on custom items triggers [onLongPress] (delete callback).
+/// When [isPacked] is true the card glows with the violet → cyan accent
+/// gradient border. Long-press on custom items triggers [onLongPress]
+/// (delete callback).
 class PackItemCard extends StatefulWidget {
   const PackItemCard({
     required this.item,
@@ -65,6 +70,8 @@ class _PackItemCardState extends State<PackItemCard>
   @override
   Widget build(BuildContext context) {
     final packed = widget.item.isPacked;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTapDown: _onTapDown,
@@ -79,68 +86,35 @@ class _PackItemCardState extends State<PackItemCard>
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18.r),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: packed
-                  ? [
-                      const Color(0xFF1E0A3C),
-                      const Color(0xFF0A1F3C),
-                    ]
-                  : [
-                      const Color(0xFF12102A),
-                      const Color(0xFF0E0E24),
+            color: colorScheme.surfaceContainerLowest,
+            gradient: packed
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      packCheckAccentStart.withValues(alpha: isDark ? 0.20 : 0.10),
+                      packCheckAccentEnd.withValues(alpha: isDark ? 0.12 : 0.05),
                     ],
+                  )
+                : null,
+            border: Border.all(
+              color: packed
+                  ? packCheckAccentEnd.withValues(alpha: isDark ? 0.55 : 0.4)
+                  : colorScheme.outlineVariant.withValues(alpha: 0.5),
+              width: 1,
             ),
-            // Glowing border via box shadow + border simulation
             boxShadow: packed
                 ? [
                     BoxShadow(
-                      color: const Color(0xFFA855F7).withOpacity(0.55),
+                      color: packCheckAccentStart.withValues(alpha: isDark ? 0.28 : 0.16),
                       blurRadius: 14,
-                      spreadRadius: 1,
-                    ),
-                    BoxShadow(
-                      color: const Color(0xFF06B6D4).withOpacity(0.3),
-                      blurRadius: 8,
                       spreadRadius: 0,
                     ),
                   ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.35),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                : null,
           ),
           child: Stack(
             children: [
-              // Gradient border ring when packed
-              if (packed)
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(18.r),
-                    child: CustomPaint(painter: _GradientBorderPainter()),
-                  ),
-                ),
-              // Glassmorphism inner layer
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(17.r),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: packed
-                            ? Colors.white.withOpacity(0.04)
-                            : Colors.white.withOpacity(0.02),
-                        borderRadius: BorderRadius.circular(17.r),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
               // Content
               Center(
                 child: Padding(
@@ -162,8 +136,8 @@ class _PackItemCardState extends State<PackItemCard>
                           fontSize: 10.sp,
                           height: 1.2,
                           color: packed
-                              ? Colors.white
-                              : Colors.white.withOpacity(0.55),
+                              ? colorScheme.onSurface
+                              : colorScheme.onSurfaceVariant,
                           letterSpacing: 0.2,
                         ),
                       ),
@@ -182,7 +156,7 @@ class _PackItemCardState extends State<PackItemCard>
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
-                        colors: [Color(0xFFA855F7), Color(0xFF06B6D4)],
+                        colors: [packCheckAccentStart, packCheckAccentEnd],
                       ),
                     ),
                     child: Icon(
@@ -209,6 +183,7 @@ class _ItemVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (item.imagePath != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(10.r),
@@ -223,8 +198,11 @@ class _ItemVisual extends StatelessWidget {
     return ShaderMask(
       shaderCallback: (bounds) => LinearGradient(
         colors: isPacked
-            ? [const Color(0xFFA855F7), const Color(0xFF06B6D4)]
-            : [Colors.white38, Colors.white24],
+            ? [packCheckAccentStart, packCheckAccentEnd]
+            : [
+                colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              ],
       ).createShader(bounds),
       child: Icon(
         PackItemIcons.resolve(item.iconCodePoint),
@@ -233,25 +211,4 @@ class _ItemVisual extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Paints a 1.5-px gradient border around the card when selected.
-class _GradientBorderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    const gradient = LinearGradient(
-      colors: [Color(0xFFA855F7), Color(0xFF06B6D4), Color(0xFFA855F7)],
-      stops: [0.0, 0.5, 1.0],
-    );
-    final rect = Offset.zero & size;
-    final paint = Paint()
-      ..shader = gradient.createShader(rect)
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-    final rRect = RRect.fromRectAndRadius(rect.deflate(0.75), const Radius.circular(18));
-    canvas.drawRRect(rRect, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

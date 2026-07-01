@@ -1,6 +1,7 @@
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_member_balance.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_card_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -50,20 +51,10 @@ class KurbaniMemberCard extends StatelessWidget {
     final initials = _initials(balance.memberName);
     final color = _netColor;
 
-    return Container(
+    return KurbaniCardShell(
+      accent: color,
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10.r,
-            offset: Offset(0, 3.h),
-          ),
-        ],
-      ),
+      borderRadius: BorderRadius.circular(16.r),
       child: Row(
         children: [
           // Avatar

@@ -2,6 +2,8 @@ import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/services/contacts/app_contact.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/club/data/model/payment_entry.dart';
+import 'package:fclub/feature/club/data/model/payment_status.dart';
+import 'package:fclub/feature/club/presentation/widgets/club_card_shell.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_member_avatar.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_status_badge.dart';
 import 'package:flutter/material.dart';
@@ -24,20 +26,12 @@ class ClubHistoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Material(
-      color: colorScheme.surfaceContainerLowest,
-      borderRadius: BorderRadius.circular(16.r),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16.r),
-        child: Container(
-          margin: EdgeInsets.only(bottom: 10.h),
-          padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-          ),
-          child: Row(
+    return ClubCardShell(
+      accent: entry.status.color,
+      onTap: onTap,
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.all(12.w),
+      child: Row(
             children: [
               ClubMemberAvatar(
                 name: contact?.name ?? 'Unknown',
@@ -90,8 +84,6 @@ class ClubHistoryTile extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
     );
   }
 }

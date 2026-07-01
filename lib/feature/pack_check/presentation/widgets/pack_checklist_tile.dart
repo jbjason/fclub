@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../data/model/pack_item.dart';
 import '../../data/pack_item_icons.dart';
+import 'pack_item_card.dart' show packCheckAccentStart, packCheckAccentEnd;
 
 /// A single checklist row used in check (return-verify) mode.
 ///
@@ -22,6 +23,8 @@ class PackChecklistTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final checked = item.isCheckedBack;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onToggle,
@@ -31,31 +34,29 @@ class PackChecklistTile extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14.r),
-          gradient: LinearGradient(
-            colors: checked
-                ? [
-                    const Color(0xFF06B6D4).withOpacity(0.15),
-                    const Color(0xFFA855F7).withOpacity(0.1),
-                  ]
-                : [
-                    const Color(0xFF12102A),
-                    const Color(0xFF0E0E24),
+          color: colorScheme.surfaceContainerLowest,
+          gradient: checked
+              ? LinearGradient(
+                  colors: [
+                    packCheckAccentEnd.withValues(alpha: isDark ? 0.18 : 0.10),
+                    packCheckAccentStart.withValues(alpha: isDark ? 0.12 : 0.06),
                   ],
-          ),
+                )
+              : null,
           border: Border.all(
             color: checked
-                ? const Color(0xFF06B6D4).withOpacity(0.45)
-                : Colors.white.withOpacity(0.07),
+                ? packCheckAccentEnd.withValues(alpha: isDark ? 0.5 : 0.35)
+                : colorScheme.outlineVariant.withValues(alpha: 0.5),
             width: 1,
           ),
           boxShadow: checked
               ? [
                   BoxShadow(
-                    color: const Color(0xFF06B6D4).withOpacity(0.2),
+                    color: packCheckAccentEnd.withValues(alpha: isDark ? 0.22 : 0.12),
                     blurRadius: 10,
                   ),
                 ]
-              : [],
+              : null,
         ),
         child: Row(
           children: [
@@ -69,8 +70,9 @@ class PackChecklistTile extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: 'Poppins_Medium',
                   fontSize: 14.sp,
-                  color: checked ? Colors.white : Colors.white70,
-                  decoration: checked ? TextDecoration.none : null,
+                  color: checked
+                      ? colorScheme.onSurface
+                      : colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -83,12 +85,13 @@ class PackChecklistTile extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: checked
                     ? const LinearGradient(
-                        colors: [Color(0xFF06B6D4), Color(0xFFA855F7)],
+                        colors: [packCheckAccentEnd, packCheckAccentStart],
                       )
                     : null,
                 border: checked
                     ? null
-                    : Border.all(color: Colors.white30, width: 1.5),
+                    : Border.all(
+                        color: colorScheme.outlineVariant, width: 1.5),
               ),
               child: checked
                   ? Icon(Icons.check_rounded, color: Colors.white, size: 14.r)
@@ -109,6 +112,7 @@ class _TileVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (item.imagePath != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(8.r),
@@ -123,8 +127,11 @@ class _TileVisual extends StatelessWidget {
     return ShaderMask(
       shaderCallback: (b) => LinearGradient(
         colors: checked
-            ? [const Color(0xFF06B6D4), const Color(0xFFA855F7)]
-            : [Colors.white38, Colors.white24],
+            ? [packCheckAccentEnd, packCheckAccentStart]
+            : [
+                colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              ],
       ).createShader(b),
       child: Icon(
         PackItemIcons.resolve(item.iconCodePoint),

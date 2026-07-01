@@ -35,8 +35,19 @@ class SettingsTile extends StatelessWidget {
                 width: 40.r,
                 height: 40.r,
                 decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.1),
+                  gradient: LinearGradient(
+                    colors: [
+                      iconColor.withValues(alpha: 0.28),
+                      iconColor.withValues(alpha: 0.10),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: iconColor.withValues(alpha: 0.30),
+                    width: 1,
+                  ),
                 ),
                 child: Icon(
                   icon,

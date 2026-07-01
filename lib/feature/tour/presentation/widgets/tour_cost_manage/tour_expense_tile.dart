@@ -3,6 +3,7 @@ import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/tour/data/expense_category.dart';
 import 'package:fclub/feature/tour/data/model/tour_expense_model.dart';
 import 'package:fclub/feature/tour/data/model/tour_member_model.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_card_shell.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_member_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -29,17 +30,12 @@ class TourExpenseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final category = ExpenseCategory.values[expense.categoryIndex];
-    return Container(
+    return TourCardShell(
+      accent: category.color,
       margin: EdgeInsets.only(bottom: 10.h),
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-      ),
+      borderRadius: BorderRadius.circular(14.r),
       child: Row(
         children: [
           TourMemberAvatar(
