@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class SignInTextStyle extends StatelessWidget {
@@ -7,12 +8,12 @@ class SignInTextStyle extends StatelessWidget {
     return Row(
       children: [
         Padding(
-          padding: EdgeInsets.only(top: 30, left: 10, bottom: 10),
+          padding: const EdgeInsets.only(top: 30, left: 10, bottom: 10),
           child: RotatedBox(
             quarterTurns: -1,
             child: Text(
-              'Sign in',
-              style: TextStyle(
+              'sign_in'.tr(),
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 38,
                 fontWeight: FontWeight.w900,
@@ -21,11 +22,11 @@ class SignInTextStyle extends StatelessWidget {
           ),
         ),
         IntrinsicHeight(
-          child: const Padding(
-            padding: EdgeInsets.only(top: 15),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 15),
             child: Text(
-              'A world of\npossibility in an\napp',
-              style: TextStyle(fontSize: 24, color: Colors.white),
+              'auth_tagline'.tr(),
+              style: const TextStyle(fontSize: 24, color: Colors.white),
             ),
           ),
         ),

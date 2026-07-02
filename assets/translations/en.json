@@ -1,7 +1,7 @@
 {
   "email_address": "Email Address",
   "password": "Password",
-  "sign_in": "Sign In",
+  "sign_in": "Sign in",
   "change_language": "Change Language",
   "auth_tagline": "A world of\npossibility in an\napp",
   "auth_email_required": "Email is required.",

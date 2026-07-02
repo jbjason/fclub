@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
+import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/tour/data/model/tour_member_model.dart';
 import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_cost_manage_fab.dart';
@@ -76,6 +77,57 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
               ),
             ),
           ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 12.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'tour_total_budget'.tr(),
+                        style: TextStyle(
+                          fontFamily: MyString.rubikRegular,
+                          fontSize: 12.sp,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        CurrencyFormatter.format(tourProvider.decidedBudget),
+                        style: TextStyle(
+                          fontFamily: MyString.poppinsBold,
+                          fontSize: 13.sp,
+                          color: summary.isOverBudget
+                              ? MyColor.error
+                              : MyColor.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 6.h),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6.r),
+                    child: LinearProgressIndicator(
+                      value: summary.budgetProgress,
+                      minHeight: 8.h,
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        summary.isOverBudget
+                            ? MyColor.error
+                            : MyColor.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           SliverPersistentHeader(
             pinned: true,
             delegate: TourTabBarHeaderDelegate(
@@ -145,7 +197,7 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
           onPressed: _showMemberManageSheet,
         ),
         IconButton(
-          tooltip: 'Edit Budget',
+          tooltip: 'tour_edit_budget'.tr(),
           icon: const Icon(Icons.tune_rounded),
           onPressed: () => _showBudgetDialog(tourProvider),
         ),
@@ -168,54 +220,16 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
     );
   }
 
-  void _showBudgetDialog(TourProvider tourProvider) {
-    final controller = TextEditingController(
-      text: tourProvider.decidedBudget.toStringAsFixed(0),
-    );
-    showDialog<void>(
+  Future<void> _showBudgetDialog(TourProvider tourProvider) async {
+    final newBudget = await showDialog<double>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        title: Text(
-          'total_budget'.tr(),
-          style: TextStyle(
-              fontFamily: MyString.poppinsBold, fontSize: 16.sp),
-        ),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            prefixText: '৳ ',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text('cancel'.tr()),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final v = double.tryParse(controller.text.trim());
-              if (v != null) tourProvider.updateDecidedBudget(v);
-              Navigator.pop(dialogContext);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: MyColor.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-            ),
-            child: Text('save'.tr()),
-          ),
-        ],
+      builder: (_) => _BudgetDialog(
+        initialValue: tourProvider.decidedBudget,
       ),
     );
+    if (newBudget != null && mounted) {
+      tourProvider.updateDecidedBudget(newBudget);
+    }
   }
 
   Future<void> _showEditPaidToManagerDialog(
@@ -255,5 +269,71 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
     if (amount != null) {
       await tourProvider.updateMemberPaidToManager(member.id, amount);
     }
+  }
+}
+
+class _BudgetDialog extends StatefulWidget {
+  const _BudgetDialog({required this.initialValue});
+  final double initialValue;
+
+  @override
+  State<_BudgetDialog> createState() => _BudgetDialogState();
+}
+
+class _BudgetDialogState extends State<_BudgetDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: widget.initialValue.toStringAsFixed(0),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+      title: Text(
+        'total_budget'.tr(),
+        style: TextStyle(fontFamily: MyString.poppinsBold, fontSize: 16.sp),
+      ),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          prefixText: '৳ ',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('cancel'.tr()),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(
+            context,
+            double.tryParse(_controller.text.trim()),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: MyColor.primary,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+          ),
+          child: Text('save'.tr()),
+        ),
+      ],
+    );
   }
 }

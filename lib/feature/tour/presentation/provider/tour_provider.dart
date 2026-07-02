@@ -172,8 +172,8 @@ class TourProvider with ChangeNotifier {
     final session = _activeSession;
     if (session == null) return;
     session.decidedBudget = amount;
-    await _sessionsBox.put(session.id, session);
     notifyListeners();
+    await _sessionsBox.put(session.id, session);
   }
 
   Future<void> updateMemberPaidToManager(
