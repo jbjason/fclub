@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/my_dialog.dart';
@@ -46,11 +47,11 @@ class _AddExtraPaymentBottomSheetState
     final amount = double.tryParse(_amountController.text.trim()) ?? 0;
 
     if (_memberId == null) {
-      MyDialog().showFailedToast(msg: 'Select a member.', context: context);
+      MyDialog().showFailedToast(msg: 'club_select_member'.tr(), context: context);
       return;
     }
     if (amount <= 0) {
-      MyDialog().showFailedToast(msg: 'Enter a valid amount.', context: context);
+      MyDialog().showFailedToast(msg: 'enter_valid_amount'.tr(), context: context);
       return;
     }
 
@@ -99,7 +100,7 @@ class _AddExtraPaymentBottomSheetState
               Row(
                 children: [
                   Text(
-                    'Add Extra Payment',
+                    'tour_add_extra_payment'.tr(),
                     style: TextStyle(
                       fontFamily: MyString.poppinsBold,
                       fontWeight: FontWeight.w700,
@@ -118,7 +119,7 @@ class _AddExtraPaymentBottomSheetState
                 ],
               ),
               SizedBox(height: 16.h),
-              Text('Member', style: _labelStyle),
+              Text('members'.tr(), style: _labelStyle),
               SizedBox(height: 8.h),
               SizedBox(
                 height: 72.h,
@@ -166,12 +167,12 @@ class _AddExtraPaymentBottomSheetState
               TextField(
                 controller: _amountController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Amount'),
+                decoration: InputDecoration(labelText: 'amount'.tr()),
               ),
               SizedBox(height: 12.h),
               TextField(
                 controller: _noteController,
-                decoration: const InputDecoration(labelText: 'Note (optional)'),
+                decoration: InputDecoration(labelText: 'note_optional'.tr()),
               ),
               SizedBox(height: 24.h),
               SizedBox(
@@ -182,7 +183,7 @@ class _AddExtraPaymentBottomSheetState
                       ? const Center(child: CircularProgressIndicator())
                       : ElevatedButton(
                           onPressed: _submit,
-                          child: const Text('Add Payment'),
+                          child: Text('payments'.tr()),
                         ),
                 ),
               ),

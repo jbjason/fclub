@@ -1,6 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 /// Month picker for [ClubEntryForm], offering every month from the club's
 /// start date through a few months ahead (to allow advance payments).
@@ -31,7 +31,7 @@ class ClubMonthDropdown extends StatelessWidget {
     return DropdownButtonFormField<DateTime>(
       initialValue: value,
       isExpanded: true,
-      decoration: const InputDecoration(labelText: 'Month'),
+      decoration: InputDecoration(labelText: 'month'.tr()),
       items: _months.map((month) {
         return DropdownMenuItem(
           value: month,
@@ -39,7 +39,7 @@ class ClubMonthDropdown extends StatelessWidget {
         );
       }).toList(),
       onChanged: onChanged,
-      validator: (value) => value == null ? 'Select a month' : null,
+      validator: (value) => value == null ? 'club_select_month'.tr() : null,
     );
   }
 }

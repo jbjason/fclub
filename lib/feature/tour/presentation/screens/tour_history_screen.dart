@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
@@ -58,11 +59,11 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.r)),
-        title: Text('Finish this tour?',
+        title: Text('tour_finish_confirm_title'.tr(),
             style: TextStyle(
                 fontFamily: MyString.poppinsBold, fontSize: 16.sp)),
         content: Text(
-          'The session will be moved to history. You can still view it later.',
+          'tour_finish_confirm_body'.tr(),
           style: TextStyle(
               fontFamily: MyString.rubikRegular,
               fontSize: 13.sp,
@@ -72,7 +73,7 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -82,7 +83,7 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r)),
             ),
-            child: const Text('Finish'),
+            child: Text('finish'.tr()),
           ),
         ],
       ),
@@ -98,11 +99,11 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.r)),
-        title: Text('Remove this record?',
+        title: Text('tour_delete_confirm_title'.tr(),
             style: TextStyle(
                 fontFamily: MyString.poppinsBold, fontSize: 16.sp)),
         content: Text(
-          'This tour history entry will be permanently deleted.',
+          'tour_delete_confirm_body'.tr(),
           style: TextStyle(
               fontFamily: MyString.rubikRegular,
               fontSize: 13.sp,
@@ -112,7 +113,7 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -122,7 +123,7 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r)),
             ),
-            child: const Text('Delete'),
+            child: Text('delete'.tr()),
           ),
         ],
       ),
@@ -192,7 +193,7 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
               : MyColor.primary,
           foregroundColor: Colors.white,
           icon: const Icon(Icons.add_rounded),
-          label: Text('New Tour',
+          label: Text('tour_new'.tr(),
               style: TextStyle(
                   fontFamily: MyString.poppinsBold, fontSize: 13.sp)),
         ),

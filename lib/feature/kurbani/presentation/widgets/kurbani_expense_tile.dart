@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_expense_model.dart';
@@ -99,7 +100,7 @@ class KurbaniExpenseTile extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        isAllMembers ? 'Shared by all' : 'Paid by ${payer!.name}',
+                        isAllMembers ? 'kurbani_shared_all'.tr() : 'Paid by ${payer!.name}',
                         style: TextStyle(
                           fontFamily: MyString.rubikRegular,
                           fontSize: 10.sp,

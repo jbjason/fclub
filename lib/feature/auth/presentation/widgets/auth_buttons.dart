@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class AuthButtons extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Sign In',
+                    'sign_in'.tr(),
                     style: const TextStyle(color: Colors.white70,fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                 ),

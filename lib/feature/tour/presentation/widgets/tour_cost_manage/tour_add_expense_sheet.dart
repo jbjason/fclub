@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/my_dialog.dart';
 import 'package:fclub/feature/tour/data/expense_category.dart';
@@ -72,20 +73,20 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
     final amount = double.tryParse(_amountController.text.trim()) ?? 0;
 
     if (title.isEmpty) {
-      MyDialog().showFailedToast(msg: 'Enter a title.', context: context);
+      MyDialog().showFailedToast(msg: 'enter_title'.tr(), context: context);
       return;
     }
     if (amount <= 0) {
-      MyDialog().showFailedToast(msg: 'Enter a valid amount.', context: context);
+      MyDialog().showFailedToast(msg: 'enter_valid_amount'.tr(), context: context);
       return;
     }
     if (_paidByMemberId == null) {
-      MyDialog().showFailedToast(msg: 'Select who paid.', context: context);
+      MyDialog().showFailedToast(msg: 'select_who_paid'.tr(), context: context);
       return;
     }
     if (!_allBenefit && _beneficiaryIds.isEmpty) {
       MyDialog().showFailedToast(
-        msg: 'Select at least one beneficiary.',
+        msg: 'select_beneficiary'.tr(),
         context: context,
       );
       return;
@@ -138,7 +139,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
               SizedBox(height: 12.h),
               Row(
                 children: [
-                  Text('Add Expense', style: _titleStyle),
+                  Text('add_expense'.tr(), style: _titleStyle),
                   const Spacer(),
                   IconButton(
                     icon: Icon(Icons.close_rounded,
@@ -152,16 +153,16 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
               SizedBox(height: 16.h),
               TextField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
+                decoration: InputDecoration(labelText: 'enter_title'.tr()),
               ),
               SizedBox(height: 12.h),
               TextField(
                 controller: _amountController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Amount'),
+                decoration: InputDecoration(labelText: 'amount'.tr()),
               ),
               SizedBox(height: 16.h),
-              Text('Category', style: _labelStyle),
+              Text('category'.tr(), style: _labelStyle),
               SizedBox(height: 8.h),
               SizedBox(
                 height: 64.h,
@@ -179,7 +180,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                 ),
               ),
               SizedBox(height: 16.h),
-              Text('Paid by', style: _labelStyle),
+              Text('paid_by'.tr(), style: _labelStyle),
               SizedBox(height: 8.h),
               Wrap(
                 spacing: 10.w,
@@ -193,7 +194,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                 }).toList(),
               ),
               SizedBox(height: 16.h),
-              Text('Who benefited?', style: _labelStyle),
+              Text('who_benefited'.tr(), style: _labelStyle),
               SizedBox(height: 8.h),
               Wrap(
                 spacing: 10.w,
@@ -215,7 +216,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
               SizedBox(height: 16.h),
               TextField(
                 controller: _noteController,
-                decoration: const InputDecoration(labelText: 'Note (optional)'),
+                decoration: InputDecoration(labelText: 'note_optional'.tr()),
               ),
               SizedBox(height: 24.h),
               SizedBox(
@@ -226,7 +227,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                       ? const Center(child: CircularProgressIndicator())
                       : ElevatedButton(
                           onPressed: () => _submit(members),
-                          child: const Text('Add Expense'),
+                          child: Text('add_expense'.tr()),
                         ),
                 ),
               ),

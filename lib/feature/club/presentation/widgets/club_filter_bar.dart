@@ -1,9 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/feature/club/data/model/payment_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 
 /// Search box + month/status filter chips for the History screen.
 class ClubFilterBar extends StatelessWidget {
@@ -38,7 +38,7 @@ class ClubFilterBar extends StatelessWidget {
         TextField(
           onChanged: onSearchChanged,
           decoration: InputDecoration(
-            hintText: 'Search member name',
+            hintText: 'club_search_member'.tr(),
             prefixIcon: const Icon(Icons.search_rounded),
           ),
         ),
@@ -56,7 +56,7 @@ class ClubFilterBar extends StatelessWidget {
                 SizedBox(width: 8.w),
               ],
               _StatusChip(
-                label: 'All',
+                label: 'all'.tr(),
                 isSelected: selectedStatus == null,
                 color: colorScheme.primary,
                 onTap: () => onStatusChanged(null),
@@ -97,7 +97,7 @@ class _MonthChip extends StatelessWidget {
       initialValue: selectedMonth,
       onSelected: onMonthChanged,
       itemBuilder: (context) => [
-        const PopupMenuItem(value: null, child: Text('All months')),
+        PopupMenuItem(value: null, child: Text('club_filter_all_months'.tr())),
         ...availableMonths.map((month) {
           return PopupMenuItem(
             value: month,
@@ -119,7 +119,7 @@ class _MonthChip extends StatelessWidget {
             SizedBox(width: 6.w),
             Text(
               selectedMonth == null
-                  ? 'All months'
+                  ? 'club_filter_all_months'.tr()
                   : DateFormat('MMM yyyy').format(selectedMonth!),
               style: TextStyle(
                 fontFamily: MyString.poppinsMedium,

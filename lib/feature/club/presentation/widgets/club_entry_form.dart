@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/club/data/model/payment_entry.dart';
 import 'package:fclub/feature/club/data/model/payment_status.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
@@ -6,7 +7,6 @@ import 'package:fclub/feature/club/presentation/widgets/club_month_dropdown.dart
 import 'package:fclub/feature/club/presentation/widgets/club_status_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 /// Fields collected by [ClubEntryForm] on submit.
@@ -130,16 +130,16 @@ class _ClubEntryFormState extends State<ClubEntryForm> {
           TextFormField(
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Amount'),
+            decoration: InputDecoration(labelText: 'amount'.tr()),
             validator: (value) {
-              if (value == null || value.trim().isEmpty) return 'Required';
+              if (value == null || value.trim().isEmpty) return 'required'.tr();
               final parsed = double.tryParse(value.trim());
-              if (parsed == null || parsed <= 0) return 'Enter a valid amount';
+              if (parsed == null || parsed <= 0) return 'enter_valid_amount'.tr();
               return null;
             },
           ),
           SizedBox(height: 16.h),
-          Text('Status', style: textTheme.labelLarge),
+          Text('status'.tr(), style: textTheme.labelLarge),
           SizedBox(height: 8.h),
           ClubStatusSelector(
             selected: _status,
@@ -149,9 +149,9 @@ class _ClubEntryFormState extends State<ClubEntryForm> {
           InkWell(
             onTap: _pickDate,
             child: InputDecorator(
-              decoration: const InputDecoration(
-                labelText: 'Date',
-                suffixIcon: Icon(Icons.calendar_today_rounded),
+              decoration: InputDecoration(
+                labelText: 'date'.tr(),
+                suffixIcon: const Icon(Icons.calendar_today_rounded),
               ),
               child: Text(DateFormat('d MMM yyyy').format(_date)),
             ),
@@ -159,7 +159,7 @@ class _ClubEntryFormState extends State<ClubEntryForm> {
           SizedBox(height: 16.h),
           TextFormField(
             controller: _noteController,
-            decoration: const InputDecoration(labelText: 'Note (optional)'),
+            decoration: InputDecoration(labelText: 'note_optional'.tr()),
             maxLines: 2,
           ),
           SizedBox(height: 24.h),

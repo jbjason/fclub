@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
@@ -53,7 +54,7 @@ class LockerBalanceCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Current Cash',
+                'locker_current_cash'.tr(),
                 style: TextStyle(
                   fontFamily: MyString.poppinsMedium,
                   fontSize: 12.sp,
@@ -86,7 +87,7 @@ class LockerBalanceCard extends StatelessWidget {
           if (isNegative) ...[
             SizedBox(height: 2.h),
             Text(
-              'Spending has exceeded total collected',
+              'locker_exceeded'.tr(),
               style: TextStyle(fontSize: 11.sp, color: colorScheme.onSurfaceVariant),
             ),
           ],
@@ -110,9 +111,9 @@ class LockerBalanceCard extends StatelessWidget {
           SizedBox(height: 14.h),
           Row(
             children: [
-              _MiniStat(label: 'Collected', amount: collected),
+              _MiniStat(label: 'collected'.tr(), amount: collected),
               SizedBox(width: 24.w),
-              _MiniStat(label: 'Spent', amount: spent),
+              _MiniStat(label: 'spent'.tr(), amount: spent),
             ],
           ),
         ],

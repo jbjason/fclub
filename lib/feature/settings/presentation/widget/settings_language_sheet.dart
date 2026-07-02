@@ -1,52 +1,50 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
-import 'package:fclub/feature/settings/presentation/provider/settings_provider.dart';
+import 'package:fclub/core/services/locale_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-/// Human label for a [ThemeMode], used on the Appearance tile's subtitle.
-String themeModeLabel(ThemeMode mode) {
-  switch (mode) {
-    case ThemeMode.system:
-      return 'system_default'.tr();
-    case ThemeMode.light:
-      return 'theme_light'.tr();
-    case ThemeMode.dark:
-      return 'theme_dark'.tr();
+/// Human label for a locale, used on the Language tile's subtitle.
+String localeName(Locale locale) {
+  switch (locale.languageCode) {
+    case 'bn':
+      return 'বাংলা';
+    default:
+      return 'English';
   }
 }
 
-/// Bottom sheet letting the user pick Light/Dark/System — applies
-/// immediately via [SettingsProvider.setThemeMode] and persists.
-Future<void> showThemeModeSheet(BuildContext context) {
-  final settingsProvider = context.read<SettingsProvider>();
+/// Bottom sheet for picking app language — applies immediately via
+/// [LocaleProvider] and persists through [EasyLocalization].
+Future<void> showLanguageSheet(BuildContext context) {
+  final localeProvider = context.read<LocaleProvider>();
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (_) => ChangeNotifierProvider.value(
-      value: settingsProvider,
-      child: const _ThemeModeSheetContent(),
+      value: localeProvider,
+      child: const _LanguageSheetContent(),
     ),
   );
 }
 
-class _ThemeModeSheetContent extends StatelessWidget {
-  const _ThemeModeSheetContent();
+class _LanguageSheetContent extends StatelessWidget {
+  const _LanguageSheetContent();
 
   static const _options = [
-    (ThemeMode.system, Icons.brightness_auto_rounded),
-    (ThemeMode.light, Icons.light_mode_rounded),
-    (ThemeMode.dark, Icons.dark_mode_rounded),
+    (Locale('en'), Icons.translate_rounded, 'English', 'English (US)'),
+    (Locale('bn'), Icons.translate_rounded, 'বাংলা', 'Bangla'),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final settingsProvider = context.watch<SettingsProvider>();
-    final selected = settingsProvider.settings.themeMode;
+    final localeProvider = context.watch<LocaleProvider>();
+    final selected = localeProvider.locale;
     final colorScheme = Theme.of(context).colorScheme;
+    const accent = Color(0xFF16A34A);
 
     return SafeArea(
       child: Container(
@@ -71,7 +69,7 @@ class _ThemeModeSheetContent extends StatelessWidget {
               ),
             ),
             Text(
-              'appearance'.tr(),
+              'language'.tr(),
               style: TextStyle(
                 fontFamily: MyString.poppinsBold,
                 fontWeight: FontWeight.w700,
@@ -81,11 +79,11 @@ class _ThemeModeSheetContent extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             ..._options.map((option) {
-              final (mode, icon) = option;
-              final isSelected = mode == selected;
+              final (locale, icon, nativeName, englishName) = option;
+              final isSelected = locale.languageCode == selected.languageCode;
               return GestureDetector(
                 onTap: () async {
-                  await settingsProvider.setThemeMode(mode);
+                  await localeProvider.changeLocale(context, locale.languageCode);
                   if (context.mounted) Navigator.pop(context);
                 },
                 child: Container(
@@ -93,32 +91,49 @@ class _ThemeModeSheetContent extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? MyColor.primary.withValues(alpha: 0.08)
+                        ? accent.withValues(alpha: 0.08)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(
                       color: isSelected
-                          ? MyColor.primary.withValues(alpha: 0.3)
+                          ? accent.withValues(alpha: 0.3)
                           : Colors.transparent,
                     ),
                   ),
                   child: Row(
                     children: [
-                      Icon(icon, color: isSelected ? MyColor.primary : MyColor.gray400, size: 20.r),
+                      Icon(icon,
+                          color: isSelected ? accent : MyColor.gray400,
+                          size: 20.r),
                       SizedBox(width: 12.w),
                       Expanded(
-                        child: Text(
-                          themeModeLabel(mode),
-                          style: TextStyle(
-                            fontFamily: MyString.poppinsMedium,
-                            fontSize: 14.sp,
-                            color: colorScheme.onSurface,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              nativeName,
+                              style: TextStyle(
+                                fontFamily: MyString.poppinsMedium,
+                                fontSize: 14.sp,
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                            Text(
+                              englishName,
+                              style: TextStyle(
+                                fontFamily: MyString.rubikRegular,
+                                fontSize: 11.sp,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Icon(
-                        isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                        color: isSelected ? MyColor.primary : MyColor.gray300,
+                        isSelected
+                            ? Icons.check_circle_rounded
+                            : Icons.radio_button_unchecked_rounded,
+                        color: isSelected ? accent : MyColor.gray300,
                         size: 20.r,
                       ),
                     ],

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class _KurbaniAddAnimalPartSheetState
     if (!_formKey.currentState!.validate()) return;
     if (_selectedPart == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a part')),
+        SnackBar(content: Text('select_a_part'.tr())),
       );
       return;
     }
@@ -103,7 +104,7 @@ class _KurbaniAddAnimalPartSheetState
                 Icon(Icons.set_meal_rounded, color: Colors.white, size: 22.r),
                 SizedBox(width: 10.w),
                 Text(
-                  'Add Animal Part',
+                  'kurbani_add_part'.tr(),
                   style: TextStyle(
                     fontFamily: MyString.poppinsBold,
                     fontSize: 16.sp,
@@ -123,7 +124,7 @@ class _KurbaniAddAnimalPartSheetState
                 children: [
                   // Part name chips
                   Text(
-                    'Part Name',
+                    'kurbani_part_name'.tr(),
                     style: TextStyle(
                       fontFamily: MyString.poppinsBold,
                       fontSize: 12.sp,
@@ -183,7 +184,7 @@ class _KurbaniAddAnimalPartSheetState
                       return null;
                     },
                     decoration: InputDecoration(
-                      labelText: 'Weight (kg)',
+                      labelText: 'kurbani_weight'.tr(),
                       hintText: '0.0',
                       prefixIcon:
                           Icon(Icons.scale_rounded, size: 18.r),
@@ -213,7 +214,7 @@ class _KurbaniAddAnimalPartSheetState
                   TextFormField(
                     controller: _noteController,
                     decoration: InputDecoration(
-                      labelText: 'Note (optional)',
+                      labelText: 'note_optional'.tr(),
                       prefixIcon: Icon(Icons.notes_rounded, size: 18.r),
                       filled: true,
                       fillColor: colorScheme.surfaceContainerHighest,
@@ -252,7 +253,7 @@ class _KurbaniAddAnimalPartSheetState
                               ),
                             )
                           : Text(
-                              'Save Part',
+                              'save_part'.tr(),
                               style: TextStyle(
                                 fontFamily: MyString.poppinsBold,
                                 fontSize: 14.sp,

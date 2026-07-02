@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
@@ -64,7 +65,7 @@ class KurbaniMemberManageSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Manage Members',
+                        'manage_members'.tr(),
                         style: TextStyle(
                           fontFamily: MyString.poppinsBold,
                           fontSize: 16.sp,
@@ -95,7 +96,7 @@ class KurbaniMemberManageSheet extends StatelessWidget {
               children: [
                 _SectionLabel(
                   icon: Icons.check_circle_rounded,
-                  title: 'Current Members',
+                  title: 'current_members'.tr(),
                   color: _kEmerald,
                 ),
                 ...provider.members.map((m) {
@@ -114,7 +115,7 @@ class KurbaniMemberManageSheet extends StatelessWidget {
                   SizedBox(height: 8.h),
                   _SectionLabel(
                     icon: Icons.person_add_rounded,
-                    title: 'Add from Contacts',
+                    title: 'add_from_contacts'.tr(),
                     color: _kDeepEmerald,
                   ),
                   ...available.map(

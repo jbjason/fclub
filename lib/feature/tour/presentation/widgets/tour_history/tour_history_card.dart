@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
@@ -82,7 +83,7 @@ class TourHistoryCard extends StatelessWidget {
                   mainAxisAlignment:
                       MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Spent',
+                    Text('spent'.tr(),
                         style: TextStyle(
                             fontFamily: MyString.rubikRegular,
                             fontSize: 11.sp,

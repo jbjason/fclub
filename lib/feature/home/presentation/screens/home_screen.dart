@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
@@ -64,14 +65,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 const HomeHeader(),
                 SizedBox(height: 24.h),
                 // ── Highlights section ──────────────────────────────
-                const _SectionTitle(label: 'Highlights'),
+                _SectionTitle(label: 'highlights'.tr()),
                 SizedBox(height: 12.h),
                 const HomeClubStatsCard(),
                 SizedBox(height: 12.h),
                 const HomeLockerStatCard(),
                 SizedBox(height: 24.h),
                 // ── Quick Access section ────────────────────────────
-                const _SectionTitle(label: 'Quick Access'),
+                _SectionTitle(label: 'quick_access'.tr()),
                 SizedBox(height: 12.h),
                 // ── Feature cards ───────────────────────────────────
                 const HomeFeatureGrid(),

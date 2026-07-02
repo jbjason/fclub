@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/club/data/model/payment_status.dart';
 import 'package:fclub/feature/club/presentation/screens/club_add_entry_screen.dart';
@@ -64,10 +65,10 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Monthly Overview'),
+        title: Text('club_monthly_overview'.tr()),
         actions: [
           IconButton(
-            tooltip: 'Payment history',
+            tooltip: 'club_payment_history'.tr(),
             icon: const Icon(Icons.history_rounded),
             onPressed: () => Navigator.push<void>(
               context,
@@ -79,11 +80,11 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openAddEntry,
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Add Entry'),
+        label: Text('club_add_entry'.tr()),
       ),
       body: SafeArea(
         child: months.isEmpty
-            ? const ClubEmptyState(message: 'No monthly data yet.')
+            ? ClubEmptyState(message: 'club_no_monthly_data'.tr())
             : Column(
                 children: [
                   if (years.length > 1)
@@ -93,7 +94,7 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen> {
                       child: Row(
                         children: [
                           ChoiceChip(
-                            label: const Text('All'),
+                            label: Text('all'.tr()),
                             selected: _selectedYear == null,
                             onSelected: (_) =>
                                 setState(() => _selectedYear = null),
@@ -115,8 +116,8 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen> {
                     ),
                   Expanded(
                     child: filteredMonths.isEmpty
-                        ? const ClubEmptyState(
-                            message: 'No months for selected year.')
+                        ? ClubEmptyState(
+                            message: 'club_no_months_year'.tr())
                         : Scrollbar(
                             controller: _scrollController,
                             thumbVisibility: true,

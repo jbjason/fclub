@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
@@ -19,9 +20,9 @@ class TourPaymentsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (payments.isEmpty) {
-      return const TourEmptyState(
+      return TourEmptyState(
         icon: Icons.payments_rounded,
-        message: 'No extra payments yet.',
+        message: 'tour_no_expenses'.tr(),
       );
     }
 

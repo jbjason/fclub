@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/locker/data/model/locker_expense.dart';
 import 'package:fclub/feature/locker/presentation/provider/locker_provider.dart';
 import 'package:fclub/feature/locker/presentation/screens/locker_add_expense_screen.dart';
@@ -59,7 +60,7 @@ class _LockerScreenState extends State<LockerScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(title: const Text('Locker')),
+      appBar: AppBar(title: Text('locker_feature_title'.tr())),
       body: SafeArea(
         child: Column(
           children: [
@@ -77,15 +78,15 @@ class _LockerScreenState extends State<LockerScreen> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Expense History',
+                  'locker_expense_history'.tr(),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
             ),
             Expanded(
               child: expenses.isEmpty
-                  ? const LockerEmptyState(
-                      message: 'No expenses recorded yet.\nTap "Add Expense" to log the first one.',
+                  ? LockerEmptyState(
+                      message: 'locker_no_expenses'.tr(),
                     )
                   : Scrollbar(
                       controller: _scrollController,
@@ -110,7 +111,7 @@ class _LockerScreenState extends State<LockerScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openAddExpense,
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Add Expense'),
+        label: Text('add_expense'.tr()),
       ),
     );
   }

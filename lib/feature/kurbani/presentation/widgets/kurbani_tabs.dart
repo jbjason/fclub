@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_summary.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
@@ -38,14 +39,14 @@ class KurbaniCostTab extends StatelessWidget {
           // Expenses section
           _SectionHeader(
             icon: Icons.receipt_long_rounded,
-            title: 'Expenses',
+            title: 'expenses'.tr(),
             subtitle: '${expenses.length} entries · Total ${_formatAmount(summary.totalSpent)}',
             color: const Color(0xFF0891B2),
           ),
           if (expenses.isEmpty)
             _EmptyState(
               icon: Icons.receipt_long_outlined,
-              message: 'No expenses yet.\nTap + to add one.',
+              message: 'kurbani_no_expenses'.tr(),
             )
           else
             ...expenses.map(
@@ -60,8 +61,8 @@ class KurbaniCostTab extends StatelessWidget {
           // Member balances section
           _SectionHeader(
             icon: Icons.people_rounded,
-            title: 'Member Balances',
-            subtitle: '${summary.memberBalances.length} members',
+            title: 'kurbani_member_balances'.tr(),
+            subtitle: '${summary.memberBalances.length} ${'members'.tr()}',
             color: const Color(0xFF6D28D9),
           ),
           ...summary.memberBalances.map(
@@ -106,14 +107,14 @@ class KurbaniAnimalTab extends StatelessWidget {
           // Parts section
           _SectionHeader(
             icon: Icons.set_meal_rounded,
-            title: 'Parts Breakdown',
+            title: 'kurbani_animal_parts'.tr(),
             subtitle: '${parts.length} parts recorded',
             color: const Color(0xFF7C2D12),
           ),
           if (parts.isEmpty)
             _EmptyState(
               icon: Icons.set_meal_outlined,
-              message: 'No animal parts recorded yet.\nTap + to add.',
+              message: 'kurbani_no_parts'.tr(),
             )
           else
             ...parts.map(
@@ -270,7 +271,7 @@ class _AnimalWeightHero extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Total Animal Weight',
+                  'kurbani_total_weight'.tr(),
                   style: TextStyle(
                     fontFamily: MyString.rubikRegular,
                     fontSize: 11.sp,

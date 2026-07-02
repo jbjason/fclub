@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_entry_form.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +16,10 @@ class ClubAddEntryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Entry')),
+      appBar: AppBar(title: Text('club_add_entry'.tr())),
       body: ClubEntryForm(
         initialMonth: initialMonth,
-        submitLabel: 'Save Entry',
+        submitLabel: 'club_save_entry'.tr(),
         onSubmit: ({
           required contactId,
           required month,

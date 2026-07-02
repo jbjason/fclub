@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_feature_item.dart';
 import 'package:flutter/material.dart';
@@ -64,8 +65,8 @@ class HomeFeatureCard extends StatelessWidget {
                 // ── Centre: title + subtitle ───────────────────────
                 Expanded(
                   child: _FeatureLabel(
-                    title: item.title,
-                    subtitle: item.subtitle,
+                    title: item.title.tr(),
+                    subtitle: item.subtitle.tr(),
                     colorScheme: colorScheme,
                   ),
                 ),

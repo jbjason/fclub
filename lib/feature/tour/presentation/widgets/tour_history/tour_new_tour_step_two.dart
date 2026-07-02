@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/services/contacts/app_contact.dart';
@@ -81,7 +82,7 @@ class TourNewTourStepTwo extends StatelessWidget {
                             ),
                             if (isMe)
                               Text(
-                                'Creator · always included',
+                                'creator_always_included'.tr(),
                                 style: TextStyle(
                                   fontFamily: MyString.rubikRegular,
                                   fontSize: 10.sp,
@@ -121,7 +122,7 @@ class TourNewTourStepTwo extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14.r)),
               ),
               child: Text(
-                'Create Tour ($selectedCount members)',
+                'tour_create'.tr(namedArgs: {'count': selectedCount.toString()}),
                 style: TextStyle(
                     fontFamily: MyString.poppinsBold, fontSize: 14.sp),
               ),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/services/contacts/app_contact.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_member_avatar.dart';
@@ -22,7 +23,7 @@ class ClubMemberDropdown extends StatelessWidget {
     return DropdownButtonFormField<String>(
       initialValue: value,
       isExpanded: true,
-      decoration: const InputDecoration(labelText: 'Member'),
+      decoration: InputDecoration(labelText: 'member'.tr()),
       items: contacts.map((contact) {
         return DropdownMenuItem(
           value: contact.id,
@@ -47,7 +48,7 @@ class ClubMemberDropdown extends StatelessWidget {
         );
       }).toList(),
       onChanged: onChanged,
-      validator: (value) => value == null ? 'Select a member' : null,
+      validator: (value) => value == null ? 'club_select_member'.tr() : null,
     );
   }
 }

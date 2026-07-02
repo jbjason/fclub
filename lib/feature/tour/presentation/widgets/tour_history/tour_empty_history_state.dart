@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:flutter/material.dart';
@@ -18,14 +19,14 @@ class TourEmptyHistoryState extends StatelessWidget {
               size: 64.r,
               color: MyColor.primary.withValues(alpha: 0.2)),
           SizedBox(height: 16.h),
-          Text('No trips yet',
+          Text('tour_no_trips'.tr(),
               style: TextStyle(
                   fontFamily: MyString.poppinsBold,
                   fontSize: 16.sp,
                   color: colorScheme.onSurface)),
           SizedBox(height: 6.h),
           Text(
-            'Tap the button below to start your\nfirst trip management.',
+            'tour_empty_state'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
                 fontFamily: MyString.rubikRegular,
@@ -37,7 +38,7 @@ class TourEmptyHistoryState extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: onNew,
             icon: const Icon(Icons.add_rounded),
-            label: Text('Start New Tour',
+            label: Text('tour_start'.tr(),
                 style: TextStyle(
                     fontFamily: MyString.poppinsBold, fontSize: 13.sp)),
             style: ElevatedButton.styleFrom(

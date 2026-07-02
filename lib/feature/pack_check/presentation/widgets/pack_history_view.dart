@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -63,7 +64,7 @@ class PackHistoryView extends StatelessWidget {
               child: Row(
                 children: [
                   Text(
-                    'Past Sessions',
+                    'pack_past_sessions'.tr(),
                     style: TextStyle(
                       fontFamily: 'Poppins_Bold',
                       fontSize: 14.sp,
@@ -76,7 +77,7 @@ class PackHistoryView extends StatelessWidget {
                       onTap: () =>
                           _confirmClearHistory(context, provider),
                       child: Text(
-                        'Clear all',
+                        'pack_clear_history'.tr(),
                         style: TextStyle(
                           fontFamily: 'Poppins_Regular',
                           fontSize: 11.sp,
@@ -136,12 +137,12 @@ class PackHistoryView extends StatelessWidget {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r)),
         title: Text(
-          'Clear history?',
+          'pack_clear_history_title'.tr(),
           style: TextStyle(
               color: textColor, fontFamily: 'Poppins_Bold'),
         ),
         content: Text(
-          'All completed sessions will be permanently removed.',
+          'pack_clear_history_body'.tr(),
           style: TextStyle(
               color: subColor,
               fontFamily: 'Poppins_Regular',
@@ -151,7 +152,7 @@ class PackHistoryView extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              'Cancel',
+              'cancel'.tr(),
               style: TextStyle(
                 color: isDark
                     ? Colors.white38
@@ -161,8 +162,8 @@ class PackHistoryView extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Clear',
+            child: Text(
+              'pack_clear'.tr(),
               style: TextStyle(
                 color: Color(0xFFF43F5E),
                 fontFamily: 'Poppins_Bold',
@@ -228,8 +229,8 @@ class _CreateNewButton extends StatelessWidget {
               SizedBox(width: 8.w),
               Text(
                 disabled
-                    ? 'Finish active session first'
-                    : 'Start New Session',
+                    ? 'pack_finish_active_first'.tr()
+                    : 'pack_start_session'.tr(),
                 style: TextStyle(
                   fontFamily: 'Poppins_Bold',
                   fontSize: 15.sp,
@@ -264,7 +265,7 @@ class _EmptyHistory extends StatelessWidget {
           Icon(Icons.history_rounded, size: 44.r, color: color),
           SizedBox(height: 10.h),
           Text(
-            'No past sessions yet',
+            'pack_no_past_sessions'.tr(),
             style: TextStyle(
               fontFamily: 'Poppins_Medium',
               fontSize: 13.sp,
@@ -273,7 +274,7 @@ class _EmptyHistory extends StatelessWidget {
           ),
           SizedBox(height: 4.h),
           Text(
-            'Completed sessions will appear here.',
+            'pack_no_past_sessions_subtitle'.tr(),
             style: TextStyle(
               fontFamily: 'Poppins_Regular',
               fontSize: 11.sp,

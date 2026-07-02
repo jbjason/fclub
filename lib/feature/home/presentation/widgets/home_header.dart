@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +61,7 @@ class HomeHeader extends StatelessWidget {
           SizedBox(height: 16.h),
           // ── Headline ───────────────────────────────────────────────
           Text(
-            'Your Financial\nCommand Center',
+            'home_headline'.tr(),
             style: TextStyle(
               fontFamily: MyString.poppinsBold,
               fontWeight: FontWeight.w700,
@@ -72,7 +73,7 @@ class HomeHeader extends StatelessWidget {
           ),
           SizedBox(height: 6.h),
           Text(
-            'Manage clubs, lockers, tours & more — all in one place.',
+            'home_description'.tr(),
             style: TextStyle(
               fontFamily: MyString.rubikRegular,
               fontSize: 12.5.sp,

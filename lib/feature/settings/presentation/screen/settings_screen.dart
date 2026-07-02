@@ -8,6 +8,9 @@ import 'package:fclub/core/util/my_dialog.dart';
 import 'package:fclub/feature/auth/presentation/provider/auth_session_provider.dart';
 import 'package:fclub/feature/settings/presentation/provider/settings_provider.dart';
 import 'package:fclub/feature/settings/presentation/widget/settings_section.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:fclub/core/services/locale_service.dart';
+import 'package:fclub/feature/settings/presentation/widget/settings_language_sheet.dart';
 import 'package:fclub/feature/settings/presentation/widget/settings_theme_sheet.dart';
 import 'package:fclub/feature/settings/presentation/widget/settings_tile.dart';
 import 'package:provider/provider.dart';
@@ -47,13 +50,13 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       SizedBox(height: 28.h),
                       SettingsSection(
-                        title: 'Account',
+                        title: 'account'.tr(),
                         children: [
                           SettingsTile(
                             icon: Icons.person_outline_rounded,
                             iconColor: const Color(0xFFEC4899),
-                            title: 'Edit Profile',
-                            subtitle: 'Update name, photo & details',
+                            title: 'edit_profile'.tr(),
+                            subtitle: 'edit_profile_subtitle'.tr(),
                             onTap: () {
                               if (uid.isEmpty) {
                                 MyDialog().showFailedToast(
@@ -65,87 +68,85 @@ class SettingsScreen extends StatelessWidget {
                               }
                               MyDialog().showComingSoonDialog(
                                 context: context,
-                                featureName: 'Edit Profile',
+                                featureName: 'edit_profile'.tr(),
                               );
                             },
                           ),
                           SettingsTile(
                             icon: Icons.lock_outline_rounded,
                             iconColor: const Color(0xFFDB2777),
-                            title: 'Change Password',
-                            subtitle: 'Update your security credentials',
+                            title: 'change_password'.tr(),
+                            subtitle: 'change_password_subtitle'.tr(),
                             onTap: () => MyDialog().showComingSoonDialog(
                               context: context,
-                              featureName: 'Change Password',
+                              featureName: 'change_password'.tr(),
                             ),
                           ),
                           SettingsTile(
                             icon: Icons.notifications_none_rounded,
                             iconColor: const Color(0xFFF97316),
-                            title: 'Notifications',
-                            subtitle: 'Push, email & in-app alerts',
+                            title: 'notifications'.tr(),
+                            subtitle: 'notifications_subtitle'.tr(),
                             onTap: () => MyDialog().showComingSoonDialog(
                               context: context,
-                              featureName: 'Notifications',
+                              featureName: 'notifications'.tr(),
                             ),
                           ),
                         ],
                       ),
                       SizedBox(height: 20.h),
                       SettingsSection(
-                        title: 'Preferences',
+                        title: 'preferences'.tr(),
                         children: [
                           SettingsTile(
                             icon: Icons.palette_outlined,
                             iconColor: const Color(0xFFDB2777),
-                            title: 'Appearance',
+                            title: 'appearance'.tr(),
                             subtitle: themeModeLabel(themeMode),
                             onTap: () => showThemeModeSheet(context),
                           ),
                           SettingsTile(
                             icon: Icons.language_rounded,
                             iconColor: const Color(0xFF16A34A),
-                            title: 'Language',
-                            subtitle: 'English (US)',
-                            onTap: () => MyDialog().showComingSoonDialog(
-                              context: context,
-                              featureName: 'Language',
-                            ),
+                            title: 'language'.tr(),
+                            subtitle: localeName(
+                                context.watch<LocaleProvider>().locale),
+                            onTap: () => showLanguageSheet(context),
                           ),
                         ],
                       ),
                       SizedBox(height: 20.h),
                       SettingsSection(
-                        title: 'Support',
+                        title: 'support'.tr(),
                         children: [
                           SettingsTile(
                             icon: Icons.help_outline_rounded,
                             iconColor: const Color(0xFF0F766E),
-                            title: 'Help Center',
-                            subtitle: 'FAQs & documentation',
+                            title: 'help_center'.tr(),
+                            subtitle: 'help_center_subtitle'.tr(),
                             onTap: () => MyDialog().showComingSoonDialog(
                               context: context,
-                              featureName: 'Help Center',
+                              featureName: 'help_center'.tr(),
                             ),
                           ),
                           SettingsTile(
                             icon: Icons.info_outline_rounded,
                             iconColor: const Color(0xFF475569),
-                            title: 'About Op Media',
-                            subtitle: 'Version 1.0.0',
+                            title: 'about'.tr(),
+                            subtitle: 'app_version'.tr(),
                             onTap: () => MyDialog().showComingSoonDialog(
                               context: context,
-                              featureName: 'About Op Media',
+                              featureName: 'about'.tr(),
                             ),
                           ),
                           SettingsTile(
                             icon: Icons.shield_outlined,
                             iconColor: const Color(0xFF2563EB),
-                            title: 'Privacy Policy',
-                            subtitle: 'How we handle your data',
+                            title: 'privacy_policy'.tr(),
+                            subtitle: 'privacy_policy_subtitle'.tr(),
                             onTap: () => MyDialog().showComingSoonDialog(
                               context: context,
-                              featureName: 'Privacy Policy',
+                              featureName: 'privacy_policy'.tr(),
                             ),
                           ),
                         ],
@@ -177,7 +178,7 @@ class _SettingsHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Settings',
+                'settings_title'.tr(),
                 style: TextStyle(
                   color: colorScheme.onSurface,
                   fontFamily: MyString.poppinsBold,
@@ -187,7 +188,7 @@ class _SettingsHeader extends StatelessWidget {
               ),
               SizedBox(height: 4.h),
               Text(
-                'Manage your account & preferences.',
+                'settings_description'.tr(),
                 style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
                   fontFamily: MyString.rubikRegular,
@@ -313,7 +314,7 @@ class _ProfileCard extends StatelessWidget {
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        emailVerified ? 'Verified Account' : 'Unverified Email',
+                        emailVerified ? 'verified_account'.tr() : 'unverified_email'.tr(),
                         style: TextStyle(
                           color: colorScheme.onSurface,
                           fontFamily: MyString.poppinsMedium,
@@ -420,7 +421,7 @@ class _SignOutButton extends StatelessWidget {
                     ),
               SizedBox(width: 12.w),
               Text(
-                session.isSigningOut ? 'Signing Out...' : 'Sign Out',
+                session.isSigningOut ? 'signing_out'.tr() : 'sign_out'.tr(),
                 style: TextStyle(
                   color: colorScheme.error,
                   fontFamily: MyString.poppinsBold,

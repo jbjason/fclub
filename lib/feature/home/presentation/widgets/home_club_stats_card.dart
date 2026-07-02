@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
@@ -64,7 +65,7 @@ class HomeClubStatsCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Fundora Club',
+                      'club_feature_title'.tr(),
                       style: TextStyle(
                         fontFamily: MyString.poppinsMedium,
                         fontWeight: FontWeight.w600,
@@ -109,7 +110,7 @@ class HomeClubStatsCard extends StatelessWidget {
           // ── Stats or empty hint ────────────────────────────────────────────
           if (monthEntries.isEmpty)
             HomeStatEmptyHint(
-              message: 'No entries recorded this month.',
+              message: 'no_entries_this_month'.tr(),
               accent: MyColor.primary,
             )
           else
@@ -117,17 +118,17 @@ class HomeClubStatsCard extends StatelessWidget {
               accent: MyColor.primary,
               items: [
                 HomeStatValueItem(
-                  label: 'Collected',
+                  label: 'collected'.tr(),
                   value: CurrencyFormatter.format(collected),
                   valueColor: MyColor.success,
                 ),
                 HomeStatValueItem(
-                  label: 'Due',
+                  label: 'due'.tr(),
                   value: CurrencyFormatter.format(due),
                   valueColor: MyColor.tertiary,
                 ),
                 HomeStatValueItem(
-                  label: 'Advance',
+                  label: 'advance'.tr(),
                   value: CurrencyFormatter.format(advance),
                   valueColor: MyColor.secondary,
                 ),

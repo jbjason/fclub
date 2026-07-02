@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/services/contacts/app_contact.dart';
 import 'package:fclub/feature/club/data/model/payment_entry.dart';
 import 'package:fclub/feature/club/data/model/payment_status.dart';
@@ -115,8 +116,8 @@ class _ClubMonthDetailScreenState extends State<ClubMonthDetailScreen> {
               child: filtered.isEmpty
                   ? ClubEmptyState(
                       message: monthEntries.isEmpty
-                          ? 'No records for this month yet.'
-                          : 'No entries match your filters.',
+                          ? 'club_no_records_month'.tr()
+                          : 'club_no_matches_filter'.tr(),
                     )
                   : Scrollbar(
                       controller: _scrollController,
@@ -142,7 +143,7 @@ class _ClubMonthDetailScreenState extends State<ClubMonthDetailScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openAddEntry,
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Add Entry'),
+        label: Text('club_add_entry'.tr()),
       ),
     );
   }

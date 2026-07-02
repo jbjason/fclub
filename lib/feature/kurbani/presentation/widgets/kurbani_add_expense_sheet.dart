@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_expense_model.dart';
 import 'package:fclub/feature/kurbani/data/model/kurbani_member_model.dart';
@@ -37,7 +38,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedMemberId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select who paid')),
+        SnackBar(content: Text('select_who_paid'.tr())),
       );
       return;
     }
@@ -96,7 +97,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
                 Icon(Icons.add_card_rounded, color: Colors.white, size: 22.r),
                 SizedBox(width: 10.w),
                 Text(
-                  'Add Expense',
+                  'add_expense'.tr(),
                   style: TextStyle(
                     fontFamily: MyString.poppinsBold,
                     fontSize: 16.sp,
@@ -116,7 +117,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
                 children: [
                   _buildField(
                     controller: _titleController,
-                    label: 'Title',
+                    label: 'title_label'.tr(),
                     hint: 'e.g. Cow Purchase',
                     icon: Icons.label_outline_rounded,
                     validator: (v) =>
@@ -125,7 +126,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
                   SizedBox(height: 12.h),
                   _buildField(
                     controller: _amountController,
-                    label: 'Amount (৳)',
+                    label: 'amount_bdt'.tr(),
                     hint: '0',
                     icon: Icons.attach_money_rounded,
                     keyboardType: TextInputType.number,
@@ -140,7 +141,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
                   SizedBox(height: 12.h),
                   _buildField(
                     controller: _noteController,
-                    label: 'Note (optional)',
+                    label: 'note_optional'.tr(),
                     hint: 'Any detail…',
                     icon: Icons.notes_rounded,
                   ),
@@ -167,7 +168,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
                               ),
                             )
                           : Text(
-                              'Save Expense',
+                              'save_expense'.tr(),
                               style: TextStyle(
                                 fontFamily: MyString.poppinsBold,
                                 fontSize: 14.sp,
@@ -224,7 +225,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
   Widget _buildMemberDropdown(List<KurbaniMemberModel> members) {
     return DropdownButtonFormField<String>(
       initialValue: _selectedMemberId,
-      hint: const Text('Who paid?'),
+      hint: Text('who_paid_hint'.tr()),
       items: [
         DropdownMenuItem(
           value: KurbaniExpenseModel.allMembersSentinel,
@@ -232,7 +233,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
             children: [
               Icon(Icons.group_rounded, size: 16.r, color: const Color(0xFF6D28D9)),
               SizedBox(width: 8.w),
-              const Text('All Members (Shared)'),
+              Text('kurbani_all_members_shared'.tr()),
             ],
           ),
         ),
@@ -242,7 +243,7 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
       ],
       onChanged: (v) => setState(() => _selectedMemberId = v),
       decoration: InputDecoration(
-        labelText: 'Paid By',
+        labelText: 'paid_by'.tr(),
         prefixIcon: Icon(Icons.person_outline_rounded, size: 18.r),
         filled: true,
         fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,

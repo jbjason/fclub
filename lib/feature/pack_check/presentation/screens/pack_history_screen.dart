@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -125,14 +126,14 @@ class PackHistoryScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r)),
         title: Text(
-          'Delete session?',
+          'pack_delete_session'.tr(),
           style: TextStyle(
             color: isDark ? Colors.white : const Color(0xFF1A0A3D),
             fontFamily: 'Poppins_Bold',
           ),
         ),
         content: Text(
-          'This session will be permanently removed from history.',
+          'pack_delete_session_warning'.tr(),
           style: TextStyle(
             color: isDark ? Colors.white54 : const Color(0xFF7B6EA0),
             fontFamily: 'Poppins_Regular',
@@ -143,7 +144,7 @@ class PackHistoryScreen extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              'Cancel',
+              'cancel'.tr(),
               style: TextStyle(
                 color: isDark ? Colors.white38 : const Color(0xFF9E93C8),
               ),
@@ -151,9 +152,9 @@ class PackHistoryScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Delete',
-              style: TextStyle(
+            child: Text(
+              'delete'.tr(),
+              style: const TextStyle(
                 color: Color(0xFFF43F5E),
                 fontFamily: 'Poppins_Bold',
               ),
@@ -198,7 +199,7 @@ class _HistoryAppBar extends StatelessWidget {
               colors: [Color(0xFFA855F7), Color(0xFF06B6D4)],
             ).createShader(b),
             child: Text(
-              'Carry Check',
+              'carry_check'.tr(),
               style: TextStyle(
                 fontFamily: 'Poppins_Black',
                 fontSize: 20.sp,
@@ -222,7 +223,7 @@ class _HistoryAppBar extends StatelessWidget {
               ),
             ),
             child: Text(
-              'History',
+              'history'.tr(),
               style: TextStyle(
                 fontFamily: 'Poppins_Medium',
                 fontSize: 10.sp,
@@ -299,8 +300,8 @@ class _ResumeCard extends StatelessWidget {
                   SizedBox(height: 2.h),
                   Text(
                     isDraft
-                        ? 'Draft – ${session.packedCount} items selected'
-                        : '${session.packedCount} of ${session.items.length} items – tap to continue',
+                        ? 'pack_draft_subtitle'.tr(namedArgs: {'count': session.packedCount.toString()})
+                        : 'pack_active_subtitle'.tr(namedArgs: {'packed': session.packedCount.toString(), 'total': session.items.length.toString()}),
                     style: TextStyle(
                       fontFamily: 'Poppins_Regular',
                       fontSize: 11.sp,
@@ -320,7 +321,7 @@ class _ResumeCard extends StatelessWidget {
                 ),
               ),
               child: Text(
-                isDraft ? 'Continue' : 'Resume',
+                isDraft ? 'pack_continue'.tr() : 'resume'.tr(),
                 style: TextStyle(
                   fontFamily: 'Poppins_Bold',
                   fontSize: 11.sp,
@@ -458,7 +459,7 @@ class _PackSessionDetailSheet extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      '${packed.length} packed',
+                      'pack_n_packed'.tr(namedArgs: {'count': packed.length.toString()}),
                       style: TextStyle(
                         fontFamily: 'Poppins_Bold',
                         fontSize: 10.sp,
@@ -481,7 +482,7 @@ class _PackSessionDetailSheet extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Text(
-                'Packed Items',
+                'pack_packed_items'.tr(),
                 style: TextStyle(
                   fontFamily: 'Poppins_Bold',
                   fontSize: 12.sp,
@@ -507,7 +508,7 @@ class _PackSessionDetailSheet extends StatelessWidget {
                   if (packed.isEmpty) {
                     return Center(
                       child: Text(
-                        'No items packed',
+                        'pack_no_items_packed'.tr(),
                         style: TextStyle(
                           color: textSecondary,
                           fontFamily: 'Poppins_Regular',
@@ -625,7 +626,7 @@ class _NewSessionDialog extends StatelessWidget {
           colors: [Color(0xFFA855F7), Color(0xFF06B6D4)],
         ).createShader(b),
         child: Text(
-          'New Session',
+          'pack_new_session'.tr(),
           style: TextStyle(
             fontFamily: 'Poppins_Bold',
             fontSize: 18.sp,
@@ -638,7 +639,7 @@ class _NewSessionDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Where are you heading?',
+            'pack_where_heading'.tr(),
             style: TextStyle(
               fontFamily: 'Poppins_Regular',
               fontSize: 12.sp,
@@ -652,7 +653,7 @@ class _NewSessionDialog extends StatelessWidget {
             textCapitalization: TextCapitalization.words,
             style: TextStyle(color: textColor),
             decoration: InputDecoration(
-              hintText: 'e.g. Office trip, Weekend outing…',
+              hintText: 'pack_trip_name_hint'.tr(),
               hintStyle: TextStyle(color: hintColor),
               filled: true,
               fillColor: fillColor,
@@ -667,7 +668,7 @@ class _NewSessionDialog extends StatelessWidget {
               ),
             ),
             onSubmitted: (v) => Navigator.pop(
-                context, v.trim().isEmpty ? 'My Trip' : v.trim()),
+                context, v.trim().isEmpty ? 'pack_default_trip_name'.tr() : v.trim()),
           ),
         ],
       ),
@@ -675,7 +676,7 @@ class _NewSessionDialog extends StatelessWidget {
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(
-            'Cancel',
+            'cancel'.tr(),
             style: TextStyle(
               color: isDark ? Colors.white38 : const Color(0xFF9E93C8),
             ),
@@ -684,11 +685,11 @@ class _NewSessionDialog extends StatelessWidget {
         TextButton(
           onPressed: () {
             final name = controller.text.trim();
-            Navigator.pop(context, name.isEmpty ? 'My Trip' : name);
+            Navigator.pop(context, name.isEmpty ? 'pack_default_trip_name'.tr() : name);
           },
-          child: const Text(
-            'Create',
-            style: TextStyle(
+          child: Text(
+            'pack_create'.tr(),
+            style: const TextStyle(
               color: Color(0xFFA855F7),
               fontFamily: 'Poppins_Bold',
             ),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
@@ -35,7 +36,7 @@ class HomeLockerStatCard extends StatelessWidget {
     // ── Expense count subtitle ──────────────────────────────────────────────
     final expenseCount = locker.expenses.length;
     final subtitle = expenseCount == 0
-        ? 'No expenses recorded'
+        ? 'no_expenses_recorded'.tr()
         : '$expenseCount expense${expenseCount == 1 ? '' : 's'} recorded';
 
     return HomeStatCardShell(
@@ -58,7 +59,7 @@ class HomeLockerStatCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Locker',
+                      'locker_feature_title'.tr(),
                       style: TextStyle(
                         fontFamily: MyString.poppinsMedium,
                         fontWeight: FontWeight.w600,
@@ -119,17 +120,17 @@ class HomeLockerStatCard extends StatelessWidget {
             accent: MyColor.secondary,
             items: [
               HomeStatValueItem(
-                label: 'Available',
+                label: 'available'.tr(),
                 value: CurrencyFormatter.format(locker.currentCash),
                 valueColor: availableColor,
               ),
               HomeStatValueItem(
-                label: 'Collected',
+                label: 'collected'.tr(),
                 value: CurrencyFormatter.format(locker.baseBalance),
                 valueColor: MyColor.success,
               ),
               HomeStatValueItem(
-                label: 'Spent',
+                label: 'spent'.tr(),
                 value: CurrencyFormatter.format(locker.totalExpenses),
                 valueColor: MyColor.tertiary,
               ),

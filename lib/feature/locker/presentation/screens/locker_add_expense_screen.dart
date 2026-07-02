@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/locker/presentation/provider/locker_provider.dart';
 import 'package:fclub/feature/locker/presentation/widgets/locker_expense_form.dart';
 import 'package:flutter/material.dart';
@@ -11,9 +12,9 @@ class LockerAddExpenseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Expense')),
+      appBar: AppBar(title: Text('add_expense'.tr())),
       body: LockerExpenseForm(
-        submitLabel: 'Save Expense',
+        submitLabel: 'save'.tr(),
         onSubmit: ({required title, required amount, required date, note}) async {
           await context.read<LockerProvider>().addExpense(
                 title: title,

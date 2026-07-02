@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/core/util/my_dialog.dart';
@@ -37,7 +38,7 @@ class TourSummaryScreen extends StatelessWidget {
   Future<void> _copyToClipboard(BuildContext context, TourProvider tourProvider) async {
     await Clipboard.setData(ClipboardData(text: _buildShareText(tourProvider)));
     if (!context.mounted) return;
-    MyDialog().showSuccessToast(msg: 'Copied to clipboard.', context: context);
+    MyDialog().showSuccessToast(msg: 'copied_clipboard'.tr(), context: context);
   }
 
   Future<void> _shareToWhatsApp(BuildContext context, TourProvider tourProvider) async {
@@ -45,7 +46,7 @@ class TourSummaryScreen extends StatelessWidget {
     final uri = Uri.parse('https://wa.me/?text=$text');
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && context.mounted) {
-      MyDialog().showFailedToast(msg: 'Could not open WhatsApp.', context: context);
+      MyDialog().showFailedToast(msg: 'could_not_open_whatsapp'.tr(), context: context);
     }
   }
 
@@ -56,7 +57,7 @@ class TourSummaryScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(title: const Text('Settlement Summary')),
+      appBar: AppBar(title: Text('settlement_summary'.tr())),
       body: ListView(
         padding: EdgeInsets.all(16.w),
         children: [
@@ -68,7 +69,7 @@ class TourSummaryScreen extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => _copyToClipboard(context, tourProvider),
                   icon: const Icon(Icons.copy_rounded),
-                  label: const Text('Copy'),
+                  label: Text('copy'.tr()),
                 ),
               ),
               SizedBox(width: 12.w),
@@ -76,7 +77,7 @@ class TourSummaryScreen extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () => _shareToWhatsApp(context, tourProvider),
                   icon: const Icon(Icons.share_rounded),
-                  label: const Text('WhatsApp'),
+                  label: Text('whatsapp'.tr()),
                 ),
               ),
             ],

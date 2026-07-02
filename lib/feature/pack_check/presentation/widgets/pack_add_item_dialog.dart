@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
@@ -81,7 +82,7 @@ class _PackAddItemDialogState extends State<PackAddItemDialog> {
                 colors: [Color(0xFFA855F7), Color(0xFF06B6D4)],
               ).createShader(b),
               child: Text(
-                'Add Custom Item',
+                'pack_add_custom_item'.tr(),
                 style: TextStyle(
                   fontFamily: 'Poppins_Bold',
                   fontSize: 18.sp,
@@ -96,7 +97,7 @@ class _PackAddItemDialogState extends State<PackAddItemDialog> {
               style: const TextStyle(color: Colors.white),
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
-                hintText: 'Item name…',
+                hintText: 'pack_item_name_hint'.tr(),
                 hintStyle: const TextStyle(color: Colors.white38),
                 filled: true,
                 fillColor: Colors.white.withOpacity(0.05),
@@ -113,7 +114,7 @@ class _PackAddItemDialogState extends State<PackAddItemDialog> {
             SizedBox(height: 16.h),
             // Icon selector
             Text(
-              'Choose an icon',
+              'pack_choose_icon'.tr(),
               style: TextStyle(
                 fontFamily: 'Poppins_Medium',
                 fontSize: 12.sp,
@@ -163,7 +164,7 @@ class _PackAddItemDialogState extends State<PackAddItemDialog> {
               children: [
                 Expanded(
                   child: _ActionButton(
-                    label: 'Add Icon Item',
+                    label: 'pack_add_icon_item'.tr(),
                     icon: Icons.add_circle_outline_rounded,
                     gradient: const [Color(0xFFA855F7), Color(0xFF7C3AED)],
                     onTap: () => _submit(context, usePhoto: false),
@@ -172,7 +173,7 @@ class _PackAddItemDialogState extends State<PackAddItemDialog> {
                 SizedBox(width: 10.w),
                 Expanded(
                   child: _ActionButton(
-                    label: 'Take Photo',
+                    label: 'pack_take_photo'.tr(),
                     icon: Icons.camera_alt_rounded,
                     gradient: const [Color(0xFF06B6D4), Color(0xFF0891B2)],
                     onTap: () => _submit(context, usePhoto: true, source: ImageSource.camera),
@@ -181,7 +182,7 @@ class _PackAddItemDialogState extends State<PackAddItemDialog> {
                 SizedBox(width: 10.w),
                 Expanded(
                   child: _ActionButton(
-                    label: 'From Gallery',
+                    label: 'pack_from_gallery'.tr(),
                     icon: Icons.photo_library_rounded,
                     gradient: const [Color(0xFF10B981), Color(0xFF059669)],
                     onTap: () => _submit(context, usePhoto: true, source: ImageSource.gallery),
@@ -203,14 +204,14 @@ class _PackAddItemDialogState extends State<PackAddItemDialog> {
     final name = _nameCtrl.text.trim();
     if (name.isEmpty && !usePhoto) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a name.')),
+        SnackBar(content: Text('pack_enter_name_error'.tr())),
       );
       return;
     }
     Navigator.pop(context);
     final provider = context.read<PackCheckProvider>();
     if (usePhoto) {
-      await provider.addPhotoItem(name: name.isEmpty ? 'Custom' : name, source: source);
+      await provider.addPhotoItem(name: name.isEmpty ? 'pack_custom_fallback'.tr() : name, source: source);
     } else {
       await provider.addCustomItem(name: name, icon: _selectedIcon);
     }

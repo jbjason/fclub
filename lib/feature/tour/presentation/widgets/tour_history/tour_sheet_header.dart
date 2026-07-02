@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:flutter/material.dart';
@@ -28,16 +29,14 @@ class TourSheetHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  step == 0 ? 'New Tour' : 'Add Members',
+                  step == 0 ? 'tour_new'.tr() : 'tour_add_members'.tr(),
                   style: TextStyle(
                       fontFamily: MyString.poppinsBold,
                       fontSize: 17.sp,
                       color: colorScheme.onSurface),
                 ),
                 Text(
-                  step == 0
-                      ? 'Step 1 of 2 · Trip details'
-                      : 'Step 2 of 2 · Who\'s coming?',
+                  step == 0 ? 'tour_step1'.tr() : 'tour_step2'.tr(),
                   style: TextStyle(
                       fontFamily: MyString.rubikRegular,
                       fontSize: 11.sp,

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
@@ -23,7 +24,7 @@ Future<void> showLockerEditBalanceDialog(
   final result = await showDialog<double>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      title: const Text('Update Total Collected'),
+      title: Text('locker_update_collected'.tr()),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +33,7 @@ Future<void> showLockerEditBalanceDialog(
             controller: controller,
             autofocus: true,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Amount'),
+            decoration: InputDecoration(labelText: 'amount'.tr()),
           ),
           if (showSuggestion) ...[
             SizedBox(height: 12.h),
@@ -51,7 +52,7 @@ Future<void> showLockerEditBalanceDialog(
                     Icon(Icons.savings_rounded, size: 14.r, color: MyColor.primary),
                     SizedBox(width: 6.w),
                     Text(
-                      'Use Fundora Club total: ${CurrencyFormatter.format(suggestion)}',
+                      'locker_club_total_suggestion'.tr(namedArgs: {'amount': CurrencyFormatter.format(suggestion)}),
                       style: TextStyle(
                         fontFamily: MyString.poppinsMedium,
                         fontSize: 11.sp,
@@ -68,14 +69,14 @@ Future<void> showLockerEditBalanceDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dialogContext),
-          child: const Text('Cancel'),
+          child: Text('cancel'.tr()),
         ),
         TextButton(
           onPressed: () => Navigator.pop(
             dialogContext,
             double.tryParse(controller.text.trim()) ?? lockerProvider.baseBalance,
           ),
-          child: const Text('Save'),
+          child: Text('save'.tr()),
         ),
       ],
     ),

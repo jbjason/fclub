@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/club/data/model/payment_entry.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_entry_form.dart';
@@ -16,16 +17,16 @@ class ClubEditEntryScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete this entry?'),
-        content: const Text('This payment record will be permanently removed.'),
+        title: Text('club_delete_confirm'.tr()),
+        content: Text('club_delete_warning'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Delete'),
+            child: Text('delete'.tr()),
           ),
         ],
       ),
@@ -41,7 +42,7 @@ class ClubEditEntryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Entry'),
+        title: Text('club_edit_entry'.tr()),
         actions: [
           IconButton(
             tooltip: 'Delete entry',
@@ -52,7 +53,7 @@ class ClubEditEntryScreen extends StatelessWidget {
       ),
       body: ClubEntryForm(
         initialEntry: entry,
-        submitLabel: 'Update Entry',
+        submitLabel: 'club_update_entry'.tr(),
         onSubmit: ({
           required contactId,
           required month,

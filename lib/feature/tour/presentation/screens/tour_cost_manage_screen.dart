@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
@@ -52,21 +53,21 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
               child: Row(
                 children: [
                   TourStatCard(
-                    label: 'Collected',
+                    label: 'collected'.tr(),
                     amount: summary.totalCollected,
                     icon: Icons.savings_rounded,
                     color: MyColor.secondary,
                   ),
                   SizedBox(width: 10.w),
                   TourStatCard(
-                    label: 'Spent',
+                    label: 'spent'.tr(),
                     amount: summary.totalSpent,
                     icon: Icons.shopping_bag_rounded,
                     color: MyColor.tertiary,
                   ),
                   SizedBox(width: 10.w),
                   TourStatCard(
-                    label: 'Balance',
+                    label: 'balance'.tr(),
                     amount: summary.balance,
                     icon: Icons.account_balance_wallet_rounded,
                     color: summary.balance >= 0 ? MyColor.primary : MyColor.error,
@@ -83,10 +84,10 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
                 labelColor: MyColor.primary,
                 unselectedLabelColor: Theme.of(context).colorScheme.outline,
                 indicatorColor: MyColor.primary,
-                tabs: const [
-                  Tab(text: 'Expenses'),
-                  Tab(text: 'Payments'),
-                  Tab(text: 'Members'),
+                tabs: [
+                  Tab(text: 'expenses'.tr()),
+                  Tab(text: 'payments'.tr()),
+                  Tab(text: 'members'.tr()),
                 ],
               ),
             ),
@@ -139,7 +140,7 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
       ),
       actions: [
         IconButton(
-          tooltip: 'Manage Members',
+          tooltip: 'manage_members'.tr(),
           icon: const Icon(Icons.people_alt_rounded),
           onPressed: _showMemberManageSheet,
         ),
@@ -149,7 +150,7 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
           onPressed: () => _showBudgetDialog(tourProvider),
         ),
         IconButton(
-          tooltip: 'Settlement summary',
+          tooltip: 'settlement_summary'.tr(),
           icon: const Icon(Icons.receipt_long_rounded),
           onPressed: () =>
               Navigator.pushNamed(context, AppRouteName.tourSummary),
@@ -178,7 +179,7 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
           borderRadius: BorderRadius.circular(20.r),
         ),
         title: Text(
-          'Total Budget',
+          'total_budget'.tr(),
           style: TextStyle(
               fontFamily: MyString.poppinsBold, fontSize: 16.sp),
         ),
@@ -195,7 +196,7 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () {
@@ -210,7 +211,7 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
                 borderRadius: BorderRadius.circular(10.r),
               ),
             ),
-            child: const Text('Save'),
+            child: Text('save'.tr()),
           ),
         ],
       ),
@@ -233,19 +234,19 @@ class _TourCostManageScreenState extends State<TourCostManageScreen>
           controller: controller,
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(labelText: 'Amount'),
+          decoration: InputDecoration(labelText: 'amount'.tr()),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(
               dialogContext,
               double.tryParse(controller.text.trim()) ?? 0,
             ),
-            child: const Text('Save'),
+            child: Text('save'.tr()),
           ),
         ],
       ),

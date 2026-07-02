@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/locker/data/model/locker_expense.dart';
 import 'package:fclub/feature/locker/presentation/provider/locker_provider.dart';
 import 'package:fclub/feature/locker/presentation/widgets/locker_expense_form.dart';
@@ -16,16 +17,16 @@ class LockerEditExpenseScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete this expense?'),
-        content: const Text('This record will be permanently removed.'),
+        title: Text('locker_delete_confirm'.tr()),
+        content: Text('locker_delete_warning'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Delete'),
+            child: Text('delete'.tr()),
           ),
         ],
       ),
@@ -41,10 +42,10 @@ class LockerEditExpenseScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Expense'),
+        title: Text('locker_update_expense'.tr()),
         actions: [
           IconButton(
-            tooltip: 'Delete expense',
+            tooltip: 'delete_expense_title'.tr(),
             icon: const Icon(Icons.delete_outline_rounded),
             onPressed: () => _confirmDelete(context),
           ),
@@ -52,7 +53,7 @@ class LockerEditExpenseScreen extends StatelessWidget {
       ),
       body: LockerExpenseForm(
         initialExpense: expense,
-        submitLabel: 'Update Expense',
+        submitLabel: 'locker_update_expense'.tr(),
         onSubmit: ({required title, required amount, required date, note}) async {
           await context.read<LockerProvider>().updateExpense(
                 id: expense.id,

@@ -26,10 +26,15 @@ class AuthScreen extends StatelessWidget {
           child: ClipPath(
             clipper: AuthClipper(),
             child: Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.only(
+                top: 20,
+                bottom: 20,
+                left: 7,
+                right: 20,
+              ),
               decoration: BoxDecoration(
                 color: MyColor.logBackColor,
-              //  border: Border.all(color: Colors.black),
+                //  border: Border.all(color: Colors.black),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(30),
                   bottomRight: Radius.circular(30),

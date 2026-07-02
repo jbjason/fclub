@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
@@ -48,7 +49,7 @@ class TourActiveSessionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
-                    'IN PROGRESS',
+                    'in_progress'.tr(),
                     style: TextStyle(
                       fontFamily: MyString.poppinsBold,
                       fontSize: 9.sp,
@@ -85,7 +86,7 @@ class TourActiveSessionCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10.r),
             ),
             child: Text(
-              'Resume',
+              'resume'.tr(),
               style: TextStyle(
                 fontFamily: MyString.poppinsBold,
                 fontSize: 12.sp,
@@ -107,7 +108,7 @@ class TourActiveSessionCard extends StatelessWidget {
                   Icon(Icons.done_all_rounded,
                       color: MyColor.success, size: 18.r),
                   SizedBox(width: 10.w),
-                  Text('Finish Session',
+                  Text('finish_session'.tr(),
                       style: TextStyle(color: MyColor.success)),
                 ]),
               ),
@@ -117,7 +118,7 @@ class TourActiveSessionCard extends StatelessWidget {
                   Icon(Icons.delete_outline_rounded,
                       color: MyColor.error, size: 18.r),
                   SizedBox(width: 10.w),
-                  Text('Delete Session',
+                  Text('delete_session'.tr(),
                       style: TextStyle(color: MyColor.error)),
                 ]),
               ),

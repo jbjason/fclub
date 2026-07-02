@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/locker/data/model/locker_expense.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 
 /// Fields collected by [LockerExpenseForm] on submit.
 typedef LockerExpenseFormSubmit = Future<void> Function({
@@ -90,19 +90,19 @@ class _LockerExpenseFormState extends State<LockerExpenseForm> {
         children: [
           TextFormField(
             controller: _titleController,
-            decoration: const InputDecoration(labelText: 'Title'),
+            decoration: InputDecoration(labelText: 'title_label'.tr()),
             validator: (value) =>
-                (value == null || value.trim().isEmpty) ? 'Required' : null,
+                (value == null || value.trim().isEmpty) ? 'required'.tr() : null,
           ),
           SizedBox(height: 16.h),
           TextFormField(
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Amount'),
+            decoration: InputDecoration(labelText: 'amount'.tr()),
             validator: (value) {
-              if (value == null || value.trim().isEmpty) return 'Required';
+              if (value == null || value.trim().isEmpty) return 'required'.tr();
               final parsed = double.tryParse(value.trim());
-              if (parsed == null || parsed <= 0) return 'Enter a valid amount';
+              if (parsed == null || parsed <= 0) return 'enter_valid_amount'.tr();
               return null;
             },
           ),
@@ -110,9 +110,9 @@ class _LockerExpenseFormState extends State<LockerExpenseForm> {
           InkWell(
             onTap: _pickDate,
             child: InputDecorator(
-              decoration: const InputDecoration(
-                labelText: 'Date',
-                suffixIcon: Icon(Icons.calendar_today_rounded),
+              decoration: InputDecoration(
+                labelText: 'date'.tr(),
+                suffixIcon: const Icon(Icons.calendar_today_rounded),
               ),
               child: Text(DateFormat('d MMM yyyy').format(_date)),
             ),
@@ -120,7 +120,7 @@ class _LockerExpenseFormState extends State<LockerExpenseForm> {
           SizedBox(height: 16.h),
           TextFormField(
             controller: _noteController,
-            decoration: const InputDecoration(labelText: 'Note (optional)'),
+            decoration: InputDecoration(labelText: 'note_optional'.tr()),
             maxLines: 2,
           ),
           SizedBox(height: 24.h),

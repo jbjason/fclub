@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/list_extensions.dart';
 import 'package:fclub/feature/tour/data/model/tour_expense_model.dart';
@@ -26,9 +27,9 @@ class TourExpensesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (expenses.isEmpty) {
-      return const TourEmptyState(
+      return TourEmptyState(
         icon: Icons.receipt_long_rounded,
-        message: 'No expenses yet.',
+        message: 'tour_no_expenses'.tr(),
       );
     }
 

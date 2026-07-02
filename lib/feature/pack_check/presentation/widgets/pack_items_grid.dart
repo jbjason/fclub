@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -75,11 +76,11 @@ class _ItemTile extends StatelessWidget {
         backgroundColor: const Color(0xFF12102A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         title: Text(
-          'Remove "${item.name}"?',
+          'pack_remove_item_title'.tr(namedArgs: {'name': item.name}),
           style: const TextStyle(color: Colors.white, fontFamily: 'Poppins_Bold'),
         ),
         content: Text(
-          'This custom item will be permanently deleted.',
+          'pack_remove_item_body'.tr(),
           style: TextStyle(
             color: Colors.white54,
             fontFamily: 'Poppins_Regular',
@@ -89,16 +90,16 @@ class _ItemTile extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+            child: Text('cancel'.tr(), style: const TextStyle(color: Colors.white54)),
           ),
           TextButton(
             onPressed: () {
               provider.removeCustomItem(item.id);
               Navigator.pop(context);
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Color(0xFFF43F5E)),
+            child: Text(
+              'delete'.tr(),
+              style: const TextStyle(color: Color(0xFFF43F5E)),
             ),
           ),
         ],
@@ -126,8 +127,8 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 12.h),
           Text(
             isCheckMode
-                ? 'Nothing packed yet.\nSwitch to Pack mode first.'
-                : 'No items found.',
+                ? 'pack_nothing_packed'.tr()
+                : 'pack_no_items_found'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white38,

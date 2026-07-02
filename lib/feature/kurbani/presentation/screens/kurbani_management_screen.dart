@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
 import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_add_animal_part_sheet.dart';
@@ -158,7 +159,7 @@ class _KurbaniManagementScreenState extends State<KurbaniManagementScreen>
                       ),
                     ),
                     Text(
-                      '${provider.members.length} Members · Eid ul-Adha',
+                      '${provider.members.length} ${'members'.tr()} · ${'kurbani_eid'.tr()}',
                       style: TextStyle(
                         fontFamily: MyString.rubikRegular,
                         fontSize: 10.sp,
@@ -178,7 +179,7 @@ class _KurbaniManagementScreenState extends State<KurbaniManagementScreen>
                   size: 22.r,
                 ),
                 onPressed: _showMemberManageSheet,
-                tooltip: 'Manage Members',
+                tooltip: 'manage_members'.tr(),
               ),
               IconButton(
                 icon: Icon(
@@ -198,21 +199,21 @@ class _KurbaniManagementScreenState extends State<KurbaniManagementScreen>
               child: Row(
                 children: [
                   KurbaniStatCard(
-                    label: 'Budget',
+                    label: 'budget'.tr(),
                     amount: summary.totalBudget,
                     icon: Icons.savings_rounded,
                     color: _kViolet,
                   ),
                   SizedBox(width: 8.w),
                   KurbaniStatCard(
-                    label: 'Spent',
+                    label: 'spent'.tr(),
                     amount: summary.totalSpent,
                     icon: Icons.shopping_bag_rounded,
                     color: _kCyan,
                   ),
                   SizedBox(width: 8.w),
                   KurbaniStatCard(
-                    label: summary.isDeficit ? 'Deficit' : 'Surplus',
+                    label: summary.isDeficit ? 'deficit'.tr() : 'surplus'.tr(),
                     amount: summary.balance.abs(),
                     icon: summary.isDeficit
                         ? Icons.trending_down_rounded
@@ -243,14 +244,14 @@ class _KurbaniManagementScreenState extends State<KurbaniManagementScreen>
                   fontFamily: MyString.rubikRegular,
                   fontSize: 13.sp,
                 ),
-                tabs: const [
+                tabs: [
                   Tab(
-                    icon: Icon(Icons.receipt_rounded, size: 18),
-                    text: 'Cost Split',
+                    icon: const Icon(Icons.receipt_rounded, size: 18),
+                    text: 'kurbani_cost_split'.tr(),
                   ),
                   Tab(
-                    icon: Icon(Icons.set_meal_rounded, size: 18),
-                    text: 'Animal Parts',
+                    icon: const Icon(Icons.set_meal_rounded, size: 18),
+                    text: 'kurbani_animal_parts'.tr(),
                   ),
                 ],
               ),
@@ -280,7 +281,7 @@ class _KurbaniManagementScreenState extends State<KurbaniManagementScreen>
         label: AnimatedBuilder(
           animation: _tabController,
           builder: (context, child) => Text(
-            _tabController.index == 0 ? 'Add Expense' : 'Add Part',
+            _tabController.index == 0 ? 'add_expense'.tr() : 'kurbani_add_part'.tr(),
             style: TextStyle(fontFamily: MyString.poppinsBold, fontSize: 13.sp),
           ),
         ),
@@ -301,7 +302,7 @@ class _KurbaniManagementScreenState extends State<KurbaniManagementScreen>
           borderRadius: BorderRadius.circular(20.r),
         ),
         title: Text(
-          'Budget per Member',
+          'kurbani_budget_per_member'.tr(),
           style: TextStyle(fontFamily: MyString.poppinsBold, fontSize: 16.sp),
         ),
         content: TextField(
@@ -317,7 +318,7 @@ class _KurbaniManagementScreenState extends State<KurbaniManagementScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () {
@@ -332,7 +333,7 @@ class _KurbaniManagementScreenState extends State<KurbaniManagementScreen>
                 borderRadius: BorderRadius.circular(10.r),
               ),
             ),
-            child: const Text('Save'),
+            child: Text('save'.tr()),
           ),
         ],
       ),

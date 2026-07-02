@@ -17,36 +17,36 @@ class HomeFeatureGrid extends StatelessWidget {
 
   static const List<HomeFeatureItem> _features = [
     HomeFeatureItem(
-      title: 'Fundora Club',
-      subtitle: 'Monthly savings & payment tracking',
+      title: 'club_feature_title',
+      subtitle: 'club_feature_subtitle',
       icon: Icons.savings_rounded,
       accent: MyColor.primary,           // Violet Blaze
       route: AppRouteName.club,
     ),
     HomeFeatureItem(
-      title: 'Locker',
-      subtitle: 'Secure personal vault & credentials',
+      title: 'locker_feature_title',
+      subtitle: 'locker_feature_subtitle',
       icon: Icons.lock_outline_rounded,
       accent: MyColor.secondary,         // Electric Cyan
       route: AppRouteName.locker,
     ),
     HomeFeatureItem(
-      title: 'Tour Dashboard',
-      subtitle: 'Shared trip expenses & settlements',
+      title: 'tour_feature_title',
+      subtitle: 'tour_feature_subtitle',
       icon: Icons.receipt_long_rounded,
       accent: MyColor.tertiary,          // Rose Red
       route: AppRouteName.tourCostManage,
     ),
     HomeFeatureItem(
-      title: 'Kurbani',
-      subtitle: 'Animal share & cost distribution',
+      title: 'kurbani_feature_title',
+      subtitle: 'kurbani_feature_subtitle',
       icon: Icons.diversity_3_rounded,
       accent: MyColor.warning,           // Amber
       route: AppRouteName.kurbani,
     ),
     HomeFeatureItem(
-      title: 'Carry Check',
-      subtitle: 'Pack lists & travel checklist',
+      title: 'pack_feature_title',
+      subtitle: 'pack_feature_subtitle',
       icon: Icons.backpack_rounded,
       accent: MyColor.success,           // Emerald Green
       route: AppRouteName.packCheck,

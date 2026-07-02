@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -101,14 +102,14 @@ class PackSessionScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Discard session?',
+          'pack_discard_title'.tr(),
           style: TextStyle(
             color: isDark ? Colors.white : const Color(0xFF1A0A3D),
             fontFamily: 'Poppins_Bold',
           ),
         ),
         content: Text(
-          'You haven\'t confirmed this session yet.\nLeaving now will discard it completely.',
+          'pack_discard_body'.tr(),
           style: TextStyle(
             color: isDark ? Colors.white54 : const Color(0xFF7B6EA0),
             fontFamily: 'Poppins_Regular',
@@ -119,7 +120,7 @@ class PackSessionScreen extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              'Keep editing',
+              'pack_keep_editing'.tr(),
               style: TextStyle(
                 color:
                     isDark ? Colors.white54 : const Color(0xFF9E93C8),
@@ -128,9 +129,9 @@ class PackSessionScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Discard',
-              style: TextStyle(
+            child: Text(
+              'pack_discard'.tr(),
+              style: const TextStyle(
                 color: Color(0xFFF43F5E),
                 fontFamily: 'Poppins_Bold',
               ),
@@ -212,7 +213,7 @@ class _SessionAppBar extends StatelessWidget {
                       colors: [Color(0xFFA855F7), Color(0xFF06B6D4)],
                     ).createShader(b),
                     child: Text(
-                      'Carry Check',
+                      'carry_check'.tr(),
                       style: TextStyle(
                         fontFamily: 'Poppins_Black',
                         fontSize: 18.sp,
@@ -269,8 +270,8 @@ class _SessionAppBar extends StatelessWidget {
                           ),
                           Text(
                             provider.isCheckMode
-                                ? '${session!.checkedBackCount} of ${session!.packedCount} verified'
-                                : '${session!.packedCount} of ${session!.items.length} selected',
+                                ? 'pack_count_verified'.tr(namedArgs: {'checked': session!.checkedBackCount.toString(), 'packed': session!.packedCount.toString()})
+                                : 'pack_count_selected'.tr(namedArgs: {'packed': session!.packedCount.toString(), 'total': session!.items.length.toString()}),
                             style: TextStyle(
                               fontFamily: 'Poppins_Regular',
                               fontSize: 10.sp,
@@ -313,7 +314,7 @@ class _StepPills extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _Pill(
-          label: 'Pack',
+          label: 'pack_step_pack'.tr(),
           isActive: !isCheckMode,
           isDone: isCheckMode,
           color: const Color(0xFFA855F7),
@@ -341,7 +342,7 @@ class _StepPills extends StatelessWidget {
           ),
         ),
         _Pill(
-          label: 'Check',
+          label: 'pack_step_check'.tr(),
           isActive: isCheckMode,
           isDone: false,
           color: const Color(0xFF06B6D4),
@@ -439,7 +440,7 @@ class _StatusPill extends StatelessWidget {
           ),
           SizedBox(width: 4.w),
           Text(
-            isDraft ? 'Draft' : 'Active',
+            isDraft ? 'pack_draft'.tr() : 'pack_active_status'.tr(),
             style: TextStyle(
               fontFamily: 'Poppins_Bold',
               fontSize: 9.sp,
@@ -467,11 +468,11 @@ class _InstructionBanner extends StatelessWidget {
         ? const Color(0xFF06B6D4)
         : const Color(0xFFA855F7);
     final String heading = isCheckMode
-        ? 'Check off items one by one'
-        : 'Tap items you\'re bringing';
+        ? 'pack_check_heading'.tr()
+        : 'pack_pack_heading'.tr();
     final String subtext = isCheckMode
-        ? 'Verify each item is packed — then mark it done.'
-        : 'Select everything in your bag so nothing gets forgotten.';
+        ? 'pack_verify_description'.tr()
+        : 'pack_select_description'.tr();
     final IconData icon = isCheckMode
         ? Icons.playlist_add_check_rounded
         : Icons.touch_app_rounded;
@@ -589,7 +590,7 @@ class _CheckListView extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(top: 40.h),
             child: Text(
-              'No packed items to verify.\nGo back to Step 1 and select items.',
+              'pack_no_packed_to_verify'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Poppins_Regular',
@@ -630,7 +631,7 @@ class _VerifyProgressBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '$done of $total items verified',
+                'pack_progress_verified'.tr(namedArgs: {'done': done.toString(), 'total': total.toString()}),
                 style: TextStyle(
                   fontFamily: 'Poppins_Medium',
                   fontSize: 12.sp,
@@ -682,7 +683,7 @@ class _NoSession extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'No active session.\nGo back and start one.',
+        'pack_no_active'.tr(),
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: 'Poppins_Regular',
@@ -718,10 +719,10 @@ class _BottomCta extends StatelessWidget {
         icon: isDraft
             ? Icons.save_alt_rounded
             : Icons.check_circle_outline_rounded,
-        label: isDraft ? 'Confirm & Start Checking' : 'Back to Step 2',
+        label: isDraft ? 'pack_confirm_start'.tr() : 'pack_back_step2'.tr(),
         sublabel: isDraft
-            ? '${session.packedCount} items selected — tap to save & verify'
-            : '${session.packedCount} items to verify',
+            ? 'pack_items_selected_sublabel'.tr(namedArgs: {'count': session.packedCount.toString()})
+            : 'pack_items_to_verify_count'.tr(namedArgs: {'count': session.packedCount.toString()}),
         gradient: const [Color(0xFFA855F7), Color(0xFF7C3AED)],
         onTap: isDraft ? provider.confirmDraft : provider.enterCheckMode,
       );
@@ -730,8 +731,8 @@ class _BottomCta extends StatelessWidget {
     if (provider.isCheckMode && session.allCheckedBack) {
       return _CtaBar(
         icon: Icons.verified_rounded,
-        label: 'All here! Mark complete',
-        sublabel: 'Session will move to history',
+        label: 'pack_all_here'.tr(),
+        sublabel: 'pack_session_move_to_history'.tr(),
         gradient: const [Color(0xFF10B981), Color(0xFF059669)],
         onTap: () => _onComplete(ctx, provider),
       );
@@ -753,14 +754,14 @@ class _BottomCta extends StatelessWidget {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r)),
         title: Text(
-          '🎉  All clear!',
+          'pack_all_clear'.tr(),
           style: TextStyle(
             color: isDark ? Colors.white : const Color(0xFF1A0A3D),
             fontFamily: 'Poppins_Bold',
           ),
         ),
         content: Text(
-          'Everything is accounted for.\nThis session will be saved to your history.',
+          'pack_all_clear_body'.tr(),
           style: TextStyle(
             color: isDark ? Colors.white54 : const Color(0xFF7B6EA0),
             fontFamily: 'Poppins_Regular',
@@ -771,7 +772,7 @@ class _BottomCta extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              'Cancel',
+              'cancel'.tr(),
               style: TextStyle(
                 color:
                     isDark ? Colors.white38 : const Color(0xFF9E93C8),
@@ -780,9 +781,9 @@ class _BottomCta extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Complete',
-              style: TextStyle(
+            child: Text(
+              'pack_complete'.tr(),
+              style: const TextStyle(
                 color: Color(0xFF10B981),
                 fontFamily: 'Poppins_Bold',
               ),

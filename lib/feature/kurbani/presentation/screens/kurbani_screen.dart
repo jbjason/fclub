@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/core/services/contacts/app_contact.dart';
@@ -9,7 +10,6 @@ import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_card_shell.da
 import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_member_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 // ── Kurbani colour constants ───────────────────────────────────────────────
@@ -79,12 +79,12 @@ class _KurbaniScreenState extends State<KurbaniScreen> {
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
         title: Text(
-          'Finish this Kurbani?',
+          'kurbani_finish_title'.tr(),
           style: TextStyle(
               fontFamily: MyString.poppinsBold, fontSize: 16.sp),
         ),
         content: Text(
-          'The session will be marked as complete and moved to history. All data is preserved.',
+          'kurbani_finish_body'.tr(),
           style: TextStyle(
               fontFamily: MyString.rubikRegular,
               fontSize: 13.sp,
@@ -94,7 +94,7 @@ class _KurbaniScreenState extends State<KurbaniScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -104,7 +104,7 @@ class _KurbaniScreenState extends State<KurbaniScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r)),
             ),
-            child: const Text('Finish'),
+            child: Text('finish'.tr()),
           ),
         ],
       ),
@@ -124,12 +124,12 @@ class _KurbaniScreenState extends State<KurbaniScreen> {
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
         title: Text(
-          'Remove this record?',
+          'tour_delete_confirm_title'.tr(),
           style: TextStyle(
               fontFamily: MyString.poppinsBold, fontSize: 16.sp),
         ),
         content: Text(
-          'This Kurbani history entry will be permanently deleted.',
+          'kurbani_delete_body'.tr(),
           style: TextStyle(
               fontFamily: MyString.rubikRegular,
               fontSize: 13.sp,
@@ -139,7 +139,7 @@ class _KurbaniScreenState extends State<KurbaniScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -149,7 +149,7 @@ class _KurbaniScreenState extends State<KurbaniScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r)),
             ),
-            child: const Text('Delete'),
+            child: Text('delete'.tr()),
           ),
         ],
       ),
@@ -219,7 +219,7 @@ class _KurbaniScreenState extends State<KurbaniScreen> {
           foregroundColor: Colors.white,
           icon: const Icon(Icons.add_rounded),
           label: Text(
-            'New Kurbani',
+            'kurbani_new'.tr(),
             style: TextStyle(
                 fontFamily: MyString.poppinsBold, fontSize: 13.sp),
           ),
@@ -278,7 +278,7 @@ class _KurbaniHistoryAppBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Kurbani',
+                    'kurbani_feature_title'.tr(),
                     style: TextStyle(
                       fontFamily: MyString.poppinsBold,
                       fontSize: 18.sp,
@@ -288,7 +288,7 @@ class _KurbaniHistoryAppBar extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Annual log',
+                    'kurbani_annual_log'.tr(),
                     style: TextStyle(
                       fontFamily: MyString.rubikRegular,
                       fontSize: 11.sp,
@@ -349,7 +349,7 @@ class _ActiveSessionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
-                    'IN PROGRESS',
+                    'in_progress'.tr(),
                     style: TextStyle(
                       fontFamily: MyString.poppinsBold,
                       fontSize: 9.sp,
@@ -368,7 +368,7 @@ class _ActiveSessionCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${session.members.length} members · ${CurrencyFormatter.format(session.totalSpent)} spent',
+                  'kurbani_active_subtitle'.tr(namedArgs: {'count': session.members.length.toString(), 'spent': CurrencyFormatter.format(session.totalSpent)}),
                   style: TextStyle(
                     fontFamily: MyString.rubikRegular,
                     fontSize: 11.sp,
@@ -385,7 +385,7 @@ class _ActiveSessionCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10.r),
             ),
             child: Text(
-              'Resume',
+              'resume'.tr(),
               style: TextStyle(
                 fontFamily: MyString.poppinsBold,
                 fontSize: 12.sp,
@@ -409,7 +409,7 @@ class _ActiveSessionCard extends StatelessWidget {
                         color: _kEmerald, size: 18.r),
                     SizedBox(width: 10.w),
                     Text(
-                      'Finish Session',
+                      'finish_session'.tr(),
                       style: TextStyle(
                         fontFamily: MyString.poppinsMedium,
                         fontSize: 13.sp,
@@ -427,7 +427,7 @@ class _ActiveSessionCard extends StatelessWidget {
                         color: _kRose, size: 18.r),
                     SizedBox(width: 10.w),
                     Text(
-                      'Delete Session',
+                      'delete_session'.tr(),
                       style: TextStyle(
                         fontFamily: MyString.poppinsMedium,
                         fontSize: 13.sp,
@@ -531,7 +531,7 @@ class _HistoryCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Spent',
+                                'spent'.tr(),
                                 style: TextStyle(
                                   fontFamily: MyString.rubikRegular,
                                   fontSize: 11.sp,
@@ -572,22 +572,19 @@ class _HistoryCard extends StatelessWidget {
                   children: [
                     _InfoChip(
                       icon: Icons.people_rounded,
-                      label:
-                          '${session.members.length} members',
+                      label: 'kurbani_members_count'.tr(namedArgs: {'count': session.members.length.toString()}),
                       color: const Color(0xFF6D28D9),
                     ),
                     SizedBox(width: 8.w),
                     _InfoChip(
                       icon: Icons.receipt_long_rounded,
-                      label:
-                          '${session.expenses.length} expenses',
+                      label: 'kurbani_expenses_count'.tr(namedArgs: {'count': session.expenses.length.toString()}),
                       color: const Color(0xFF0891B2),
                     ),
                     SizedBox(width: 8.w),
                     _InfoChip(
                       icon: Icons.set_meal_rounded,
-                      label:
-                          '${session.animalParts.length} parts',
+                      label: 'kurbani_parts_count'.tr(namedArgs: {'count': session.animalParts.length.toString()}),
                       color: _kEmerald,
                     ),
                   ],
@@ -651,7 +648,7 @@ class _EmptyHistoryState extends StatelessWidget {
               size: 64.r, color: _kDeepEmerald.withValues(alpha: 0.2)),
           SizedBox(height: 16.h),
           Text(
-            'No Kurbani records yet',
+            'kurbani_no_records'.tr(),
             style: TextStyle(
               fontFamily: MyString.poppinsBold,
               fontSize: 16.sp,
@@ -660,7 +657,7 @@ class _EmptyHistoryState extends StatelessWidget {
           ),
           SizedBox(height: 6.h),
           Text(
-            'Tap the button below to start your\nfirst Kurbani management.',
+            'kurbani_empty_subtitle'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: MyString.rubikRegular,
@@ -674,7 +671,7 @@ class _EmptyHistoryState extends StatelessWidget {
             onPressed: onNew,
             icon: const Icon(Icons.add_rounded),
             label: Text(
-              'Start New Kurbani',
+              'kurbani_start'.tr(),
               style: TextStyle(
                   fontFamily: MyString.poppinsBold, fontSize: 13.sp),
             ),
@@ -791,19 +788,19 @@ class _HistoryDetailSheetContent extends StatelessWidget {
 
             // Budget summary
             _DetailSection(
-              title: 'Budget Summary',
+              title: 'budget_summary'.tr(),
               child: Column(
                 children: [
                   _SummaryRow(
-                    label: 'Budget / member',
+                    label: 'kurbani_budget_per_member'.tr(),
                     value: CurrencyFormatter.format(session.budgetPerMember),
                   ),
                   _SummaryRow(
-                    label: 'Total budget',
+                    label: 'total_budget'.tr(),
                     value: CurrencyFormatter.format(budget),
                   ),
                   _SummaryRow(
-                    label: 'Total spent',
+                    label: 'total_spent'.tr(),
                     value: CurrencyFormatter.format(spent),
                     valueColor: isOver ? _kRose : _kDeepEmerald,
                   ),
@@ -825,8 +822,7 @@ class _HistoryDetailSheetContent extends StatelessWidget {
 
             // Members
             _DetailSection(
-              title:
-                  'Members (${session.members.length})',
+              title: 'kurbani_members_section'.tr(namedArgs: {'count': session.members.length.toString()}),
               child: Column(
                 children: session.members.map((m) {
                   final initials =
@@ -892,8 +888,7 @@ class _HistoryDetailSheetContent extends StatelessWidget {
 
             // Expenses
             _DetailSection(
-              title:
-                  'Expenses (${session.expenses.length})',
+              title: 'kurbani_expenses_section'.tr(namedArgs: {'count': session.expenses.length.toString()}),
               child: Column(
                 children: session.expenses.map((e) {
                   return Padding(
@@ -1010,12 +1005,18 @@ class _NewKurbaniSheetState extends State<_NewKurbaniSheet> {
   int _step = 0;
 
   // Step 1
-  final _groupNameCtrl = TextEditingController(text: 'Kurbani 1447 H');
+  late final TextEditingController _groupNameCtrl;
   final _budgetCtrl = TextEditingController(text: '3000');
   final _formKey = GlobalKey<FormState>();
 
   // Step 2
   final Set<String> _selectedIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _groupNameCtrl = TextEditingController(text: 'kurbani_default_title'.tr());
+  }
 
   @override
   void dispose() {
@@ -1125,7 +1126,7 @@ class _SheetHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  step == 0 ? 'New Kurbani' : 'Select Participants',
+                  step == 0 ? 'kurbani_new'.tr() : 'kurbani_select_participants'.tr(),
                   style: TextStyle(
                     fontFamily: MyString.poppinsBold,
                     fontSize: 17.sp,
@@ -1134,8 +1135,8 @@ class _SheetHeader extends StatelessWidget {
                 ),
                 Text(
                   step == 0
-                      ? 'Step 1 of 2 · Group details'
-                      : 'Step 2 of 2 · Choose members',
+                      ? 'kurbani_step1'.tr()
+                      : 'kurbani_step2'.tr(),
                   style: TextStyle(
                     fontFamily: MyString.rubikRegular,
                     fontSize: 11.sp,
@@ -1190,20 +1191,20 @@ class _StepOneContent extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _FieldLabel('Group / Year label'),
+            _FieldLabel('kurbani_group_label'.tr()),
             SizedBox(height: 6.h),
             TextFormField(
               controller: groupNameCtrl,
               style: TextStyle(
                   fontFamily: MyString.poppinsRegular, fontSize: 14.sp),
               decoration: _inputDeco(context,
-                  hint: 'e.g. Kurbani 1447 H',
+                  hint: 'kurbani_group_name_hint'.tr(),
                   icon: Icons.nightlight_round),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? 'required'.tr() : null,
             ),
             SizedBox(height: 16.h),
-            _FieldLabel('Budget per member (৳)'),
+            _FieldLabel('kurbani_budget_per_member'.tr()),
             SizedBox(height: 6.h),
             TextFormField(
               controller: budgetCtrl,
@@ -1213,9 +1214,9 @@ class _StepOneContent extends StatelessWidget {
               decoration: _inputDeco(context,
                   hint: '3000', icon: Icons.savings_rounded),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Required';
+                if (v == null || v.trim().isEmpty) return 'required'.tr();
                 if (double.tryParse(v.trim()) == null) {
-                  return 'Enter a valid amount';
+                  return 'enter_valid_amount'.tr();
                 }
                 return null;
               },
@@ -1233,7 +1234,7 @@ class _StepOneContent extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14.r)),
                 ),
                 child: Text(
-                  'Next: Select Members',
+                  'kurbani_next_step'.tr(),
                   style: TextStyle(
                       fontFamily: MyString.poppinsBold, fontSize: 14.sp),
                 ),
@@ -1345,7 +1346,7 @@ class _StepTwoContent extends StatelessWidget {
                             ),
                             if (isMe)
                               Text(
-                                'Creator · always included',
+                                'creator_always_included'.tr(),
                                 style: TextStyle(
                                   fontFamily: MyString.rubikRegular,
                                   fontSize: 10.sp,
@@ -1387,7 +1388,7 @@ class _StepTwoContent extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14.r)),
               ),
               child: Text(
-                'Create Kurbani ($selectedCount members)',
+                'kurbani_create'.tr(namedArgs: {'count': selectedCount.toString()}),
                 style: TextStyle(
                     fontFamily: MyString.poppinsBold, fontSize: 14.sp),
               ),
