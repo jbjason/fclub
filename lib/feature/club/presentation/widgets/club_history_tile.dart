@@ -56,7 +56,7 @@ class ClubHistoryTile extends StatelessWidget {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      DateFormat('MMMM yyyy').format(entry.month),
+                      DateFormat('dd MMMM yyyy').format(entry.month),
                       style: TextStyle(
                         fontFamily: MyString.rubikRegular,
                         fontSize: 11.sp,

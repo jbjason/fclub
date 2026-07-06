@@ -11,7 +11,6 @@ import 'package:fclub/feature/club/presentation/widgets/club_history_tile.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_summary_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 /// Drill-down from [ClubMonthlyOverviewScreen] — that one month's stats and
