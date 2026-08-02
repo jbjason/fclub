@@ -62,8 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ── Brand hero ──────────────────────────────────────
-                // const HomeHeader(),
-                // SizedBox(height: 24.h),
+                const HomeHeader(),
+                SizedBox(height: 24.h),
                 // ── Highlights section ──────────────────────────────
                 _SectionTitle(label: 'highlights'.tr()),
                 SizedBox(height: 12.h),

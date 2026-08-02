@@ -12,6 +12,7 @@ class SignInProvider with ChangeNotifier {
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController(text: "jb@gmail.com");
   final passController = TextEditingController(text: "123456");
+  final usernameController = TextEditingController(text: "jb jason");
 
   AuthUser? _currentUser;
   bool _isSigningOut = false;

@@ -8,6 +8,12 @@ class MyDimens {
 
   Center getDemoPage(String title) => Center(child: Text(title));
 
+  static Gradient get loginGradient => const LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [MyColor.logGradient1Color, MyColor.logGradient2Color],
+  );
+
   static List<BoxShadow> get getShadow => [
     BoxShadow(
       offset: Offset(5.w, 5.h),

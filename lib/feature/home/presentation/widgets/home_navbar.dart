@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,9 @@ class HomeNavBar extends StatelessWidget {
         color: Theme.of(context).cardColor,
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
             width: 0.5,
           ),
         ),
@@ -41,14 +44,14 @@ class HomeNavBar extends StatelessWidget {
             children: [
               _NavItem(
                 icon: Icons.home_rounded,
-                label: 'Home',
+                label: 'nav_home'.tr(),
                 isSelected: currentIndex == 0,
                 color: MyColor.primary,
                 onTap: () => onTap(0),
               ),
               _NavItem(
                 icon: Icons.person_rounded,
-                label: 'Profile',
+                label: 'nav_profile'.tr(),
                 isSelected: currentIndex == 1,
                 color: MyColor.primary,
                 onTap: () => onTap(1),

@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
+import 'package:easy_localization/easy_localization.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/arrays.dart';
 import 'package:elegant_notification/resources/stacked_options.dart';
@@ -7,7 +8,7 @@ import 'package:flutter/material.dart';
 class MyDialog {
   void showSuccessToast({
     required String msg,
-    String title = "Successful",
+    String? title,
     required BuildContext context,
   }) {
     ElegantNotification.success(
@@ -17,7 +18,7 @@ class MyDialog {
       toastDuration: const Duration(milliseconds: 2300),
       animation: AnimationType.fromTop,
       title: Text(
-        title,
+        title ?? 'toast_success'.tr(),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: Theme.of(
@@ -41,7 +42,7 @@ class MyDialog {
 
   void showInfoToast({
     required String msg,
-    String title = "Opps !!",
+    String? title,
     required BuildContext context,
   }) {
     ElegantNotification.info(
@@ -51,7 +52,7 @@ class MyDialog {
       toastDuration: const Duration(milliseconds: 2300),
       animation: AnimationType.fromTop,
       title: Text(
-        title,
+        title ?? 'toast_info'.tr(),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: Theme.of(
@@ -80,16 +81,16 @@ class MyDialog {
     return showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Coming Soon'),
+        title: Text('coming_soon'.tr()),
         content: Text(
           featureName == null
-              ? 'This feature is coming soon.'
-              : '$featureName is coming soon.',
+              ? 'coming_soon_generic'.tr()
+              : 'coming_soon_feature'.tr(namedArgs: {'feature': featureName}),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('OK'),
+            child: Text('ok'.tr()),
           ),
         ],
       ),
@@ -98,7 +99,7 @@ class MyDialog {
 
   void showFailedToast({
     required String msg,
-    String title = "Failed",
+    String? title,
     required BuildContext context,
   }) {
     ElegantNotification.error(
@@ -112,7 +113,7 @@ class MyDialog {
       toastDuration: const Duration(milliseconds: 2300),
       animation: AnimationType.fromRight,
       title: Text(
-        title,
+        title ?? 'toast_failed'.tr(),
         style: Theme.of(
           context,
         ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold),

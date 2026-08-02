@@ -1,438 +1,122 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/config/router/app_router.dart';
-import 'package:fclub/core/constants/my_color.dart';
-import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/services/global_service.dart';
+import 'package:fclub/core/services/locale_service.dart';
 import 'package:fclub/core/util/my_dialog.dart';
+import 'package:fclub/feature/auth/data/model/auth_user.dart';
 import 'package:fclub/feature/auth/presentation/provider/auth_session_provider.dart';
 import 'package:fclub/feature/settings/presentation/provider/settings_provider.dart';
-import 'package:fclub/feature/settings/presentation/widget/settings_section.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:fclub/core/services/locale_service.dart';
-import 'package:fclub/feature/settings/presentation/widget/settings_language_sheet.dart';
-import 'package:fclub/feature/settings/presentation/widget/settings_theme_sheet.dart';
-import 'package:fclub/feature/settings/presentation/widget/settings_tile.dart';
+import 'package:fclub/feature/settings/presentation/widget/settings_account_section.dart';
+import 'package:fclub/feature/settings/presentation/widget/settings_header.dart';
+import 'package:fclub/feature/settings/presentation/widget/settings_preferences_section.dart';
+import 'package:fclub/feature/settings/presentation/widget/settings_profile_card.dart';
+import 'package:fclub/feature/settings/presentation/widget/settings_sign_out_button.dart';
+import 'package:fclub/feature/settings/presentation/widget/settings_support_section.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
+/// Account and application preferences hub.
+///
+/// The screen intentionally contains composition and navigation only. Each
+/// visual section owns its presentation in a dedicated widget file, while
+/// persisted state continues to live in the settings and locale providers.
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final session = context.watch<AuthSessionProvider>();
+    final user = session.currentUser ?? GlobalService.instance.currentUser;
+    final settings = context.watch<SettingsProvider>().settings;
+    final locale = context.watch<LocaleProvider>().locale;
+
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
-        child: Consumer<AuthSessionProvider>(
-          builder: (context, session, _) {
-            final user =
-                session.currentUser ?? GlobalService.instance.currentUser;
-            final uid = user?.uid ?? '';
-            final rawEmail = user?.email?.trim() ?? '';
-            final rawPhotoUrl = user?.photoUrl?.trim() ?? '';
-            final email = rawEmail.isNotEmpty ? rawEmail : 'user@opmedia.com';
-            final emailVerified = user?.emailVerified ?? false;
-            final themeMode = context.watch<SettingsProvider>().settings.themeMode;
-
-            return SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 22.h),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 600.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _SettingsHeader(),
-                      SizedBox(height: 24.h),
-                      _ProfileCard(
-                        email: email,
-                        photoUrl: rawPhotoUrl,
-                        emailVerified: emailVerified,
-                      ),
-                      SizedBox(height: 28.h),
-                      SettingsSection(
-                        title: 'account'.tr(),
-                        children: [
-                          SettingsTile(
-                            icon: Icons.person_outline_rounded,
-                            iconColor: const Color(0xFFEC4899),
-                            title: 'edit_profile'.tr(),
-                            subtitle: 'edit_profile_subtitle'.tr(),
-                            onTap: () {
-                              if (uid.isEmpty) {
-                                MyDialog().showFailedToast(
-                                  msg:
-                                      'Unable to open profile editor right now.',
-                                  context: context,
-                                );
-                                return;
-                              }
-                              MyDialog().showComingSoonDialog(
-                                context: context,
-                                featureName: 'edit_profile'.tr(),
-                              );
-                            },
-                          ),
-                          SettingsTile(
-                            icon: Icons.lock_outline_rounded,
-                            iconColor: const Color(0xFFDB2777),
-                            title: 'change_password'.tr(),
-                            subtitle: 'change_password_subtitle'.tr(),
-                            onTap: () => MyDialog().showComingSoonDialog(
-                              context: context,
-                              featureName: 'change_password'.tr(),
-                            ),
-                          ),
-                          SettingsTile(
-                            icon: Icons.notifications_none_rounded,
-                            iconColor: const Color(0xFFF97316),
-                            title: 'notifications'.tr(),
-                            subtitle: 'notifications_subtitle'.tr(),
-                            onTap: () => MyDialog().showComingSoonDialog(
-                              context: context,
-                              featureName: 'notifications'.tr(),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20.h),
-                      SettingsSection(
-                        title: 'preferences'.tr(),
-                        children: [
-                          SettingsTile(
-                            icon: Icons.palette_outlined,
-                            iconColor: const Color(0xFFDB2777),
-                            title: 'appearance'.tr(),
-                            subtitle: themeModeLabel(themeMode),
-                            onTap: () => showThemeModeSheet(context),
-                          ),
-                          SettingsTile(
-                            icon: Icons.language_rounded,
-                            iconColor: const Color(0xFF16A34A),
-                            title: 'language'.tr(),
-                            subtitle: localeName(
-                                context.watch<LocaleProvider>().locale),
-                            onTap: () => showLanguageSheet(context),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20.h),
-                      SettingsSection(
-                        title: 'support'.tr(),
-                        children: [
-                          SettingsTile(
-                            icon: Icons.help_outline_rounded,
-                            iconColor: const Color(0xFF0F766E),
-                            title: 'help_center'.tr(),
-                            subtitle: 'help_center_subtitle'.tr(),
-                            onTap: () => MyDialog().showComingSoonDialog(
-                              context: context,
-                              featureName: 'help_center'.tr(),
-                            ),
-                          ),
-                          SettingsTile(
-                            icon: Icons.info_outline_rounded,
-                            iconColor: const Color(0xFF475569),
-                            title: 'about'.tr(),
-                            subtitle: 'app_version'.tr(),
-                            onTap: () => MyDialog().showComingSoonDialog(
-                              context: context,
-                              featureName: 'about'.tr(),
-                            ),
-                          ),
-                          SettingsTile(
-                            icon: Icons.shield_outlined,
-                            iconColor: const Color(0xFF2563EB),
-                            title: 'privacy_policy'.tr(),
-                            subtitle: 'privacy_policy_subtitle'.tr(),
-                            onTap: () => MyDialog().showComingSoonDialog(
-                              context: context,
-                              featureName: 'privacy_policy'.tr(),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 28.h),
-                      _SignOutButton(session: session),
-                      SizedBox(height: 32.h),
-                    ],
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SettingsHeader(),
+                  SizedBox(height: 16.h),
+                  SettingsProfileCard(
+                    displayName: _displayName(user),
+                    email: _email(user),
+                    photoUrl: user?.photoUrl?.trim() ?? '',
+                    emailVerified: user?.emailVerified ?? false,
+                    onTap: () => _openProfile(context, user?.uid ?? ''),
                   ),
-                ),
+                  SizedBox(height: 28.h),
+                  SettingsAccountSection(
+                    onEditProfile: () => _openProfile(context, user?.uid ?? ''),
+                  ),
+                  SizedBox(height: 24.h),
+                  SettingsPreferencesSection(
+                    themeMode: settings.themeMode,
+                    locale: locale,
+                  ),
+                  SizedBox(height: 24.h),
+                  const SettingsSupportSection(),
+                  SizedBox(height: 28.h),
+                  SettingsSignOutButton(
+                    isLoading: session.isSigningOut,
+                    onPressed: () => _signOut(context, session),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsHeader extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'settings_title'.tr(),
-                style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontFamily: MyString.poppinsBold,
-                  fontSize: 29.sp,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                'settings_description'.tr(),
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontFamily: MyString.rubikRegular,
-                  fontSize: 15.sp,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({
-    required this.email,
-    required this.photoUrl,
-    required this.emailVerified,
-  });
-  final String email;
-  final String photoUrl;
-  final bool emailVerified;
-
-
-  static const _accent = Color(0xFFDB2777);
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22.r),
-        gradient: LinearGradient(
-          colors: [
-            _accent.withValues(alpha: isDark ? 0.22 : 0.10),
-            const Color(0xFFEC4899).withValues(alpha: isDark ? 0.10 : 0.04),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(
-          color: _accent.withValues(alpha: isDark ? 0.35 : 0.18),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 62.r,
-            height: 62.r,
-            padding: EdgeInsets.all(3.r),
-            decoration: BoxDecoration(
-              color: _accent.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: _accent.withValues(alpha: 0.30)),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(17.r),
-              child: photoUrl.isNotEmpty
-                  ? Image.network(
-                      photoUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _InitialsAvatar(initials: "FC"),
-                    )
-                  : _InitialsAvatar(initials: "FC"),
             ),
           ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "F Club User",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colorScheme.onSurface,
-                    fontFamily: MyString.poppinsBold,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  email,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
-                    fontFamily: MyString.rubikRegular,
-                    fontSize: 13.sp,
-                  ),
-                ),
-                SizedBox(height: 10.h),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 5.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _accent.withValues(alpha: isDark ? 0.18 : 0.10),
-                    borderRadius: BorderRadius.circular(10.r),
-                    border: Border.all(
-                      color: _accent.withValues(alpha: isDark ? 0.30 : 0.20),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        emailVerified
-                            ? Icons.verified_rounded
-                            : Icons.error_outline_rounded,
-                        color: emailVerified
-                            ? MyColor.success
-                            : MyColor.warning,
-                        size: 14.r,
-                      ),
-                      SizedBox(width: 6.w),
-                      Text(
-                        emailVerified ? 'verified_account'.tr() : 'unverified_email'.tr(),
-                        style: TextStyle(
-                          color: colorScheme.onSurface,
-                          fontFamily: MyString.poppinsMedium,
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: colorScheme.onSurfaceVariant,
-            size: 24.r,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InitialsAvatar extends StatelessWidget {
-  const _InitialsAvatar({required this.initials});
-
-  final String initials;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      color: _ProfileCard._accent.withValues(alpha: 0.12),
-      child: Text(
-        initials,
-        style: TextStyle(
-          color: _ProfileCard._accent,
-          fontFamily: MyString.poppinsBold,
-          fontWeight: FontWeight.w700,
-          fontSize: 22.sp,
         ),
       ),
     );
   }
-}
 
-class _SignOutButton extends StatelessWidget {
-  const _SignOutButton({required this.session});
+  String _displayName(AuthUser? user) {
+    final name = user?.displayName?.trim() ?? '';
+    return name.isEmpty ? 'settings_default_user_name'.tr() : name;
+  }
 
-  final AuthSessionProvider session;
+  String _email(AuthUser? user) {
+    final email = user?.email?.trim() ?? '';
+    return email.isEmpty ? 'settings_email_unavailable'.tr() : email;
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Material(
-      color: colorScheme.errorContainer,
-      borderRadius: BorderRadius.circular(18.r),
-      child: InkWell(
-        onTap: session.isSigningOut
-            ? null
-            : () async {
-                final result = await session.signOut();
-                if (!context.mounted) return;
+  void _openProfile(BuildContext context, String uid) {
+    if (uid.isEmpty) {
+      MyDialog().showFailedToast(
+        msg: 'settings_profile_unavailable'.tr(),
+        context: context,
+      );
+      return;
+    }
 
-                if (!result.isSuccess) {
-                  MyDialog().showFailedToast(
-                    msg: result.message,
-                    context: context,
-                  );
-                  return;
-                }
+    MyDialog().showComingSoonDialog(
+      context: context,
+      featureName: 'edit_profile'.tr(),
+    );
+  }
 
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  AppRouteName.authGate,
-                  (route) => false,
-                );
-              },
-        borderRadius: BorderRadius.circular(18.r),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18.r),
-            border: Border.all(color: colorScheme.error.withValues(alpha: 0.12)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              session.isSigningOut
-                  ? SizedBox(
-                      width: 20.r,
-                      height: 20.r,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.w,
-                        color: colorScheme.error,
-                      ),
-                    )
-                  : Icon(
-                      Icons.logout_rounded,
-                      color: colorScheme.error,
-                      size: 20.r,
-                    ),
-              SizedBox(width: 12.w),
-              Text(
-                session.isSigningOut ? 'signing_out'.tr() : 'sign_out'.tr(),
-                style: TextStyle(
-                  color: colorScheme.error,
-                  fontFamily: MyString.poppinsBold,
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+  Future<void> _signOut(
+    BuildContext context,
+    AuthSessionProvider session,
+  ) async {
+    final result = await session.signOut();
+    if (!context.mounted) return;
+
+    if (!result.isSuccess) {
+      MyDialog().showFailedToast(msg: result.message, context: context);
+      return;
+    }
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRouteName.authGate,
+      (route) => false,
     );
   }
 }

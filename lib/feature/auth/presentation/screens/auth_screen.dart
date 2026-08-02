@@ -24,7 +24,10 @@ class AuthScreen extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [MyColor.logGradient1Color, MyColor.logGradient2Color],
+                  colors: [
+                    MyColor.logGradient1Color,
+                    MyColor.logGradient2Color,
+                  ],
                 ),
               ),
               child: ClipPath(
@@ -34,13 +37,7 @@ class AuthScreen extends StatelessWidget {
                     horizontal: 20,
                     vertical: 20,
                   ),
-                  decoration: BoxDecoration(
-                    color: MyColor.logBackColor,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      bottomRight: Radius.circular(30),
-                    ),
-                  ),
+                  decoration: BoxDecoration(color: MyColor.logBackColor),
                   child: AuthBody(),
                 ),
               ),
@@ -75,8 +72,7 @@ class _LanguageToggleButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.translate,
-                color: Colors.white70, size: 14),
+            Icon(Icons.translate, color: Colors.white70, size: 14),
             const SizedBox(width: 6),
             Text(
               isBn ? 'EN' : 'বাং',

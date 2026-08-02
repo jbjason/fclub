@@ -3,10 +3,10 @@ import 'package:fclub/core/services/contacts/app_contact.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/club/data/model/payment_entry.dart';
 import 'package:fclub/feature/club/data/model/payment_status.dart';
-import 'package:fclub/feature/club/presentation/screens/club_add_entry_screen.dart';
-import 'package:fclub/feature/club/presentation/screens/club_edit_entry_screen.dart';
+import 'package:fclub/feature/club/presentation/screens/club_details/club_add_entry_screen.dart';
+import 'package:fclub/feature/club/presentation/screens/club_details/club_edit_entry_screen.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
-import 'package:fclub/feature/club/presentation/screens/club_month_detail_screen.dart';
+import 'package:fclub/feature/club/presentation/screens/club_details/club_month_detail_screen.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_empty_state.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_filter_bar.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_history_tile.dart';
@@ -80,7 +80,8 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen>
     return entries.where((entry) {
       final contact = contactsById[entry.contactId];
       final matchesSearch =
-          query.isEmpty || (contact?.name.toLowerCase().contains(query) ?? false);
+          query.isEmpty ||
+          (contact?.name.toLowerCase().contains(query) ?? false);
       final matchesMonth =
           _selectedMonth == null || entry.month == _selectedMonth;
       final matchesStatus =
@@ -125,9 +126,7 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen>
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        title: Text('club_feature_title'.tr()),
-      ),
+      appBar: AppBar(title: Text('club_feature_title'.tr())),
       body: SafeArea(
         child: Column(
           children: [
@@ -146,12 +145,12 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen>
               indicatorColor: colorScheme.primary,
               tabs: [
                 Tab(
-                  icon: const Icon(Icons.receipt_long_rounded, size: 18),
-                  text: 'history'.tr(),
-                ),
-                Tab(
                   icon: const Icon(Icons.calendar_month_rounded, size: 18),
                   text: 'club_monthly_overview'.tr(),
+                ),
+                Tab(
+                  icon: const Icon(Icons.receipt_long_rounded, size: 18),
+                  text: 'history'.tr(),
                 ),
               ],
             ),
@@ -159,8 +158,13 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildHistoryTab(filtered, entries, availableMonths, contactsById),
                   _buildOverviewTab(filteredMonths, months, years, entries),
+                  _buildHistoryTab(
+                    filtered,
+                    entries,
+                    availableMonths,
+                    contactsById,
+                  ),
                 ],
               ),
             ),
@@ -249,8 +253,9 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen>
                     child: ChoiceChip(
                       label: Text('$year'),
                       selected: _selectedYear == year,
-                      onSelected: (selected) =>
-                          setState(() => _selectedYear = selected ? year : null),
+                      onSelected: (selected) => setState(
+                        () => _selectedYear = selected ? year : null,
+                      ),
                     ),
                   ),
                 ),
@@ -261,48 +266,48 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen>
           child: months.isEmpty
               ? ClubEmptyState(message: 'club_no_monthly_data'.tr())
               : filteredMonths.isEmpty
-                  ? ClubEmptyState(message: 'club_no_months_year'.tr())
-                  : Scrollbar(
-                      controller: _overviewScrollController,
-                      thumbVisibility: true,
-                      child: ListView.builder(
-                        controller: _overviewScrollController,
-                        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 100.h),
-                        itemCount: filteredMonths.length,
-                        itemBuilder: (context, index) {
-                          final month = filteredMonths[index];
-                          final monthEntries =
-                              entries.where((e) => e.month == month).toList();
-                          final collected = monthEntries
-                              .where((e) => e.status == PaymentStatus.paid)
-                              .fold<double>(0, (sum, e) => sum + e.amount);
-                          final due = monthEntries
-                              .where((e) => e.status == PaymentStatus.due)
-                              .fold<double>(0, (sum, e) => sum + e.amount);
-                          final advance = monthEntries
-                              .where((e) => e.status == PaymentStatus.advance)
-                              .fold<double>(0, (sum, e) => sum + e.amount);
-                          final memberCount = monthEntries
-                              .map((e) => e.contactId)
-                              .toSet()
-                              .length;
-                          return ClubMonthOverviewTile(
-                            month: month,
-                            collected: collected,
-                            due: due,
-                            advance: advance,
-                            memberCount: memberCount,
-                            onTap: () => Navigator.push<void>(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    ClubMonthDetailScreen(month: month),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+              ? ClubEmptyState(message: 'club_no_months_year'.tr())
+              : Scrollbar(
+                  controller: _overviewScrollController,
+                  thumbVisibility: true,
+                  child: ListView.builder(
+                    controller: _overviewScrollController,
+                    padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 100.h),
+                    itemCount: filteredMonths.length,
+                    itemBuilder: (context, index) {
+                      final month = filteredMonths[index];
+                      final monthEntries = entries
+                          .where((e) => e.month == month)
+                          .toList();
+                      final collected = monthEntries
+                          .where((e) => e.status == PaymentStatus.paid)
+                          .fold<double>(0, (sum, e) => sum + e.amount);
+                      final due = monthEntries
+                          .where((e) => e.status == PaymentStatus.due)
+                          .fold<double>(0, (sum, e) => sum + e.amount);
+                      final advance = monthEntries
+                          .where((e) => e.status == PaymentStatus.advance)
+                          .fold<double>(0, (sum, e) => sum + e.amount);
+                      final memberCount = monthEntries
+                          .map((e) => e.contactId)
+                          .toSet()
+                          .length;
+                      return ClubMonthOverviewTile(
+                        month: month,
+                        collected: collected,
+                        due: due,
+                        advance: advance,
+                        memberCount: memberCount,
+                        onTap: () => Navigator.push<void>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ClubMonthDetailScreen(month: month),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
         ),
       ],
     );
