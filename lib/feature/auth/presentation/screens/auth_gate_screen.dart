@@ -3,11 +3,11 @@ import 'package:fclub/feature/auth/data/model/auth_user.dart';
 import 'package:fclub/feature/auth/data/repository/auth_repository.dart';
 import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:fclub/feature/auth/presentation/screens/auth_screen.dart';
-import 'package:fclub/feature/home/presentation/screens/home.dart';
+import 'package:fclub/feature/home/presentation/screens/group_gateway_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-/// Decides whether the user lands on [AuthScreen] or [Home].
+/// Decides whether the user lands on [AuthScreen] or [GroupGatewayScreen].
 ///
 /// Subscribes to [AuthRepository.authStateChanges] once and keeps reacting to
 /// it for the lifetime of the app, so both the initial auto-sign-in check and
@@ -36,7 +36,7 @@ class AuthGateScreenState extends State<AuthGateScreen> {
           );
         }
         return snapshot.data != null
-            ? const Home()
+            ? const GroupGatewayScreen()
             : ChangeNotifierProvider(
                 create: (context) =>
                     SignInProvider(context.read<AuthRepository>()),

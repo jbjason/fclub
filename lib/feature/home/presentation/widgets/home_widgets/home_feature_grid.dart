@@ -1,7 +1,7 @@
 import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/core/constants/my_color.dart';
-import 'package:fclub/feature/home/presentation/widgets/home_feature_card.dart';
-import 'package:fclub/feature/home/presentation/widgets/home_feature_item.dart';
+import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_feature_card.dart';
+import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_feature_item.dart';
 import 'package:flutter/material.dart';
 
 /// Renders the complete catalogue of navigable features as a vertical column

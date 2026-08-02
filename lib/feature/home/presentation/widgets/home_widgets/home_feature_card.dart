@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
-import 'package:fclub/feature/home/presentation/widgets/home_feature_item.dart';
+import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_feature_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 

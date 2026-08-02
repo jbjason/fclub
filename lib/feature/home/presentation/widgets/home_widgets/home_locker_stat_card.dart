@@ -3,7 +3,7 @@ import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
-import 'package:fclub/feature/home/presentation/widgets/home_stat_shell.dart';
+import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_stat_shell.dart';
 import 'package:fclub/feature/locker/presentation/provider/locker_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

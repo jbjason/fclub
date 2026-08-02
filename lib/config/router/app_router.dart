@@ -1,10 +1,9 @@
-import 'package:fclub/core/constants/my_color.dart';
-import 'package:fclub/feature/auth/data/model/auth_user.dart';
 import 'package:fclub/feature/auth/data/repository/auth_repository.dart';
 import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:fclub/feature/auth/presentation/screens/auth_gate_screen.dart';
 import 'package:fclub/feature/auth/presentation/screens/auth_screen.dart';
 import 'package:fclub/feature/club/presentation/screens/club_monthly_overview_screen.dart';
+import 'package:fclub/feature/home/presentation/screens/group_gateway_screen.dart';
 import 'package:fclub/feature/home/presentation/screens/home.dart';
 import 'package:fclub/feature/kurbani/presentation/screens/kurbani_screen.dart';
 import 'package:fclub/feature/locker/presentation/screens/locker_screen.dart';
@@ -20,6 +19,7 @@ class AppRouteName {
   static const String signIn = '/auth/sign-in';
   static const String settings = '/settings';
   static const String profileDetails = '/settings/profile-details';
+  static const String groupGateway = '/groups';
   static const String home = '/home';
   static const String club = '/home/club';
   static const String locker = '/home/locker';
@@ -58,13 +58,24 @@ abstract class AppRouter {
         );
 
       case AppRouteName.club:
-        return _materialRoute(settings: settings, child: const ClubMonthlyOverviewScreen());
+        return _materialRoute(
+          settings: settings,
+          child: const ClubMonthlyOverviewScreen(),
+        );
       case AppRouteName.locker:
         return _materialRoute(settings: settings, child: const LockerScreen());
       case AppRouteName.kurbani:
         return _materialRoute(settings: settings, child: const KurbaniScreen());
       case AppRouteName.packCheck:
-        return _materialRoute(settings: settings, child: const PackCheckScreen());
+        return _materialRoute(
+          settings: settings,
+          child: const PackCheckScreen(),
+        );
+      case AppRouteName.groupGateway:
+        return _materialRoute(
+          settings: settings,
+          child: const GroupGatewayScreen(),
+        );
       //     case AppRouteName.settings:
       //       return _materialRoute(settings: settings, child: SettingsScreen());
       //     case AppRouteName.profileDetails:
@@ -98,7 +109,10 @@ abstract class AppRouter {
 
       case AppRouteName.authGate:
       default:
-        return _materialRoute(settings: settings, child: const AuthGateScreen());
+        return _materialRoute(
+          settings: settings,
+          child: const AuthGateScreen(),
+        );
     }
   }
 
@@ -123,4 +137,3 @@ class _RouteMessageScreen extends StatelessWidget {
     return Scaffold(body: Center(child: Text(message)));
   }
 }
-
