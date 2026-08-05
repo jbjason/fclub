@@ -2,10 +2,24 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class GroupSecretCodeField extends StatelessWidget {
-  const GroupSecretCodeField({super.key});
+  const GroupSecretCodeField({
+    super.key,
+    required this.controller,
+    required this.focusNode,
+    required this.enabled,
+    required this.onChanged,
+    required this.onSubmitted,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool enabled;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +48,19 @@ class GroupSecretCodeField extends StatelessWidget {
         SizedBox(height: 7.h),
         TextField(
           key: const Key('group-secret-code-field'),
+          controller: controller,
+          focusNode: focusNode,
+          enabled: enabled,
+          onChanged: onChanged,
+          onSubmitted: onSubmitted,
           textCapitalization: TextCapitalization.characters,
           autocorrect: false,
           enableSuggestions: false,
           textInputAction: TextInputAction.done,
+          inputFormatters: const [
+            _UpperCaseTextFormatter(),
+            _GroupPinFormatter(),
+          ],
           style: TextStyle(
             fontFamily: MyString.rubikMedium,
             fontWeight: FontWeight.w600,
@@ -99,6 +122,35 @@ class GroupSecretCodeField extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _UpperCaseTextFormatter extends TextInputFormatter {
+  const _UpperCaseTextFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return newValue.copyWith(text: newValue.text.toUpperCase());
+  }
+}
+
+class _GroupPinFormatter extends TextInputFormatter {
+  const _GroupPinFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final filtered = newValue.text.replaceAll(RegExp('[^A-Z0-9-]'), '');
+    if (filtered.length > 12) return oldValue;
+    return newValue.copyWith(
+      text: filtered,
+      selection: TextSelection.collapsed(offset: filtered.length),
     );
   }
 }

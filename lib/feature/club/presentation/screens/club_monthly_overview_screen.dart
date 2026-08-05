@@ -44,9 +44,7 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen>
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final globalContacts = context.read<GlobalContactsProvider>();
-      final clubProvider = context.read<ClubProvider>();
       await globalContacts.loadContacts();
-      await clubProvider.seedDemoData();
     });
   }
 

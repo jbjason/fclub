@@ -7,8 +7,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class GroupJoinCard extends StatelessWidget {
-  const GroupJoinCard({super.key, required this.onJoin});
+  const GroupJoinCard({
+    super.key,
+    required this.controller,
+    required this.focusNode,
+    required this.isJoining,
+    required this.onChanged,
+    required this.onJoin,
+  });
 
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool isJoining;
+  final ValueChanged<String> onChanged;
   final VoidCallback onJoin;
 
   @override
@@ -21,12 +32,19 @@ class GroupJoinCard extends StatelessWidget {
       description: 'group_join_description'.tr(),
       child: Column(
         children: [
-          const GroupSecretCodeField(),
+          GroupSecretCodeField(
+            controller: controller,
+            focusNode: focusNode,
+            enabled: !isJoining,
+            onChanged: onChanged,
+            onSubmitted: (_) => onJoin(),
+          ),
           SizedBox(height: 15.h),
           GroupGradientButton(
-            label: 'group_join_button'.tr(),
+            label: isJoining ? 'group_joining'.tr() : 'group_join_button'.tr(),
             icon: Icons.lock_open_rounded,
             colors: const [MyColor.primary, MyColor.secondary],
+            isLoading: isJoining,
             onTap: onJoin,
           ),
         ],

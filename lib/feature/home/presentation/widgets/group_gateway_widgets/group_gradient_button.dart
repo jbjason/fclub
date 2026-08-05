@@ -9,12 +9,14 @@ class GroupGradientButton extends StatelessWidget {
     required this.icon,
     required this.colors,
     required this.onTap,
+    this.isLoading = false,
   });
 
   final String label;
   final IconData icon;
   final List<Color> colors;
   final VoidCallback onTap;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +49,24 @@ class GroupGradientButton extends StatelessWidget {
             ),
             child: InkWell(
               key: ValueKey<String>('group-action-$label'),
-              onTap: onTap,
+              onTap: isLoading ? null : onTap,
               borderRadius: BorderRadius.circular(16.r),
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(icon, color: Colors.white, size: 19.r),
+                    if (isLoading)
+                      SizedBox(
+                        width: 19.r,
+                        height: 19.r,
+                        child: const CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.2,
+                        ),
+                      )
+                    else
+                      Icon(icon, color: Colors.white, size: 19.r),
                     SizedBox(width: 9.w),
                     Flexible(
                       child: Text(
@@ -70,11 +82,12 @@ class GroupGradientButton extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 9.w),
-                    Icon(
-                      Icons.arrow_forward_rounded,
-                      color: Colors.white.withValues(alpha: 0.85),
-                      size: 17.r,
-                    ),
+                    if (!isLoading)
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Colors.white.withValues(alpha: 0.85),
+                        size: 17.r,
+                      ),
                   ],
                 ),
               ),

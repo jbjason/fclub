@@ -1,9 +1,14 @@
 import 'package:fclub/feature/auth/data/repository/auth_repository.dart';
+import 'package:fclub/core/services/auth/firebase_auth_service.dart';
 import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:fclub/feature/auth/presentation/screens/auth_gate_screen.dart';
 import 'package:fclub/feature/auth/presentation/screens/auth_screen.dart';
 import 'package:fclub/feature/club/presentation/screens/club_monthly_overview_screen.dart';
 import 'package:fclub/feature/home/presentation/screens/group_gateway_screen.dart';
+import 'package:fclub/feature/home/data/models/group_user.dart';
+import 'package:fclub/feature/home/data/repositories/group_repository.dart';
+import 'package:fclub/feature/home/presentation/provider/group_creation_provider.dart';
+import 'package:fclub/feature/home/presentation/screens/group_create_screen.dart';
 import 'package:fclub/feature/home/presentation/screens/home.dart';
 import 'package:fclub/feature/kurbani/presentation/screens/kurbani_screen.dart';
 import 'package:fclub/feature/locker/presentation/screens/locker_screen.dart';
@@ -20,6 +25,7 @@ class AppRouteName {
   static const String settings = '/settings';
   static const String profileDetails = '/settings/profile-details';
   static const String groupGateway = '/groups';
+  static const String groupCreate = '/groups/create';
   static const String home = '/home';
   static const String club = '/home/club';
   static const String locker = '/home/locker';
@@ -75,6 +81,32 @@ abstract class AppRouter {
         return _materialRoute(
           settings: settings,
           child: const GroupGatewayScreen(),
+        );
+      case AppRouteName.groupCreate:
+        return MaterialPageRoute<dynamic>(
+          settings: settings,
+          builder: (context) {
+            final firebaseUser = context
+                .read<FirebaseAuthService>()
+                .currentUser;
+            final fallbackName = firebaseUser?.email?.split('@').first;
+            return ChangeNotifierProvider(
+              create: (context) => GroupCreationProvider(
+                repository: context.read<GroupRepository>(),
+                signedInUser: GroupUser(
+                  id: firebaseUser?.uid ?? '',
+                  username: firebaseUser?.displayName?.trim().isNotEmpty == true
+                      ? firebaseUser!.displayName!.trim()
+                      : fallbackName?.trim().isNotEmpty == true
+                      ? fallbackName!.trim()
+                      : 'Fundora Member',
+                  profilePic: firebaseUser?.photoURL ?? '',
+                  email: firebaseUser?.email ?? '',
+                ),
+              )..loadUsers(),
+              child: const GroupCreateScreen(),
+            );
+          },
         );
       //     case AppRouteName.settings:
       //       return _materialRoute(settings: settings, child: SettingsScreen());

@@ -94,32 +94,4 @@ class ClubProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Seeds every current member as "Paid" for each month from
-  /// [clubStartMonth] through the current month.
-  Future<void> seedDemoData() async {
-    if (hasDemoData) return;
-
-    final contacts = clubMembers;
-    if (contacts.isEmpty) return;
-
-    final now = DateTime.now();
-    final currentMonth = DateTime(now.year, now.month, 1);
-
-    var month = clubStartMonth;
-    while (!month.isAfter(currentMonth)) {
-      for (final contact in contacts) {
-        final entry = PaymentEntry(
-          id: _uuid.v4(),
-          contactId: contact.id,
-          month: month,
-          amount: monthlyContribution,
-          statusIndex: PaymentStatus.paid.index,
-          date: DateTime(month.year, month.month, 5),
-        );
-        await _entriesBox.put(entry.id, entry);
-      }
-      month = DateTime(month.year, month.month + 1, 1);
-    }
-    notifyListeners();
-  }
 }

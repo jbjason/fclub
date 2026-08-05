@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
-import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_club_stats_card.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_feature_grid.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_header.dart';
@@ -30,10 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       final contacts = context.read<GlobalContactsProvider>();
-      final club = context.read<ClubProvider>();
       final locker = context.read<LockerProvider>();
       await contacts.loadContacts();
-      await club.seedDemoData();
       await locker.seedDemoData();
     });
   }

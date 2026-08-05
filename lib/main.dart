@@ -12,6 +12,8 @@ import 'package:fclub/core/services/contacts/global_contacts_hive_box.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/club/data/club_hive_box.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
+import 'package:fclub/feature/home/data/repositories/firestore_group_repository.dart';
+import 'package:fclub/feature/home/data/repositories/group_repository.dart';
 import 'package:fclub/feature/kurbani/data/kurbani_hive_boxes.dart';
 import 'package:fclub/feature/locker/data/locker_hive_box.dart';
 import 'package:fclub/feature/locker/presentation/provider/locker_provider.dart';
@@ -61,6 +63,7 @@ class MyApp extends StatelessWidget {
               globalService: GlobalService.instance,
             ),
           ),
+          Provider<GroupRepository>(create: (_) => FirestoreGroupRepository()),
           ChangeNotifierProvider(
             create: (context) =>
                 AuthSessionProvider(context.read<AuthRepository>()),
