@@ -50,6 +50,32 @@ class SignInProvider with ChangeNotifier {
     }
   }
 
+  Future<void> signUp(BuildContext context) async {
+    if (!formKey.currentState!.validate()) return;
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _currentUser = await _authRepository.signUpWithEmail(
+        email: emailController.text,
+        password: passController.text,
+        name: usernameController.text,
+      );
+      MyDialog().showSuccessToast(
+        msg: 'Account created successfully!',
+        context: context,
+      );
+    } catch (error) {
+      _errorMessage = _toMessage(error);
+      MyDialog().showFailedToast(msg: _errorMessage!, context: context);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<AuthActionResult> signOut() async {
     _isSigningOut = true;
     notifyListeners();
@@ -91,6 +117,17 @@ class SignInProvider with ChangeNotifier {
     return null;
   }
 
+  String? validateName(String? value) {
+    final name = (value ?? '').trim();
+    if (name.isEmpty) {
+      return 'Name is required.';
+    }
+    if (name.length < 2) {
+      return 'Name must be at least 2 characters.';
+    }
+    return null;
+  }
+
   String _toMessage(Object error) {
     final message = error.toString();
     return message.startsWith('Exception: ')
@@ -102,6 +139,7 @@ class SignInProvider with ChangeNotifier {
   void dispose() {
     emailController.dispose();
     passController.dispose();
+    usernameController.dispose();
     super.dispose();
   }
 }

@@ -54,7 +54,7 @@ class ClubPaymentMethodSelector extends StatelessWidget {
                         ),
                         SizedBox(height: 5.h),
                         Text(
-                          method.label,
+                          method.localizedLabel(context),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,

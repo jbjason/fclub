@@ -1,20 +1,20 @@
 import 'package:fclub/core/util/my_dimens.dart';
-import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class AuthTextField extends StatefulWidget {
   const AuthTextField({
     required this.controller,
     required this.title,
     required this.prefixIcon,
+    required this.validator,
     this.isPassword = false,
     super.key,
   });
   final TextEditingController controller;
   final String title;
   final IconData prefixIcon;
+  final FormFieldValidator<String> validator;
   final bool isPassword;
 
   @override
@@ -79,13 +79,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
             //   color: Colors.white,
             //   fontSize: 14,
             // ),
-            validator: (value) {
-              final provider = context.read<SignInProvider>();
-              if (widget.isPassword) {
-                return provider.validatePassword(value);
-              }
-              return provider.validateEmail(value);
-            },
+            validator: widget.validator,
             onTapUpOutside: (event) => FocusScope.of(context).unfocus(),
           ),
         ),

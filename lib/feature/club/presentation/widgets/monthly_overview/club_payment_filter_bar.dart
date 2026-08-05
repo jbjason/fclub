@@ -214,7 +214,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                   .map(
                     (status) => DropdownMenuItem(
                       value: status,
-                      child: Text(status.label),
+                      child: Text(status.localizedLabel(context)),
                     ),
                   )
                   .toList(growable: false),
@@ -231,7 +231,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                   .map(
                     (method) => DropdownMenuItem(
                       value: method,
-                      child: Text(method.label),
+                      child: Text(method.localizedLabel(context)),
                     ),
                   )
                   .toList(growable: false),

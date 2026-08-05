@@ -16,8 +16,8 @@ class AuthBody extends StatefulWidget {
 }
 
 class _AuthBodyState extends State<AuthBody> {
-  File? _userImageFile;
   bool isLogIn = true;
+  File? _userImageFile;
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +43,15 @@ class _AuthBodyState extends State<AuthBody> {
                       controller: viewModel.emailController,
                       title: 'email_address'.tr(),
                       prefixIcon: Icons.email_outlined,
+                      validator: viewModel.validateEmail,
                     ),
                     const SizedBox(height: 10),
                     if (!isLogIn) ...[
                       AuthTextField(
                         controller: viewModel.usernameController,
-                        title: 'Username',
+                        title: 'name'.tr(),
                         prefixIcon: Icons.person_outline,
+                        validator: viewModel.validateName,
                       ),
                       const SizedBox(height: 10),
                     ],
@@ -58,6 +60,7 @@ class _AuthBodyState extends State<AuthBody> {
                       title: 'password'.tr(),
                       prefixIcon: Icons.lock_outline,
                       isPassword: true,
+                      validator: viewModel.validatePassword,
                     ),
                     const SizedBox(height: 30),
                     AuthButtons(
@@ -78,19 +81,15 @@ class _AuthBodyState extends State<AuthBody> {
   }
 
   void _pickedImage(File image) => _userImageFile = image;
-  
-  void _onSubmit(BuildContext context) async {
+
+  Future<void> _onSubmit(BuildContext context) async {
     final provider = context.read<SignInProvider>();
     FocusScope.of(context).unfocus();
 
-    if (isLogIn){
+    if (isLogIn) {
       await provider.signIn(context);
-    }
-    else{
-      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailAddress,
-        password: password,
-      );
+    } else {
+      await provider.signUp(context);
     }
   }
 }

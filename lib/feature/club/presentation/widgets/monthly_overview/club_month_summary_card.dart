@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
@@ -6,18 +7,22 @@ import 'package:fclub/feature/club/data/model/club_month_summary.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_card_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 
 class ClubMonthSummaryCard extends StatelessWidget {
-  const ClubMonthSummaryCard({super.key, required this.summary});
+  const ClubMonthSummaryCard({super.key, required this.summary, this.onTap});
 
   final ClubMonthSummary summary;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final monthLabel = MaterialLocalizations.of(
+      context,
+    ).formatMonthYear(summary.month);
     return ClubCardShell(
       accent: MyColor.primary,
+      onTap: onTap,
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(15.w),
       child: Column(
@@ -35,7 +40,7 @@ class ClubMonthSummaryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      DateFormat('MMMM yyyy').format(summary.month),
+                      monthLabel,
                       style: TextStyle(
                         fontFamily: MyString.poppinsBold,
                         fontSize: 14.sp,
@@ -43,7 +48,14 @@ class ClubMonthSummaryCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${summary.memberCount} members × ${CurrencyFormatter.format(ClubConstants.monthlyTargetPerMember)}',
+                      'club_month_member_target'.tr(
+                        namedArgs: {
+                          'count': '${summary.memberCount}',
+                          'amount': CurrencyFormatter.format(
+                            ClubConstants.monthlyTargetPerMember,
+                          ),
+                        },
+                      ),
                       style: TextStyle(
                         fontFamily: MyString.rubikRegular,
                         fontSize: 10.sp,
@@ -53,13 +65,26 @@ class ClubMonthSummaryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Text(
-                '${(summary.progress * 100).round()}%',
-                style: TextStyle(
-                  fontFamily: MyString.poppinsBold,
-                  fontSize: 15.sp,
-                  color: MyColor.primary,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${(summary.progress * 100).round()}%',
+                    style: TextStyle(
+                      fontFamily: MyString.poppinsBold,
+                      fontSize: 15.sp,
+                      color: MyColor.primary,
+                    ),
+                  ),
+                  if (onTap != null) ...[
+                    SizedBox(width: 2.w),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 20.r,
+                      color: MyColor.primary,
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
@@ -77,17 +102,17 @@ class ClubMonthSummaryCard extends StatelessWidget {
           Row(
             children: [
               _Metric(
-                label: 'Collected',
+                label: 'collected'.tr(),
                 amount: summary.collected,
                 color: MyColor.success,
               ),
               _Metric(
-                label: 'Pending',
+                label: 'club_status_pending'.tr(),
                 amount: summary.pending,
                 color: MyColor.warning,
               ),
               _Metric(
-                label: 'Outstanding',
+                label: 'club_outstanding'.tr(),
                 amount: summary.outstanding,
                 color: MyColor.error,
               ),

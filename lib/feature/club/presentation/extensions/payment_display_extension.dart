@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/feature/club/data/model/club_payment.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,12 @@ extension PaymentStatusDisplay on PaymentStatus {
     PaymentStatus.pending => 'Pending',
     PaymentStatus.paid => 'Paid',
     PaymentStatus.rejected => 'Rejected',
+  };
+
+  String localizedLabel(BuildContext context) => switch (this) {
+    PaymentStatus.pending => context.tr('club_status_pending'),
+    PaymentStatus.paid => context.tr('club_status_paid'),
+    PaymentStatus.rejected => context.tr('club_status_rejected'),
   };
 
   Color get color => switch (this) {
@@ -30,6 +37,12 @@ extension PaymentMethodDisplay on PaymentMethod {
     PaymentMethod.cash => 'Cash',
     PaymentMethod.mobileWallet => 'bKash / Nagad',
     PaymentMethod.bank => 'Bank',
+  };
+
+  String localizedLabel(BuildContext context) => switch (this) {
+    PaymentMethod.cash => context.tr('club_method_cash'),
+    PaymentMethod.mobileWallet => context.tr('club_method_mobile_wallet'),
+    PaymentMethod.bank => context.tr('club_method_bank'),
   };
 
   IconData get icon => switch (this) {

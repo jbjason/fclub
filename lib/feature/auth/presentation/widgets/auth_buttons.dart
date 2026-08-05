@@ -52,7 +52,7 @@ class AuthButtons extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          'sign_in'.tr(),
+                          (isLogin ? 'sign_in' : 'create_account').tr(),
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 14,

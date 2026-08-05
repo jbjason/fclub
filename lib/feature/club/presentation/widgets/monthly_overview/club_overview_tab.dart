@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/club/data/model/club_month_summary.dart';
+import 'package:fclub/feature/club/presentation/screens/club_month_payment_details_screen.dart';
 import 'package:fclub/feature/club/presentation/widgets/monthly_overview/club_month_summary_card.dart';
 import 'package:fclub/feature/club/presentation/widgets/shared/club_state_panel.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +38,7 @@ class _ClubOverviewTabState extends State<ClubOverviewTab> {
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             children: [
               ChoiceChip(
-                label: const Text('All years'),
+                label: Text('club_filter_all_years'.tr()),
                 selected: _year == null,
                 onSelected: (_) => setState(() => _year = null),
               ),
@@ -55,16 +57,28 @@ class _ClubOverviewTabState extends State<ClubOverviewTab> {
         ),
         Expanded(
           child: visible.isEmpty
-              ? const ClubStatePanel(
+              ? ClubStatePanel(
                   icon: Icons.calendar_view_month_rounded,
-                  title: 'No monthly records',
-                  message: 'Add a payment to start this year’s Club timeline.',
+                  title: 'club_no_monthly_data'.tr(),
+                  message: 'club_no_monthly_data_message'.tr(),
                 )
               : ListView.builder(
                   padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 100.h),
                   itemCount: visible.length,
-                  itemBuilder: (_, index) =>
-                      ClubMonthSummaryCard(summary: visible[index]),
+                  itemBuilder: (context, index) {
+                    final summary = visible[index];
+                    return ClubMonthSummaryCard(
+                      summary: summary,
+                      onTap: () => Navigator.push<void>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ClubMonthPaymentDetailsScreen(
+                            month: summary.month,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
         ),
       ],

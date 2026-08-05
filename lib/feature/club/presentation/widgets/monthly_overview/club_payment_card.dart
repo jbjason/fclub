@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
@@ -9,7 +10,6 @@ import 'package:fclub/feature/club/presentation/widgets/club_member_avatar.dart'
 import 'package:fclub/feature/club/presentation/widgets/club_status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 
 enum _PaymentAction { pending, paid, rejected, delete }
 
@@ -21,6 +21,7 @@ class ClubPaymentCard extends StatelessWidget {
     required this.isAdmin,
     required this.onStatusChanged,
     required this.onDelete,
+    this.onTap,
   });
 
   final ClubPayment payment;
@@ -28,12 +29,15 @@ class ClubPaymentCard extends StatelessWidget {
   final bool isAdmin;
   final ValueChanged<PaymentStatus> onStatusChanged;
   final VoidCallback onDelete;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final localizations = MaterialLocalizations.of(context);
     return ClubCardShell(
       accent: payment.status.color,
+      onTap: onTap,
       margin: EdgeInsets.only(bottom: 11.h),
       padding: EdgeInsets.all(14.w),
       child: Column(
@@ -51,7 +55,7 @@ class ClubPaymentCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      member?.name ?? 'Former member',
+                      member?.name ?? 'club_former_member'.tr(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -61,7 +65,7 @@ class ClubPaymentCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      DateFormat('MMMM yyyy').format(payment.monthDate),
+                      localizations.formatMonthYear(payment.monthDate),
                       style: TextStyle(
                         fontFamily: MyString.rubikRegular,
                         fontSize: 10.sp,
@@ -89,7 +93,7 @@ class ClubPaymentCard extends StatelessWidget {
               if (isAdmin) ...[
                 SizedBox(width: 2.w),
                 PopupMenuButton<_PaymentAction>(
-                  tooltip: 'Review payment',
+                  tooltip: 'club_review_payment'.tr(),
                   onSelected: (action) {
                     switch (action) {
                       case _PaymentAction.pending:
@@ -103,36 +107,36 @@ class ClubPaymentCard extends StatelessWidget {
                     }
                   },
                   itemBuilder: (_) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: _PaymentAction.paid,
                       child: _MenuRow(
                         icon: Icons.verified_rounded,
-                        label: 'Mark paid',
+                        label: 'club_mark_paid'.tr(),
                         color: MyColor.success,
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: _PaymentAction.pending,
                       child: _MenuRow(
                         icon: Icons.schedule_rounded,
-                        label: 'Mark pending',
+                        label: 'club_mark_pending'.tr(),
                         color: MyColor.warning,
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: _PaymentAction.rejected,
                       child: _MenuRow(
                         icon: Icons.cancel_rounded,
-                        label: 'Reject',
+                        label: 'club_reject_payment'.tr(),
                         color: MyColor.error,
                       ),
                     ),
                     const PopupMenuDivider(),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: _PaymentAction.delete,
                       child: _MenuRow(
                         icon: Icons.delete_outline_rounded,
-                        label: 'Delete record',
+                        label: 'club_delete_record'.tr(),
                         color: MyColor.error,
                       ),
                     ),
@@ -152,13 +156,23 @@ class ClubPaymentCard extends StatelessWidget {
             children: [
               _InfoPill(
                 icon: payment.paymentMethod.icon,
-                label: payment.paymentMethod.label,
+                label: payment.paymentMethod.localizedLabel(context),
               ),
               SizedBox(width: 7.w),
               _InfoPill(
                 icon: Icons.schedule_rounded,
-                label: DateFormat('d MMM, h:mm a').format(payment.submittedAt),
+                label:
+                    '${localizations.formatShortDate(payment.submittedAt)} · '
+                    '${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(payment.submittedAt))}',
               ),
+              if (onTap != null) ...[
+                SizedBox(width: 3.w),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 19.r,
+                  color: colors.onSurfaceVariant,
+                ),
+              ],
             ],
           ),
           if (payment.note != null) ...[
@@ -184,7 +198,7 @@ class ClubPaymentCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => onStatusChanged(PaymentStatus.rejected),
                     icon: const Icon(Icons.close_rounded),
-                    label: const Text('Reject'),
+                    label: Text('club_reject_payment'.tr()),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: MyColor.error,
                     ),
@@ -195,7 +209,7 @@ class ClubPaymentCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: () => onStatusChanged(PaymentStatus.paid),
                     icon: const Icon(Icons.done_rounded),
-                    label: const Text('Approve'),
+                    label: Text('club_approve_payment'.tr()),
                     style: FilledButton.styleFrom(
                       backgroundColor: MyColor.success,
                     ),

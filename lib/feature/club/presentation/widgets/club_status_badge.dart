@@ -23,7 +23,7 @@ class ClubStatusBadge extends StatelessWidget {
           Icon(status.icon, size: 12.r, color: color),
           SizedBox(width: 4.w),
           Text(
-            status.label,
+            status.localizedLabel(context),
             style: TextStyle(
               fontFamily: MyString.poppinsBold,
               fontWeight: FontWeight.w700,

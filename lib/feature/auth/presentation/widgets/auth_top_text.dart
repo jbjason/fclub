@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/util/my_dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class AuthTopText extends StatefulWidget {
@@ -63,7 +63,10 @@ class _AuthTopTextState extends State<AuthTopText> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _imageIcon(ImageSource.camera, Icons.camera_alt_sharp),
-              const Text('Add image', style: TextStyle(color: Colors.white70)),
+              Text(
+                'Add image',
+                style: GoogleFonts.fjallaOne(color: Colors.white70),
+              ),
               _imageIcon(ImageSource.gallery, Icons.image),
             ],
           ),
