@@ -10,10 +10,12 @@ import 'package:fclub/feature/auth/data/repository/auth_repository.dart';
 import 'package:fclub/feature/auth/presentation/provider/auth_session_provider.dart';
 import 'package:fclub/core/services/contacts/global_contacts_hive_box.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
-import 'package:fclub/feature/club/data/club_hive_box.dart';
+import 'package:fclub/feature/club/data/repositories/firestore_club_repository.dart';
+import 'package:fclub/feature/club/data/repositories/club_repository.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/home/data/repositories/firestore_group_repository.dart';
 import 'package:fclub/feature/home/data/repositories/group_repository.dart';
+import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
 import 'package:fclub/feature/kurbani/data/kurbani_hive_boxes.dart';
 import 'package:fclub/feature/locker/data/locker_hive_box.dart';
 import 'package:fclub/feature/locker/presentation/provider/locker_provider.dart';
@@ -36,7 +38,6 @@ void main() async {
   await TourHiveBoxes.openBoxes();
   await KurbaniHiveBoxes.openBoxes();
   await PackCheckHiveBoxes.openBoxes();
-  await ClubHiveBox.openBox();
   await LockerHiveBox.openBoxes();
   await SettingsHiveBox.openBox();
   await EasyLocalization.ensureInitialized();
@@ -64,6 +65,8 @@ class MyApp extends StatelessWidget {
             ),
           ),
           Provider<GroupRepository>(create: (_) => FirestoreGroupRepository()),
+          Provider<ClubRepository>(create: (_) => FirestoreClubRepository()),
+          ChangeNotifierProvider(create: (_) => GroupSessionProvider()),
           ChangeNotifierProvider(
             create: (context) =>
                 AuthSessionProvider(context.read<AuthRepository>()),
@@ -78,8 +81,11 @@ class MyApp extends StatelessWidget {
                 KurbaniProvider(context.read<GlobalContactsProvider>()),
           ),
           ChangeNotifierProvider(
-            create: (context) =>
-                ClubProvider(context.read<GlobalContactsProvider>()),
+            create: (context) => ClubProvider(
+              repository: context.read<ClubRepository>(),
+              groupSession: context.read<GroupSessionProvider>(),
+              authService: context.read<FirebaseAuthService>(),
+            ),
           ),
           ChangeNotifierProvider(
             create: (context) => LockerProvider(context.read<ClubProvider>()),

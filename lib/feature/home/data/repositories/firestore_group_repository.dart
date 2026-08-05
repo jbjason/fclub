@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fclub/feature/club/data/model/club_constants.dart';
 import 'package:fclub/feature/home/data/models/create_group_request.dart';
 import 'package:fclub/feature/home/data/models/created_group.dart';
 import 'package:fclub/feature/home/data/models/group_failure.dart';
@@ -74,6 +75,12 @@ class FirestoreGroupRepository implements GroupRepository {
         'createdBy': request.creator.id,
         'createdAt': FieldValue.serverTimestamp(),
         'id': groupDocument.id,
+      });
+      batch.set(groupDocument.collection('projects').doc('club'), {
+        'id': 'club',
+        'name': 'Fundora Club',
+        'monthlyTargetPerMember': ClubConstants.monthlyTargetPerMember,
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
       final membersById = <String, GroupUser>{

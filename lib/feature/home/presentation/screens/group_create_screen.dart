@@ -2,6 +2,7 @@ import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/feature/home/data/models/created_group.dart';
 import 'package:fclub/feature/home/presentation/group_pin_generator.dart';
 import 'package:fclub/feature/home/presentation/provider/group_creation_provider.dart';
+import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
 import 'package:fclub/feature/home/presentation/widgets/group_create_widgets/group_create_hero.dart';
 import 'package:fclub/feature/home/presentation/widgets/group_create_widgets/group_create_page_header.dart';
 import 'package:fclub/feature/home/presentation/widgets/group_create_widgets/group_create_submit_bar.dart';
@@ -136,7 +137,16 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
       pinCode: _pinController.text,
     );
     if (!mounted || result == null) return;
+    _activateGroup(result);
     await _showSuccess(result);
+  }
+
+  void _activateGroup(CreatedGroup group) {
+    try {
+      context.read<GroupSessionProvider>().activateCreated(group);
+    } on ProviderNotFoundException {
+      // Widget previews and focused tests can render this screen in isolation.
+    }
   }
 
   Future<void> _showSuccess(CreatedGroup group) {

@@ -74,11 +74,11 @@ class _AuthTextFieldState extends State<AuthTextField> {
                 borderSide: BorderSide(color: Colors.grey),
               ),
             ),
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-              fontWeight: FontWeight.normal,
-              color: Colors.white,
-              fontSize: 14,
-            ),
+            // style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+            //   fontWeight: FontWeight.normal,
+            //   color: Colors.white,
+            //   fontSize: 14,
+            // ),
             validator: (value) {
               final provider = context.read<SignInProvider>();
               if (widget.isPassword) {

@@ -1,43 +1,67 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
-import 'package:fclub/feature/club/presentation/widgets/club_entry_form.dart';
+import 'package:fclub/feature/club/presentation/widgets/add_entry/club_payment_form.dart';
+import 'package:fclub/feature/club/presentation/widgets/member_management/club_member_management_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-/// Step 2 of the required flow: reached by tapping the Add button on
-/// [ClubHistoryScreen]. Saving returns to History with the list already
-/// refreshed via [ClubProvider]'s reactive state.
 class ClubAddEntryScreen extends StatelessWidget {
   const ClubAddEntryScreen({super.key, this.initialMonth});
 
-  /// Pre-selects a month when launched from a specific month's detail view.
   final DateTime? initialMonth;
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<ClubProvider>();
     return Scaffold(
-      appBar: AppBar(title: Text('club_add_entry'.tr())),
-      body: ClubEntryForm(
+      appBar: AppBar(
+        title: Text(provider.isAdmin ? 'Record payment' : 'Submit payment'),
+      ),
+      body: ClubPaymentForm(
+        members: provider.members,
+        currentMember: provider.currentMember,
+        isAdmin: provider.isAdmin,
+        isSubmitting: provider.isSubmitting,
         initialMonth: initialMonth,
-        submitLabel: 'club_save_entry'.tr(),
-        onSubmit: ({
-          required contactId,
-          required month,
-          required amount,
-          required status,
-          required date,
-          note,
-        }) async {
-          await context.read<ClubProvider>().addEntry(
-                contactId: contactId,
-                month: month,
-                amount: amount,
-                status: status,
-                date: date,
-                note: note,
-              );
-          if (context.mounted) Navigator.pop(context);
-        },
+        onManageMembers: () => showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => const ClubMemberManagementSheet(),
+        ),
+        onSubmit:
+            ({
+              required memberId,
+              required amount,
+              required month,
+              required paymentMethod,
+              note,
+            }) async {
+              try {
+                await context.read<ClubProvider>().submitPayment(
+                  memberId: memberId,
+                  amount: amount,
+                  month: month,
+                  paymentMethod: paymentMethod,
+                  note: note,
+                );
+                if (!context.mounted) return;
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      provider.isAdmin
+                          ? 'Paid entry saved.'
+                          : 'Payment submitted for admin review.',
+                    ),
+                  ),
+                );
+              } catch (error) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(provider.actionError ?? '$error')),
+                );
+              }
+            },
       ),
     );
   }

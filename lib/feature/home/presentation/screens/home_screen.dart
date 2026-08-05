@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
+import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_club_stats_card.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_feature_grid.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_header.dart';
@@ -10,7 +11,6 @@ import 'package:fclub/feature/locker/presentation/provider/locker_provider.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,13 +24,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Seed both providers so the Highlights cards are populated on first load,
-    // without waiting for the user to visit each feature screen individually.
+    // Load dashboard sources before the user visits their feature screens.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       final contacts = context.read<GlobalContactsProvider>();
+      final club = context.read<ClubProvider>();
       final locker = context.read<LockerProvider>();
       await contacts.loadContacts();
+      await club.initialize();
       await locker.seedDemoData();
     });
   }

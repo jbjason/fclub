@@ -1,5 +1,5 @@
 import 'package:fclub/core/constants/my_string.dart';
-import 'package:fclub/feature/club/data/model/payment_status.dart';
+import 'package:fclub/feature/club/presentation/extensions/payment_display_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 

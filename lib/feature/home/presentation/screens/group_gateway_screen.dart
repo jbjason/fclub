@@ -8,6 +8,7 @@ import 'package:fclub/feature/home/data/models/joined_group.dart';
 import 'package:fclub/feature/home/data/repositories/group_repository.dart';
 import 'package:fclub/feature/home/presentation/group_failure_localization.dart';
 import 'package:fclub/feature/home/presentation/provider/group_join_provider.dart';
+import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
 import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_choice_divider.dart';
 import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_create_card.dart';
 import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_gateway_backdrop.dart';
@@ -156,12 +157,21 @@ class _GroupGatewayScreenState extends State<GroupGatewayScreen> {
     if (!mounted) return;
 
     if (result != null) {
+      _activateGroup(result);
       await _showJoinSuccess(result);
       return;
     }
     await _showJoinFailure(
       provider.failure ?? const GroupFailure(GroupFailureCode.unknown),
     );
+  }
+
+  void _activateGroup(JoinedGroup group) {
+    try {
+      context.read<GroupSessionProvider>().activateJoined(group);
+    } on ProviderNotFoundException {
+      // Widget previews and focused tests can render the gateway in isolation.
+    }
   }
 
   GroupUser _firebaseGroupUser() {

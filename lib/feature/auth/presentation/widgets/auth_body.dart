@@ -78,9 +78,19 @@ class _AuthBodyState extends State<AuthBody> {
   }
 
   void _pickedImage(File image) => _userImageFile = image;
+  
   void _onSubmit(BuildContext context) async {
     final provider = context.read<SignInProvider>();
     FocusScope.of(context).unfocus();
-    await provider.signIn(context);
+
+    if (isLogIn){
+      await provider.signIn(context);
+    }
+    else{
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailAddress,
+        password: password,
+      );
+    }
   }
 }

@@ -1,4 +1,4 @@
-import 'package:fclub/feature/club/data/model/payment_status.dart';
+import 'package:fclub/feature/club/data/model/club_payment.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/locker/data/locker_hive_box.dart';
 import 'package:fclub/feature/locker/data/model/locker_expense.dart';
@@ -11,8 +11,8 @@ import 'package:uuid/uuid.dart';
 /// the list of expenses recorded against it.
 class LockerProvider with ChangeNotifier {
   LockerProvider(this._clubProvider)
-      : _expensesBox = Hive.box<LockerExpense>(LockerHiveBox.expensesBoxName),
-        _metaBox = Hive.box<dynamic>(LockerHiveBox.metaBoxName);
+    : _expensesBox = Hive.box<LockerExpense>(LockerHiveBox.expensesBoxName),
+      _metaBox = Hive.box<dynamic>(LockerHiveBox.metaBoxName);
 
   final Box<LockerExpense> _expensesBox;
   final Box<dynamic> _metaBox;
@@ -22,7 +22,8 @@ class LockerProvider with ChangeNotifier {
   static const String _baseBalanceKey = 'base_balance';
 
   /// The admin-set "total collected" figure expenses are deducted from.
-  double get baseBalance => (_metaBox.get(_baseBalanceKey) as num?)?.toDouble() ?? 0;
+  double get baseBalance =>
+      (_metaBox.get(_baseBalanceKey) as num?)?.toDouble() ?? 0;
 
   List<LockerExpense> get expenses =>
       _expensesBox.values.toList()..sort((a, b) => b.date.compareTo(a.date));
@@ -35,7 +36,7 @@ class LockerProvider with ChangeNotifier {
 
   /// What Club's payment history has actually collected so far — offered
   /// as a one-tap suggestion when the admin edits the balance.
-  double get clubCollectedTotal => _clubProvider.entries
+  double get clubCollectedTotal => _clubProvider.payments
       .where((entry) => entry.status == PaymentStatus.paid)
       .fold<double>(0, (sum, entry) => sum + entry.amount);
 

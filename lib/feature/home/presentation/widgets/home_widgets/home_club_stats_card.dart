@@ -3,19 +3,17 @@ import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
-import 'package:fclub/feature/club/data/model/payment_status.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_stat_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-/// A dashboard highlight card showing the **current month's** club payment
-/// breakdown (collected, due, advance).
+/// A dashboard highlight card showing the current month's Firestore-backed
+/// Club totals (collected, pending review, and target).
 ///
 /// Data source: [ClubProvider] — watched reactively so the card updates
-/// whenever an entry is added, edited, or deleted elsewhere in the app.
+/// whenever a payment or review status changes elsewhere in the app.
 ///
 /// Tapping the card pushes [AppRouteName.club] (the monthly overview screen).
 class HomeClubStatsCard extends StatelessWidget {
@@ -32,18 +30,7 @@ class HomeClubStatsCard extends StatelessWidget {
     final currentMonth = DateTime(now.year, now.month, 1);
     final monthLabel = DateFormat('MMMM yyyy').format(currentMonth);
 
-    final monthEntries =
-        clubProvider.entries.where((e) => e.month == currentMonth).toList();
-
-    final collected = monthEntries
-        .where((e) => e.status == PaymentStatus.paid)
-        .fold<double>(0, (s, e) => s + e.amount);
-    final due = monthEntries
-        .where((e) => e.status == PaymentStatus.due)
-        .fold<double>(0, (s, e) => s + e.amount);
-    final advance = monthEntries
-        .where((e) => e.status == PaymentStatus.advance)
-        .fold<double>(0, (s, e) => s + e.amount);
+    final summary = clubProvider.currentMonthSummary;
 
     return HomeStatCardShell(
       accent: MyColor.primary,
@@ -77,10 +64,13 @@ class HomeClubStatsCard extends StatelessWidget {
                     // Month badge
                     Container(
                       padding: EdgeInsets.symmetric(
-                          horizontal: 8.w, vertical: 2.h),
+                        horizontal: 8.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
                         color: MyColor.primary.withValues(
-                            alpha: isDark ? 0.20 : 0.10),
+                          alpha: isDark ? 0.20 : 0.10,
+                        ),
                         borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Text(
@@ -108,7 +98,7 @@ class HomeClubStatsCard extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
           // ── Stats or empty hint ────────────────────────────────────────────
-          if (monthEntries.isEmpty)
+          if (clubProvider.payments.isEmpty)
             HomeStatEmptyHint(
               message: 'no_entries_this_month'.tr(),
               accent: MyColor.primary,
@@ -119,17 +109,17 @@ class HomeClubStatsCard extends StatelessWidget {
               items: [
                 HomeStatValueItem(
                   label: 'collected'.tr(),
-                  value: CurrencyFormatter.format(collected),
+                  value: CurrencyFormatter.format(summary.collected),
                   valueColor: MyColor.success,
                 ),
                 HomeStatValueItem(
-                  label: 'due'.tr(),
-                  value: CurrencyFormatter.format(due),
+                  label: 'Pending',
+                  value: CurrencyFormatter.format(summary.pending),
                   valueColor: MyColor.tertiary,
                 ),
                 HomeStatValueItem(
-                  label: 'advance'.tr(),
-                  value: CurrencyFormatter.format(advance),
+                  label: 'Target',
+                  value: CurrencyFormatter.format(summary.target),
                   valueColor: MyColor.secondary,
                 ),
               ],
