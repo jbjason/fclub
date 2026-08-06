@@ -9,19 +9,24 @@ class AuthRepository {
   AuthRepository({
     required FirebaseAuthService firebaseAuthService,
     required GlobalService globalService,
+    Future<void> Function()? sessionCleanup,
     FirebaseFirestore? firestore,
   }) : _firebaseAuthService = firebaseAuthService,
        _globalService = globalService,
+       _sessionCleanup = sessionCleanup ?? _noSessionCleanup,
        _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseAuthService _firebaseAuthService;
   final GlobalService _globalService;
+  final Future<void> Function() _sessionCleanup;
   final FirebaseFirestore _firestore;
+
+  static Future<void> _noSessionCleanup() async {}
 
   Stream<AuthUser?> authStateChanges() {
     return _firebaseAuthService.idTokenChanges().asyncMap((user) async {
       if (user == null) {
-        await _globalService.clearSession();
+        await _clearLocalSession();
         return null;
       }
 
@@ -97,7 +102,11 @@ class AuthRepository {
 
   Future<void> signOut() async {
     await _firebaseAuthService.signOut();
-    await _globalService.clearSession();
+    await _clearLocalSession();
+  }
+
+  Future<void> _clearLocalSession() async {
+    await Future.wait([_globalService.clearSession(), _sessionCleanup()]);
   }
 
   Future<void> _deleteCreatedUser(User? user) async {

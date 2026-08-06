@@ -3,6 +3,7 @@ import 'package:fclub/feature/home/data/models/created_group.dart';
 import 'package:fclub/feature/home/data/models/group_failure.dart';
 import 'package:fclub/feature/home/data/models/group_user.dart';
 import 'package:fclub/feature/home/data/models/joined_group.dart';
+import 'package:fclub/feature/home/data/models/user_group.dart';
 import 'package:fclub/feature/home/data/repositories/group_repository.dart';
 import 'package:fclub/feature/home/presentation/provider/group_join_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -78,4 +79,14 @@ class _JoinFakeRepository implements GroupRepository {
   Future<List<GroupUser>> getUsers() {
     throw UnimplementedError();
   }
+
+  @override
+  Future<UserGroup?> getUserGroup({
+    required String userId,
+    required String groupId,
+  }) async => null;
+
+  @override
+  Future<List<UserGroup>> getUserGroups({required String userId}) async =>
+      const [];
 }

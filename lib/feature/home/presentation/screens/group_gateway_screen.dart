@@ -5,21 +5,16 @@ import 'package:fclub/core/services/auth/firebase_auth_service.dart';
 import 'package:fclub/feature/home/data/models/group_failure.dart';
 import 'package:fclub/feature/home/data/models/group_user.dart';
 import 'package:fclub/feature/home/data/models/joined_group.dart';
+import 'package:fclub/feature/home/data/models/user_group.dart';
 import 'package:fclub/feature/home/data/repositories/group_repository.dart';
 import 'package:fclub/feature/home/presentation/group_failure_localization.dart';
 import 'package:fclub/feature/home/presentation/provider/group_join_provider.dart';
 import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
-import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_choice_divider.dart';
-import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_create_card.dart';
+import 'package:fclub/feature/home/presentation/provider/user_groups_provider.dart';
 import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_gateway_backdrop.dart';
-import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_gateway_header.dart';
-import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_gateway_hero.dart';
-import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_gateway_section_label.dart';
-import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_join_card.dart';
+import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_gateway_content.dart';
 import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_join_result_dialog.dart';
-import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_privacy_note.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 /// Landing page shown after authentication and before a group is selected.
@@ -45,12 +40,20 @@ class _GroupGatewayScreenState extends State<GroupGatewayScreen> {
   final _pinController = TextEditingController();
   final _pinFocusNode = FocusNode();
   GroupJoinProvider? _joinProvider;
+  UserGroupsProvider? _userGroupsProvider;
+  GroupUser? _resolvedUser;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (widget.onJoinGroup == null && _joinProvider == null) {
-      _joinProvider = GroupJoinProvider(context.read<GroupRepository>());
+      final repository = context.read<GroupRepository>();
+      _resolvedUser = widget.currentUser ?? _firebaseGroupUser();
+      _joinProvider = GroupJoinProvider(repository);
+      if (_resolvedUser!.id.isNotEmpty) {
+        _userGroupsProvider = UserGroupsProvider(repository)
+          ..load(userId: _resolvedUser!.id);
+      }
     }
   }
 
@@ -59,23 +62,35 @@ class _GroupGatewayScreenState extends State<GroupGatewayScreen> {
     _pinController.dispose();
     _pinFocusNode.dispose();
     _joinProvider?.dispose();
+    _userGroupsProvider?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = _joinProvider;
-    if (provider == null) return _buildGateway(context, isJoining: false);
+    if (provider == null) return _buildUserGroupsListener(isJoining: false);
 
     return ListenableBuilder(
       listenable: provider,
       builder: (context, _) =>
-          _buildGateway(context, isJoining: provider.isJoining),
+          _buildUserGroupsListener(isJoining: provider.isJoining),
     );
   }
 
-  Widget _buildGateway(BuildContext context, {required bool isJoining}) {
+  Widget _buildUserGroupsListener({required bool isJoining}) {
+    final provider = _userGroupsProvider;
+    if (provider == null) return _buildGateway(isJoining: isJoining);
+
+    return ListenableBuilder(
+      listenable: provider,
+      builder: (context, _) => _buildGateway(isJoining: isJoining),
+    );
+  }
+
+  Widget _buildGateway({required bool isJoining}) {
     final colorScheme = Theme.of(context).colorScheme;
+    final groupsProvider = _userGroupsProvider;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -83,57 +98,22 @@ class _GroupGatewayScreenState extends State<GroupGatewayScreen> {
         children: [
           const Positioned.fill(child: GroupGatewayBackdrop()),
           SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final contentWidth = constraints.maxWidth > 720
-                    ? 720.0
-                    : constraints.maxWidth;
-
-                return SingleChildScrollView(
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 28.h),
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: SizedBox(
-                      width: contentWidth,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const GroupGatewayHeader(),
-                          SizedBox(height: 26.h),
-                          const GroupGatewayHero(),
-                          SizedBox(height: 28.h),
-                          GroupGatewaySectionLabel(
-                            label: 'group_gateway_choose_path'.tr(),
-                          ),
-                          SizedBox(height: 12.h),
-                          GroupJoinCard(
-                            controller: _pinController,
-                            focusNode: _pinFocusNode,
-                            isJoining: isJoining,
-                            onChanged: (_) => _joinProvider?.clearFailure(),
-                            onJoin: _join,
-                          ),
-                          SizedBox(height: 18.h),
-                          const GroupChoiceDivider(),
-                          SizedBox(height: 18.h),
-                          GroupCreateCard(
-                            onCreate:
-                                widget.onCreateGroup ??
-                                () => Navigator.pushNamed(
-                                  context,
-                                  AppRouteName.groupCreate,
-                                ),
-                          ),
-                          SizedBox(height: 22.h),
-                          const GroupPrivacyNote(),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
+            child: GroupGatewayContent(
+              pinController: _pinController,
+              pinFocusNode: _pinFocusNode,
+              isJoining: isJoining,
+              onPinChanged: (_) => _joinProvider?.clearFailure(),
+              onJoin: _join,
+              onCreate:
+                  widget.onCreateGroup ??
+                  () => Navigator.pushNamed(context, AppRouteName.groupCreate),
+              showUserGroups: groupsProvider != null,
+              groups: groupsProvider?.groups ?? const [],
+              isLoadingGroups: groupsProvider?.isLoading ?? false,
+              hasGroupsError: groupsProvider?.loadFailure != null,
+              selectingGroupId: groupsProvider?.selectingGroupId,
+              onSelectGroup: _selectGroup,
+              onRetryGroups: _loadUserGroups,
             ),
           ),
         ],
@@ -149,7 +129,7 @@ class _GroupGatewayScreenState extends State<GroupGatewayScreen> {
 
     FocusScope.of(context).unfocus();
     final provider = _joinProvider!;
-    final user = widget.currentUser ?? _firebaseGroupUser();
+    final user = _resolvedUser ?? widget.currentUser ?? _firebaseGroupUser();
     final result = await provider.join(
       pinCode: _pinController.text,
       user: user,
@@ -157,7 +137,7 @@ class _GroupGatewayScreenState extends State<GroupGatewayScreen> {
     if (!mounted) return;
 
     if (result != null) {
-      _activateGroup(result);
+      await _activateJoinedGroup(result, userId: user.id);
       await _showJoinSuccess(result);
       return;
     }
@@ -166,12 +146,58 @@ class _GroupGatewayScreenState extends State<GroupGatewayScreen> {
     );
   }
 
-  void _activateGroup(JoinedGroup group) {
+  Future<void> _activateJoinedGroup(
+    JoinedGroup group, {
+    required String userId,
+  }) async {
     try {
-      context.read<GroupSessionProvider>().activateJoined(group);
+      await context.read<GroupSessionProvider>().activateJoined(
+        group: group,
+        userId: userId,
+      );
     } on ProviderNotFoundException {
       // Widget previews and focused tests can render the gateway in isolation.
     }
+  }
+
+  Future<void> _selectGroup(UserGroup group) async {
+    final provider = _userGroupsProvider;
+    final user = _resolvedUser;
+    if (provider == null || user == null) return;
+
+    final selected = await provider.select(userId: user.id, groupId: group.id);
+    if (!mounted) return;
+    if (selected == null) {
+      final failure = provider.selectionFailure;
+      final message = failure?.code == GroupFailureCode.groupNotFound
+          ? 'group_membership_missing'.tr()
+          : (failure ?? const GroupFailure(GroupFailureCode.unknown))
+                .localizationKey
+                .tr();
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(message)));
+      return;
+    }
+
+    try {
+      await context.read<GroupSessionProvider>().activateMembership(
+        group: selected,
+        userId: user.id,
+      );
+    } on ProviderNotFoundException {
+      // Widget previews and focused tests can render the gateway in isolation.
+    }
+    if (!mounted) return;
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(AppRouteName.home, (_) => false);
+  }
+
+  void _loadUserGroups() {
+    final userId = _resolvedUser?.id;
+    if (userId == null || userId.isEmpty) return;
+    _userGroupsProvider?.load(userId: userId);
   }
 
   GroupUser _firebaseGroupUser() {

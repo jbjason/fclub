@@ -2,6 +2,7 @@ import 'package:fclub/feature/home/data/models/create_group_request.dart';
 import 'package:fclub/feature/home/data/models/created_group.dart';
 import 'package:fclub/feature/home/data/models/group_user.dart';
 import 'package:fclub/feature/home/data/models/joined_group.dart';
+import 'package:fclub/feature/home/data/models/user_group.dart';
 
 abstract interface class GroupRepository {
   Future<List<GroupUser>> getUsers();
@@ -11,5 +12,12 @@ abstract interface class GroupRepository {
   Future<JoinedGroup> joinGroup({
     required String pinCode,
     required GroupUser user,
+  });
+
+  Future<List<UserGroup>> getUserGroups({required String userId});
+
+  Future<UserGroup?> getUserGroup({
+    required String userId,
+    required String groupId,
   });
 }

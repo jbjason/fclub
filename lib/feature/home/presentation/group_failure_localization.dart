@@ -11,6 +11,7 @@ extension GroupFailureLocalization on GroupFailure {
     GroupFailureCode.network => 'group_error_network',
     GroupFailureCode.tooManyMembers => 'group_error_too_many_members',
     GroupFailureCode.usersLoadFailed => 'group_error_users_load',
+    GroupFailureCode.groupsLoadFailed => 'group_error_groups_load',
     GroupFailureCode.unknown => 'group_error_unknown',
   };
 }

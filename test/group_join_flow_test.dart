@@ -6,6 +6,7 @@ import 'package:fclub/feature/home/data/models/created_group.dart';
 import 'package:fclub/feature/home/data/models/group_failure.dart';
 import 'package:fclub/feature/home/data/models/group_user.dart';
 import 'package:fclub/feature/home/data/models/joined_group.dart';
+import 'package:fclub/feature/home/data/models/user_group.dart';
 import 'package:fclub/feature/home/data/repositories/group_repository.dart';
 import 'package:fclub/feature/home/presentation/screens/group_gateway_screen.dart';
 import 'package:flutter/material.dart';
@@ -78,6 +79,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('Your groups'), findsOneWidget);
+    expect(find.text('Existing Circle'), findsOneWidget);
+
     await tester.enterText(
       find.byKey(const Key('group-secret-code-field')),
       'wrong-1',
@@ -138,4 +142,17 @@ class _GatewayJoinRepository implements GroupRepository {
   Future<List<GroupUser>> getUsers() {
     throw UnimplementedError();
   }
+
+  @override
+  Future<UserGroup?> getUserGroup({
+    required String userId,
+    required String groupId,
+  }) async => null;
+
+  @override
+  Future<List<UserGroup>> getUserGroups({
+    required String userId,
+  }) async => const [
+    UserGroup(id: 'existing-group', name: 'Existing Circle', role: 'member'),
+  ];
 }

@@ -137,13 +137,17 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
       pinCode: _pinController.text,
     );
     if (!mounted || result == null) return;
-    _activateGroup(result);
+    await _activateGroup(result);
     await _showSuccess(result);
   }
 
-  void _activateGroup(CreatedGroup group) {
+  Future<void> _activateGroup(CreatedGroup group) async {
     try {
-      context.read<GroupSessionProvider>().activateCreated(group);
+      final userId = context.read<GroupCreationProvider>().creator.id;
+      await context.read<GroupSessionProvider>().activateCreated(
+        group: group,
+        userId: userId,
+      );
     } on ProviderNotFoundException {
       // Widget previews and focused tests can render this screen in isolation.
     }

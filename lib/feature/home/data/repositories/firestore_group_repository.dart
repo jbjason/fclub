@@ -5,6 +5,7 @@ import 'package:fclub/feature/home/data/models/created_group.dart';
 import 'package:fclub/feature/home/data/models/group_failure.dart';
 import 'package:fclub/feature/home/data/models/group_user.dart';
 import 'package:fclub/feature/home/data/models/joined_group.dart';
+import 'package:fclub/feature/home/data/models/user_group.dart';
 import 'package:fclub/feature/home/data/repositories/group_repository.dart';
 
 class FirestoreGroupRepository implements GroupRepository {
@@ -13,9 +14,89 @@ class FirestoreGroupRepository implements GroupRepository {
 
   static const _groupsCollection = 'groups';
   static const _usersCollection = 'users';
+  static const _membersCollection = 'members';
   static const _maxAdditionalMembers = 498;
 
   final FirebaseFirestore _firestore;
+
+  @override
+  Future<List<UserGroup>> getUserGroups({required String userId}) async {
+    if (userId.trim().isEmpty) {
+      throw const GroupFailure(GroupFailureCode.unauthenticated);
+    }
+
+    try {
+      final memberships = await _firestore
+          .collectionGroup(_membersCollection)
+          .where(FieldPath.documentId, isEqualTo: userId)
+          .get();
+      final groupsById = <String, UserGroup>{};
+
+      await Future.wait(
+        memberships.docs.map((membership) async {
+          final groupReference = membership.reference.parent.parent;
+          if (groupReference == null ||
+              groupReference.parent.id != _groupsCollection) {
+            return;
+          }
+
+          final group = await groupReference.get();
+          if (!group.exists || group.data() == null) return;
+          final data = group.data()!;
+          groupsById[group.id] = UserGroup(
+            id: group.id,
+            name: _stringValue(data['name'], fallback: 'Fundora Group'),
+            role: _stringValue(membership.data()['role'], fallback: 'member'),
+          );
+        }),
+      );
+
+      final groups = groupsById.values.toList(growable: false)
+        ..sort(
+          (first, second) =>
+              first.name.toLowerCase().compareTo(second.name.toLowerCase()),
+        );
+      return groups;
+    } on GroupFailure {
+      rethrow;
+    } on FirebaseException catch (error) {
+      throw _mapFirebaseFailure(error, loadingGroups: true);
+    } catch (error) {
+      throw GroupFailure(GroupFailureCode.groupsLoadFailed, error);
+    }
+  }
+
+  @override
+  Future<UserGroup?> getUserGroup({
+    required String userId,
+    required String groupId,
+  }) async {
+    if (userId.trim().isEmpty || groupId.trim().isEmpty) return null;
+
+    try {
+      final groupReference = _firestore
+          .collection(_groupsCollection)
+          .doc(groupId);
+      final membership = await groupReference
+          .collection(_membersCollection)
+          .doc(userId)
+          .get();
+      if (!membership.exists || membership.data() == null) return null;
+
+      final group = await groupReference.get();
+      if (!group.exists || group.data() == null) return null;
+      final data = group.data()!;
+      return UserGroup(
+        id: group.id,
+        name: _stringValue(data['name'], fallback: 'Fundora Group'),
+        role: _stringValue(membership.data()!['role'], fallback: 'member'),
+      );
+    } on FirebaseException catch (error) {
+      throw _mapFirebaseFailure(error, loadingGroups: true);
+    } catch (error) {
+      throw GroupFailure(GroupFailureCode.groupsLoadFailed, error);
+    }
+  }
 
   @override
   Future<List<GroupUser>> getUsers() async {
@@ -148,7 +229,7 @@ class FirestoreGroupRepository implements GroupRepository {
 
       final groupDocument = groupSnapshot.docs.first;
       final groupData = groupDocument.data();
-      final members = groupDocument.reference.collection('members');
+      final members = groupDocument.reference.collection(_membersCollection);
       final existingMembers = await members.get();
       final alreadyMember = existingMembers.docs.any((document) {
         final email = document.data()['email'];
@@ -210,6 +291,7 @@ class FirestoreGroupRepository implements GroupRepository {
   GroupFailure _mapFirebaseFailure(
     FirebaseException error, {
     bool loadingUsers = false,
+    bool loadingGroups = false,
   }) {
     return switch (error.code) {
       'permission-denied' => GroupFailure(
@@ -221,6 +303,8 @@ class FirestoreGroupRepository implements GroupRepository {
       _ => GroupFailure(
         loadingUsers
             ? GroupFailureCode.usersLoadFailed
+            : loadingGroups
+            ? GroupFailureCode.groupsLoadFailed
             : GroupFailureCode.unknown,
         error,
       ),

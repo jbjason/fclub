@@ -15,6 +15,8 @@ import 'package:fclub/feature/club/data/repositories/club_repository.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/home/data/repositories/firestore_group_repository.dart';
 import 'package:fclub/feature/home/data/repositories/group_repository.dart';
+import 'package:fclub/feature/home/data/datasources/group_selection_local_data_source.dart';
+import 'package:fclub/feature/home/data/group_session_hive_box.dart';
 import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
 import 'package:fclub/feature/kurbani/data/kurbani_hive_boxes.dart';
 import 'package:fclub/feature/locker/data/locker_hive_box.dart';
@@ -35,6 +37,7 @@ void main() async {
   await FirebaseInitializer.initialize();
   await GlobalService.instance.initialize();
   await GlobalContactsHiveBox.openBox();
+  await GroupSessionHiveBox.openBox();
   await TourHiveBoxes.openBoxes();
   await KurbaniHiveBoxes.openBoxes();
   await PackCheckHiveBoxes.openBoxes();
@@ -58,15 +61,23 @@ class MyApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(create: (_) => LocaleProvider()),
           Provider<FirebaseAuthService>(create: (_) => FirebaseAuthService()),
+          Provider<GroupSelectionLocalDataSource>(
+            create: (_) => HiveGroupSelectionLocalDataSource(),
+          ),
+          ChangeNotifierProvider(
+            create: (context) => GroupSessionProvider(
+              localDataSource: context.read<GroupSelectionLocalDataSource>(),
+            ),
+          ),
           Provider<AuthRepository>(
             create: (context) => AuthRepository(
               firebaseAuthService: context.read<FirebaseAuthService>(),
               globalService: GlobalService.instance,
+              sessionCleanup: context.read<GroupSessionProvider>().clear,
             ),
           ),
           Provider<GroupRepository>(create: (_) => FirestoreGroupRepository()),
           Provider<ClubRepository>(create: (_) => FirestoreClubRepository()),
-          ChangeNotifierProvider(create: (_) => GroupSessionProvider()),
           ChangeNotifierProvider(
             create: (context) =>
                 AuthSessionProvider(context.read<AuthRepository>()),

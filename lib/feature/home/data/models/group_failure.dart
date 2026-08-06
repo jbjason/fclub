@@ -8,6 +8,7 @@ enum GroupFailureCode {
   network,
   tooManyMembers,
   usersLoadFailed,
+  groupsLoadFailed,
   unknown,
 }
 
