@@ -1,6 +1,6 @@
 import 'package:fclub/feature/club/data/model/club_payment_filter.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
-import 'package:fclub/feature/club/presentation/screens/club_payment_details_screen.dart';
+import 'package:fclub/feature/club/presentation/screens/club_details/club_payment_details_screen.dart';
 import 'package:fclub/feature/club/presentation/widgets/monthly_overview/club_payment_card.dart';
 import 'package:fclub/feature/club/presentation/widgets/monthly_overview/club_payment_filter_bar.dart';
 import 'package:fclub/feature/club/presentation/widgets/shared/club_payment_review_actions.dart';

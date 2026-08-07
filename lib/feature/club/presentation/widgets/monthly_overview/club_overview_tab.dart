@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/club/data/model/club_month_summary.dart';
-import 'package:fclub/feature/club/presentation/screens/club_month_payment_details_screen.dart';
+import 'package:fclub/feature/club/presentation/screens/club_details/club_month_payment_details_screen.dart';
 import 'package:fclub/feature/club/presentation/widgets/monthly_overview/club_month_summary_card.dart';
 import 'package:fclub/feature/club/presentation/widgets/shared/club_state_panel.dart';
 import 'package:flutter/material.dart';

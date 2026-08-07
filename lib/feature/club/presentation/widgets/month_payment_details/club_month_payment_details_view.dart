@@ -4,7 +4,7 @@ import 'package:fclub/feature/club/data/model/club_month_payment_filter.dart';
 import 'package:fclub/feature/club/data/model/club_payment.dart';
 import 'package:fclub/feature/club/presentation/provider/club_month_payment_details_provider.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
-import 'package:fclub/feature/club/presentation/screens/club_payment_details_screen.dart';
+import 'package:fclub/feature/club/presentation/screens/club_details/club_payment_details_screen.dart';
 import 'package:fclub/feature/club/presentation/widgets/month_payment_details/club_month_payment_filter_bar.dart';
 import 'package:fclub/feature/club/presentation/widgets/month_payment_details/club_month_payment_filter_sheet.dart';
 import 'package:fclub/feature/club/presentation/widgets/month_payment_details/club_month_payment_hero.dart';
