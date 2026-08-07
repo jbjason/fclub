@@ -31,12 +31,14 @@ class ClubProvider with ChangeNotifier {
   StreamSubscription<List<ClubPayment>>? _paymentsSubscription;
   StreamSubscription<List<ClubPayment>>? _filteredSubscription;
   StreamSubscription<List<ClubMember>>? _membersSubscription;
+  StreamSubscription<String?>? _adminSubscription;
 
   List<ClubPayment> _payments = const [];
   List<ClubPayment> _filteredPayments = const [];
   List<ClubMember> _members = const [];
   List<ClubMemberCandidate> _availableMembers = const [];
   ClubPaymentFilter _filter = const ClubPaymentFilter();
+  String? _adminId;
   String? _loadedGroupId;
   String? _loadError;
   String? _actionError;
@@ -44,6 +46,9 @@ class ClubProvider with ChangeNotifier {
   bool _isFiltering = false;
   bool _isSubmitting = false;
   bool _isLoadingCandidates = false;
+  bool _hasAdminSnapshot = false;
+  bool _hasMembersSnapshot = false;
+  bool _hasPaymentsSnapshot = false;
 
   List<ClubPayment> get payments => List.unmodifiable(_payments);
   List<ClubPayment> get filteredPayments =>
@@ -68,6 +73,7 @@ class ClubProvider with ChangeNotifier {
   bool get isLoadingCandidates => _isLoadingCandidates;
   String? get loadError => _loadError;
   String? get actionError => _actionError;
+  String? get adminId => _adminId;
   String? get currentUserId => _authService.currentUser?.uid;
   String? get currentUserEmail =>
       _authService.currentUser?.email?.trim().toLowerCase();
@@ -88,7 +94,7 @@ class ClubProvider with ChangeNotifier {
     return null;
   }
 
-  bool get isAdmin => currentMember?.isAdmin ?? false;
+  bool get isAdmin => isClubAdmin(adminId: _adminId, userId: currentUserId);
 
   ClubMember? memberById(String id) {
     for (final member in _members) {
@@ -145,7 +151,10 @@ class ClubProvider with ChangeNotifier {
       notifyListeners();
       return;
     }
-    if (!force && _loadedGroupId == groupId && _paymentsSubscription != null) {
+    if (!force &&
+        _loadedGroupId == groupId &&
+        _paymentsSubscription != null &&
+        _adminSubscription != null) {
       return;
     }
 
@@ -154,7 +163,11 @@ class ClubProvider with ChangeNotifier {
     _payments = const [];
     _filteredPayments = const [];
     _members = const [];
+    _adminId = null;
     _filter = const ClubPaymentFilter();
+    _hasAdminSnapshot = false;
+    _hasMembersSnapshot = false;
+    _hasPaymentsSnapshot = false;
     _isLoading = true;
     _loadError = null;
     _actionError = null;
@@ -164,13 +177,22 @@ class ClubProvider with ChangeNotifier {
       members,
     ) {
       _members = members;
+      _hasMembersSnapshot = true;
       _completeInitialLoad();
     }, onError: _handleLoadError);
+    _adminSubscription = _repository
+        .watchAdminId(groupId: groupId, projectId: projectId)
+        .listen((adminId) {
+          _adminId = adminId;
+          _hasAdminSnapshot = true;
+          _completeInitialLoad();
+        }, onError: _handleLoadError);
     _paymentsSubscription = _repository
         .watchPayments(groupId: groupId, projectId: projectId)
         .listen((payments) {
           _payments = payments;
           if (_filter.isEmpty) _filteredPayments = payments;
+          _hasPaymentsSnapshot = true;
           _completeInitialLoad();
         }, onError: _handleLoadError);
   }
@@ -288,8 +310,8 @@ class ClubProvider with ChangeNotifier {
 
   Future<void> removeMember(ClubMember member) async {
     _requireAdmin();
-    if (member.isAdmin || member.id == currentUserId) {
-      throw const ClubFailure('The group admin cannot be removed.');
+    if (member.id == _adminId) {
+      throw const ClubFailure('The Club admin cannot be removed.');
     }
     await _runAction(
       () => _repository.removeMember(
@@ -298,6 +320,27 @@ class ClubProvider with ChangeNotifier {
       ),
     );
     await loadAvailableMembers();
+  }
+
+  Future<void> transferAdmin(ClubMember member) async {
+    _requireAdmin();
+    final currentAdminId = _requireUserId();
+    if (member.id == _adminId) {
+      throw const ClubFailure('This member is already the Club admin.');
+    }
+    if (!_members.any((candidate) => candidate.id == member.id)) {
+      throw const ClubFailure('Choose an active Club member as admin.');
+    }
+    await _runAction(
+      () => _repository.transferAdmin(
+        groupId: _requireGroupId(),
+        projectId: projectId,
+        currentAdminId: currentAdminId,
+        newAdminId: member.id,
+      ),
+    );
+    _adminId = member.id;
+    notifyListeners();
   }
 
   void clearActionError() {
@@ -324,8 +367,18 @@ class ClubProvider with ChangeNotifier {
     );
   }
 
+  static bool isClubAdmin({required String? adminId, required String? userId}) {
+    return adminId != null &&
+        adminId.isNotEmpty &&
+        userId != null &&
+        userId.isNotEmpty &&
+        adminId == userId;
+  }
+
   void _completeInitialLoad() {
-    _isLoading = false;
+    if (_hasAdminSnapshot && _hasMembersSnapshot && _hasPaymentsSnapshot) {
+      _isLoading = false;
+    }
     notifyListeners();
   }
 
@@ -387,9 +440,11 @@ class ClubProvider with ChangeNotifier {
     await _paymentsSubscription?.cancel();
     await _filteredSubscription?.cancel();
     await _membersSubscription?.cancel();
+    await _adminSubscription?.cancel();
     _paymentsSubscription = null;
     _filteredSubscription = null;
     _membersSubscription = null;
+    _adminSubscription = null;
   }
 
   @override

@@ -40,13 +40,19 @@ class FirestoreGroupRepository implements GroupRepository {
             return;
           }
 
-          final group = await groupReference.get();
+          final groupFuture = groupReference.get();
+          final clubFuture = groupReference
+              .collection('projects')
+              .doc(ClubConstants.projectId)
+              .get();
+          final group = await groupFuture;
+          final club = await clubFuture;
           if (!group.exists || group.data() == null) return;
           final data = group.data()!;
           groupsById[group.id] = UserGroup(
             id: group.id,
             name: _stringValue(data['name'], fallback: 'Fundora Group'),
-            role: _stringValue(membership.data()['role'], fallback: 'member'),
+            isAdmin: _adminId(club) == userId,
           );
         }),
       );
@@ -83,13 +89,19 @@ class FirestoreGroupRepository implements GroupRepository {
           .get();
       if (!membership.exists || membership.data() == null) return null;
 
-      final group = await groupReference.get();
+      final groupFuture = groupReference.get();
+      final clubFuture = groupReference
+          .collection('projects')
+          .doc(ClubConstants.projectId)
+          .get();
+      final group = await groupFuture;
+      final club = await clubFuture;
       if (!group.exists || group.data() == null) return null;
       final data = group.data()!;
       return UserGroup(
         id: group.id,
         name: _stringValue(data['name'], fallback: 'Fundora Group'),
-        role: _stringValue(membership.data()!['role'], fallback: 'member'),
+        isAdmin: _adminId(club) == userId,
       );
     } on FirebaseException catch (error) {
       throw _mapFirebaseFailure(error, loadingGroups: true);
@@ -157,12 +169,13 @@ class FirestoreGroupRepository implements GroupRepository {
         'createdAt': FieldValue.serverTimestamp(),
         'id': groupDocument.id,
       });
-      batch.set(groupDocument.collection('projects').doc('club'), {
-        'id': 'club',
-        'name': 'Fundora Club',
-        'monthlyTargetPerMember': ClubConstants.monthlyTargetPerMember,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      batch.set(
+        groupDocument.collection('projects').doc(ClubConstants.projectId),
+        createClubProjectData(
+          adminId: request.creator.id,
+          createdAt: FieldValue.serverTimestamp(),
+        ),
+      );
 
       final membersById = <String, GroupUser>{
         for (final member in request.members) member.id: member,
@@ -171,14 +184,13 @@ class FirestoreGroupRepository implements GroupRepository {
 
       for (final entry in membersById.entries) {
         final member = entry.value;
-        batch.set(groupDocument.collection('members').doc(entry.key), {
-          'role': entry.key == request.creator.id ? 'admin' : 'member',
-          'joinedAt': FieldValue.serverTimestamp(),
-          'username': member.username,
-          'profilePic': member.profilePic,
-          'email': member.email.trim().toLowerCase(),
-          'id': entry.key,
-        });
+        batch.set(
+          groupDocument.collection('members').doc(entry.key),
+          createMemberData(
+            member: member,
+            joinedAt: FieldValue.serverTimestamp(),
+          ),
+        );
       }
 
       await batch.commit();
@@ -196,6 +208,32 @@ class FirestoreGroupRepository implements GroupRepository {
     } catch (error) {
       throw GroupFailure(GroupFailureCode.unknown, error);
     }
+  }
+
+  static Map<String, Object> createClubProjectData({
+    required String adminId,
+    required Object createdAt,
+  }) {
+    return {
+      'id': ClubConstants.projectId,
+      'name': 'Fundora Club',
+      'adminId': adminId,
+      'monthlyTargetPerMember': ClubConstants.monthlyTargetPerMember,
+      'createdAt': createdAt,
+    };
+  }
+
+  static Map<String, Object> createMemberData({
+    required GroupUser member,
+    required Object joinedAt,
+  }) {
+    return {
+      'joinedAt': joinedAt,
+      'username': member.username,
+      'profilePic': member.profilePic,
+      'email': member.email.trim().toLowerCase(),
+      'id': member.id,
+    };
   }
 
   @override
@@ -242,14 +280,14 @@ class FirestoreGroupRepository implements GroupRepository {
           fallback: user,
           normalizedEmail: normalizedEmail,
         );
-        await members.doc(user.id).set({
-          'role': 'member',
-          'joinedAt': FieldValue.serverTimestamp(),
-          'username': member.username,
-          'profilePic': member.profilePic,
-          'email': normalizedEmail,
-          'id': user.id,
-        });
+        await members
+            .doc(user.id)
+            .set(
+              createMemberData(
+                member: member.copyWith(id: user.id, email: normalizedEmail),
+                joinedAt: FieldValue.serverTimestamp(),
+              ),
+            );
       }
 
       return JoinedGroup(
@@ -286,6 +324,11 @@ class FirestoreGroupRepository implements GroupRepository {
 
   String _stringValue(Object? value, {required String fallback}) {
     return value is String && value.trim().isNotEmpty ? value.trim() : fallback;
+  }
+
+  String? _adminId(DocumentSnapshot<Map<String, dynamic>> project) {
+    final value = project.data()?['adminId'];
+    return value is String && value.trim().isNotEmpty ? value.trim() : null;
   }
 
   GroupFailure _mapFirebaseFailure(

@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/services/auth/firebase_auth_service.dart';
+import 'package:fclub/feature/auth/presentation/provider/auth_session_provider.dart';
 import 'package:fclub/feature/home/data/models/group_failure.dart';
 import 'package:fclub/feature/home/data/models/group_user.dart';
 import 'package:fclub/feature/home/data/models/joined_group.dart';
@@ -23,11 +24,13 @@ class GroupGatewayScreen extends StatefulWidget {
     super.key,
     this.onJoinGroup,
     this.onCreateGroup,
+    this.onSignOut,
     this.currentUser,
   });
 
   final VoidCallback? onJoinGroup;
   final VoidCallback? onCreateGroup;
+  final VoidCallback? onSignOut;
 
   /// Optional injection point used by previews and widget tests.
   final GroupUser? currentUser;
@@ -42,6 +45,7 @@ class _GroupGatewayScreenState extends State<GroupGatewayScreen> {
   GroupJoinProvider? _joinProvider;
   UserGroupsProvider? _userGroupsProvider;
   GroupUser? _resolvedUser;
+  bool _isSigningOut = false;
 
   @override
   void didChangeDependencies() {
@@ -114,11 +118,39 @@ class _GroupGatewayScreenState extends State<GroupGatewayScreen> {
               selectingGroupId: groupsProvider?.selectingGroupId,
               onSelectGroup: _selectGroup,
               onRetryGroups: _loadUserGroups,
+              isSigningOut: _isSigningOut,
+              onSignOut: _signOut,
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _signOut() async {
+    if (_isSigningOut) return;
+
+    final injectedAction = widget.onSignOut;
+    if (injectedAction != null) {
+      injectedAction();
+      return;
+    }
+
+    setState(() => _isSigningOut = true);
+    final result = await context.read<AuthSessionProvider>().signOut();
+    if (!mounted) return;
+
+    setState(() => _isSigningOut = false);
+    if (!result.isSuccess) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(result.message)));
+      return;
+    }
+
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(AppRouteName.authGate, (_) => false);
   }
 
   Future<void> _join() async {

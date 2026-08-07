@@ -1,12 +1,48 @@
 import 'package:fclub/feature/club/data/model/club_month_summary.dart';
+import 'package:fclub/feature/club/data/model/club_member.dart';
 import 'package:fclub/feature/club/data/model/club_payment.dart';
 import 'package:fclub/feature/club/data/model/club_payment_filter.dart';
+import 'package:fclub/feature/club/data/repositories/firestore_club_repository.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('uses the canonical Firestore month key', () {
     expect(ClubProvider.monthKey(DateTime(2026, 8, 19)), '2026-08');
+  });
+
+  test('Club admin authority comes only from matching adminId', () {
+    expect(
+      ClubProvider.isClubAdmin(adminId: 'creator-id', userId: 'creator-id'),
+      isTrue,
+    );
+    expect(
+      ClubProvider.isClubAdmin(adminId: 'creator-id', userId: 'member-id'),
+      isFalse,
+    );
+    expect(
+      ClubProvider.isClubAdmin(adminId: null, userId: 'creator-id'),
+      isFalse,
+    );
+  });
+
+  test('Club member documents do not store a role', () {
+    final joinedAt = DateTime(2026, 8, 7);
+    const member = ClubMemberCandidate(
+      id: 'member-id',
+      name: 'Member',
+      email: 'MEMBER@FUNDORA.APP',
+      profilePic: '',
+    );
+
+    final data = FirestoreClubRepository.createMemberData(
+      member: member,
+      joinedAt: joinedAt,
+    );
+
+    expect(data['email'], 'member@fundora.app');
+    expect(data['joinedAt'], joinedAt);
+    expect(data, isNot(contains('role')));
   });
 
   test('monthly summary uses a 5000 target for every member', () {

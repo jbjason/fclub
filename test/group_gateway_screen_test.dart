@@ -33,6 +33,7 @@ void main() {
   ) async {
     var joinTaps = 0;
     var createTaps = 0;
+    var signOutTaps = 0;
 
     await _pumpGateway(
       tester,
@@ -40,11 +41,16 @@ void main() {
       themeMode: ThemeMode.light,
       onJoin: () => joinTaps++,
       onCreate: () => createTaps++,
+      onSignOut: () => signOutTaps++,
     );
 
     expect(find.text('Find your circle'), findsOneWidget);
     expect(find.text('Enter a group'), findsOneWidget);
     expect(find.text('Create your own group'), findsOneWidget);
+    expect(find.byIcon(Icons.logout_rounded), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('group-gateway-logout-button')));
+    await tester.pump();
 
     await tester.enterText(
       find.byKey(const Key('group-secret-code-field')),
@@ -62,6 +68,7 @@ void main() {
 
     expect(joinTaps, 1);
     expect(createTaps, 1);
+    expect(signOutTaps, 1);
     expect(tester.takeException(), isNull);
   });
 
@@ -74,6 +81,7 @@ void main() {
       themeMode: ThemeMode.dark,
       onJoin: () {},
       onCreate: () {},
+      onSignOut: () {},
     );
 
     expect(find.text('আপনার আপনজনদের খুঁজে নিন'), findsOneWidget);
@@ -93,6 +101,7 @@ Future<void> _pumpGateway(
   required ThemeMode themeMode,
   required VoidCallback onJoin,
   required VoidCallback onCreate,
+  required VoidCallback onSignOut,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -122,6 +131,7 @@ Future<void> _pumpGateway(
             home: GroupGatewayScreen(
               onJoinGroup: onJoin,
               onCreateGroup: onCreate,
+              onSignOut: onSignOut,
             ),
           ),
         ),

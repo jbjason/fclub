@@ -115,7 +115,6 @@ const _member = ClubMember(
   name: 'জে বি জেসন',
   email: 'member@fundora.app',
   profilePic: '',
-  role: 'member',
 );
 
 final _payment = ClubPayment(

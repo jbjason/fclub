@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/feature/club/data/model/club_member.dart';
@@ -23,7 +24,9 @@ class _ClubMemberManagementSheetState extends State<ClubMemberManagementSheet> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<ClubProvider>().loadAvailableMembers();
+      if (!mounted) return;
+      final provider = context.read<ClubProvider>();
+      if (provider.isAdmin) provider.loadAvailableMembers();
     });
   }
 
@@ -93,14 +96,18 @@ class _ClubMemberManagementSheetState extends State<ClubMemberManagementSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Manage Club members',
+                          'club_manage_members'.tr(),
                           style: TextStyle(
                             fontFamily: MyString.poppinsBold,
                             fontSize: 16.sp,
                           ),
                         ),
                         Text(
-                          '${provider.members.length} active members · admin only',
+                          'club_manage_members_subtitle'.tr(
+                            namedArgs: {
+                              'count': provider.members.length.toString(),
+                            },
+                          ),
                           style: TextStyle(
                             fontFamily: MyString.rubikRegular,
                             fontSize: 10.sp,
@@ -122,23 +129,25 @@ class _ClubMemberManagementSheetState extends State<ClubMemberManagementSheet> {
                 controller: scrollController,
                 padding: EdgeInsets.fromLTRB(18.w, 4.h, 18.w, 28.h),
                 children: [
-                  const _SectionTitle('CURRENT MEMBERS'),
+                  _SectionTitle('club_current_members'.tr()),
                   SizedBox(height: 5.h),
                   ...provider.members.map(
                     (member) => ClubMemberTile(
                       member: member,
-                      canRemove: !provider.isSubmitting,
+                      isAdmin: member.id == provider.adminId,
+                      canManage: !provider.isSubmitting,
+                      onTransferAdmin: () => _confirmTransfer(context, member),
                       onRemove: () => _confirmRemove(context, member),
                     ),
                   ),
                   SizedBox(height: 16.h),
-                  const _SectionTitle('ADD FROM FUNDORA'),
+                  _SectionTitle('club_add_from_fundora'.tr()),
                   SizedBox(height: 9.h),
                   TextField(
                     onChanged: (value) => setState(() => _query = value),
-                    decoration: const InputDecoration(
-                      hintText: 'Search name or email',
-                      prefixIcon: Icon(Icons.search_rounded),
+                    decoration: InputDecoration(
+                      hintText: 'club_search_name_email'.tr(),
+                      prefixIcon: const Icon(Icons.search_rounded),
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -161,7 +170,7 @@ class _ClubMemberManagementSheetState extends State<ClubMemberManagementSheet> {
                           TextButton.icon(
                             onPressed: provider.loadAvailableMembers,
                             icon: const Icon(Icons.refresh_rounded),
-                            label: const Text('Try again'),
+                            label: Text('group_retry'.tr()),
                           ),
                         ],
                       ),
@@ -171,8 +180,8 @@ class _ClubMemberManagementSheetState extends State<ClubMemberManagementSheet> {
                       padding: EdgeInsets.symmetric(vertical: 24.h),
                       child: Text(
                         _query.isEmpty
-                            ? 'Everyone is already in this group.'
-                            : 'No matching Fundora users.',
+                            ? 'club_everyone_added'.tr()
+                            : 'club_no_matching_users'.tr(),
                         textAlign: TextAlign.center,
                         style: TextStyle(color: colors.onSurfaceVariant),
                       ),
@@ -201,22 +210,67 @@ class _ClubMemberManagementSheetState extends State<ClubMemberManagementSheet> {
     }
   }
 
-  Future<void> _confirmRemove(BuildContext context, ClubMember member) async {
+  Future<void> _confirmTransfer(BuildContext context, ClubMember member) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Remove ${member.name}?'),
-        content: const Text(
-          'They will lose access to this group. Existing payment records remain.',
+        icon: const Icon(
+          Icons.admin_panel_settings_rounded,
+          color: MyColor.primary,
+        ),
+        title: Text(
+          'club_transfer_admin_title'.tr(namedArgs: {'name': member.name}),
+        ),
+        content: Text(
+          'club_transfer_admin_message'.tr(namedArgs: {'name': member.name}),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            icon: const Icon(Icons.swap_horiz_rounded),
+            label: Text('club_transfer_admin_confirm'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await context.read<ClubProvider>().transferAdmin(member);
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'club_transfer_admin_success'.tr(namedArgs: {'name': member.name}),
+          ),
+        ),
+      );
+      Navigator.pop(context);
+    } catch (error) {
+      if (context.mounted) _showError(context, error);
+    }
+  }
+
+  Future<void> _confirmRemove(BuildContext context, ClubMember member) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          'club_remove_member_title'.tr(namedArgs: {'name': member.name}),
+        ),
+        content: Text('club_remove_member_message'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text('cancel'.tr()),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Remove'),
+            child: Text('club_remove_member'.tr()),
           ),
         ],
       ),

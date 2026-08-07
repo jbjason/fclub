@@ -67,9 +67,10 @@ class AuthButtons extends StatelessWidget {
                   child: TextButton(
                     onPressed: onChanginSingInState,
                     child: Text(
-                      isLogin
-                          ? 'Create new account'
-                          : 'I already have an account',
+                      (isLogin
+                              ? 'auth_create_new_account'
+                              : 'auth_already_have_account')
+                          .tr(),
                       style: const TextStyle(fontSize: 12, color: Colors.white),
                     ),
                   ),

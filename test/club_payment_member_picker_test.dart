@@ -10,21 +10,18 @@ void main() {
     name: 'Admin User',
     email: 'admin@example.com',
     profilePic: '',
-    role: 'admin',
   );
   const memberOne = ClubMember(
     id: 'member-one',
     name: 'Member One',
     email: 'one@example.com',
     profilePic: '',
-    role: 'member',
   );
   const memberTwo = ClubMember(
     id: 'member-two',
     name: 'Member Two',
     email: 'two@example.com',
     profilePic: '',
-    role: 'member',
   );
   const members = [admin, memberOne, memberTwo];
 

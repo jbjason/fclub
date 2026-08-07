@@ -15,7 +15,6 @@ abstract final class ClubMemberModel {
         'photoUrl',
         'photoURL',
       ], ''),
-      role: _first(data, const ['role'], 'member').toLowerCase(),
     );
   }
 

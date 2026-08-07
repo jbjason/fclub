@@ -25,6 +25,8 @@ class GroupGatewayContent extends StatelessWidget {
     required this.selectingGroupId,
     required this.onSelectGroup,
     required this.onRetryGroups,
+    required this.isSigningOut,
+    required this.onSignOut,
   });
 
   final TextEditingController pinController;
@@ -40,6 +42,8 @@ class GroupGatewayContent extends StatelessWidget {
   final String? selectingGroupId;
   final ValueChanged<UserGroup> onSelectGroup;
   final VoidCallback onRetryGroups;
+  final bool isSigningOut;
+  final VoidCallback onSignOut;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +69,10 @@ class GroupGatewayContent extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const GroupGatewayHeader(),
+                  GroupGatewayHeader(
+                    isSigningOut: isSigningOut,
+                    onSignOut: onSignOut,
+                  ),
                   SizedBox(height: majorGap),
                   const GroupGatewayHero(),
                   if (showUserGroups) ...[

@@ -16,7 +16,7 @@ class FirestoreClubRepository implements ClubRepository {
 
   final FirebaseFirestore _firestore;
 
-  CollectionReference<Map<String, dynamic>> _payments(
+  DocumentReference<Map<String, dynamic>> _project(
     String groupId,
     String projectId,
   ) {
@@ -24,8 +24,14 @@ class FirestoreClubRepository implements ClubRepository {
         .collection('groups')
         .doc(groupId)
         .collection('projects')
-        .doc(projectId)
-        .collection('payments');
+        .doc(projectId);
+  }
+
+  CollectionReference<Map<String, dynamic>> _payments(
+    String groupId,
+    String projectId,
+  ) {
+    return _project(groupId, projectId).collection('payments');
   }
 
   CollectionReference<Map<String, dynamic>> _members(String groupId) {
@@ -80,6 +86,21 @@ class FirestoreClubRepository implements ClubRepository {
           (first, second) =>
               first.name.toLowerCase().compareTo(second.name.toLowerCase()),
         );
+      }
+    } on FirebaseException catch (error) {
+      throw _failure(error);
+    }
+  }
+
+  @override
+  Stream<String?> watchAdminId({
+    required String groupId,
+    required String projectId,
+  }) async* {
+    try {
+      await for (final snapshot in _project(groupId, projectId).snapshots()) {
+        final value = snapshot.data()?['adminId'];
+        yield value is String && value.trim().isNotEmpty ? value.trim() : null;
       }
     } on FirebaseException catch (error) {
       throw _failure(error);
@@ -196,14 +217,14 @@ class FirestoreClubRepository implements ClubRepository {
     required ClubMemberCandidate member,
   }) async {
     try {
-      await _members(groupId).doc(member.id).set({
-        'id': member.id,
-        'username': member.name,
-        'email': member.email.trim().toLowerCase(),
-        'profilePic': member.profilePic,
-        'role': 'member',
-        'joinedAt': FieldValue.serverTimestamp(),
-      });
+      await _members(groupId)
+          .doc(member.id)
+          .set(
+            createMemberData(
+              member: member,
+              joinedAt: FieldValue.serverTimestamp(),
+            ),
+          );
     } on FirebaseException catch (error) {
       throw _failure(error);
     }
@@ -219,6 +240,51 @@ class FirestoreClubRepository implements ClubRepository {
     } on FirebaseException catch (error) {
       throw _failure(error);
     }
+  }
+
+  @override
+  Future<void> transferAdmin({
+    required String groupId,
+    required String projectId,
+    required String currentAdminId,
+    required String newAdminId,
+  }) async {
+    final project = _project(groupId, projectId);
+    final newAdmin = _members(groupId).doc(newAdminId);
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final projectSnapshot = await transaction.get(project);
+        final newAdminSnapshot = await transaction.get(newAdmin);
+        final storedAdminId = projectSnapshot.data()?['adminId'];
+        if (storedAdminId != currentAdminId) {
+          throw const ClubFailure(
+            'Only the current Club admin can transfer administration.',
+          );
+        }
+        if (!newAdminSnapshot.exists) {
+          throw const ClubFailure('Choose an active Club member as admin.');
+        }
+        transaction.update(project, {
+          'adminId': newAdminId,
+          'adminUpdatedAt': FieldValue.serverTimestamp(),
+        });
+      });
+    } on FirebaseException catch (error) {
+      throw _failure(error);
+    }
+  }
+
+  static Map<String, Object> createMemberData({
+    required ClubMemberCandidate member,
+    required Object joinedAt,
+  }) {
+    return {
+      'id': member.id,
+      'username': member.name,
+      'email': member.email.trim().toLowerCase(),
+      'profilePic': member.profilePic,
+      'joinedAt': joinedAt,
+    };
   }
 
   Object? _cleanNote(String? note) {

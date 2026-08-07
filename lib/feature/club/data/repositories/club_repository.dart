@@ -11,6 +11,11 @@ abstract interface class ClubRepository {
 
   Stream<List<ClubMember>> watchMembers({required String groupId});
 
+  Stream<String?> watchAdminId({
+    required String groupId,
+    required String projectId,
+  });
+
   Future<List<ClubMemberCandidate>> getAvailableMembers({
     required String groupId,
   });
@@ -49,5 +54,12 @@ abstract interface class ClubRepository {
   Future<void> removeMember({
     required String groupId,
     required String memberId,
+  });
+
+  Future<void> transferAdmin({
+    required String groupId,
+    required String projectId,
+    required String currentAdminId,
+    required String newAdminId,
   });
 }

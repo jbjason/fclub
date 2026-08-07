@@ -153,6 +153,6 @@ class _GatewayJoinRepository implements GroupRepository {
   Future<List<UserGroup>> getUserGroups({
     required String userId,
   }) async => const [
-    UserGroup(id: 'existing-group', name: 'Existing Circle', role: 'member'),
+    UserGroup(id: 'existing-group', name: 'Existing Circle', isAdmin: false),
   ];
 }

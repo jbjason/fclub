@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/club/presentation/screens/club_details/club_add_entry_screen.dart';
@@ -48,7 +49,7 @@ class _ClubMonthlyOverviewScreenState extends State<ClubMonthlyOverviewScreen>
         actions: [
           if (provider.isAdmin)
             IconButton.filledTonal(
-              tooltip: 'Manage members',
+              tooltip: 'club_manage_members'.tr(),
               onPressed: () => showModalBottomSheet<void>(
                 context: context,
                 isScrollControlled: true,

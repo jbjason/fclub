@@ -2,11 +2,19 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_language_toggle.dart';
+import 'package:fclub/feature/home/presentation/widgets/group_gateway_widgets/group_logout_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class GroupGatewayHeader extends StatelessWidget {
-  const GroupGatewayHeader({super.key});
+  const GroupGatewayHeader({
+    super.key,
+    required this.isSigningOut,
+    required this.onSignOut,
+  });
+
+  final bool isSigningOut;
+  final VoidCallback onSignOut;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +68,8 @@ class GroupGatewayHeader extends StatelessWidget {
           ],
         ),
         const Spacer(),
+        GroupLogoutButton(isLoading: isSigningOut, onPressed: onSignOut),
+        SizedBox(width: 8.w),
         const GroupLanguageToggle(),
       ],
     );

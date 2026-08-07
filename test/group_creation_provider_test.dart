@@ -5,6 +5,7 @@ import 'package:fclub/feature/home/data/models/group_user.dart';
 import 'package:fclub/feature/home/data/models/joined_group.dart';
 import 'package:fclub/feature/home/data/models/user_group.dart';
 import 'package:fclub/feature/home/data/repositories/group_repository.dart';
+import 'package:fclub/feature/home/data/repositories/firestore_group_repository.dart';
 import 'package:fclub/feature/home/presentation/group_pin_generator.dart';
 import 'package:fclub/feature/home/presentation/provider/group_creation_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -103,6 +104,32 @@ void main() {
     final pin = GroupPinGenerator.generate();
 
     expect(pin, matches(RegExp(r'^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{3}$')));
+  });
+
+  test('Club project stores the creator as adminId', () {
+    final createdAt = DateTime(2026, 8, 7);
+
+    final data = FirestoreGroupRepository.createClubProjectData(
+      adminId: signedInUser.id,
+      createdAt: createdAt,
+    );
+
+    expect(data['id'], 'club');
+    expect(data['adminId'], signedInUser.id);
+    expect(data['createdAt'], createdAt);
+  });
+
+  test('group member documents do not store a role', () {
+    final joinedAt = DateTime(2026, 8, 7);
+
+    final data = FirestoreGroupRepository.createMemberData(
+      member: signedInUser,
+      joinedAt: joinedAt,
+    );
+
+    expect(data['id'], signedInUser.id);
+    expect(data['joinedAt'], joinedAt);
+    expect(data, isNot(contains('role')));
   });
 }
 

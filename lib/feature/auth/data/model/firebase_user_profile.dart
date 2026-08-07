@@ -10,6 +10,6 @@ class FirebaseUserProfile {
   final String name;
 
   Map<String, dynamic> toFirestore() {
-    return {'email': email, 'groupId': '', 'id': id, 'image': '', 'name': name};
+    return {'email': email, 'id': id, 'image': '', 'name': name};
   }
 }

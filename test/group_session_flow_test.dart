@@ -1,7 +1,6 @@
 import 'package:fclub/feature/home/data/datasources/group_selection_local_data_source.dart';
 import 'package:fclub/feature/home/data/models/create_group_request.dart';
 import 'package:fclub/feature/home/data/models/created_group.dart';
-import 'package:fclub/feature/home/data/models/group_failure.dart';
 import 'package:fclub/feature/home/data/models/group_user.dart';
 import 'package:fclub/feature/home/data/models/joined_group.dart';
 import 'package:fclub/feature/home/data/models/user_group.dart';
@@ -15,7 +14,7 @@ void main() {
   const membership = UserGroup(
     id: 'group-1',
     name: 'Aurora Circle',
-    role: 'admin',
+    isAdmin: true,
   );
 
   test('activating and clearing a group updates the local selection', () async {
