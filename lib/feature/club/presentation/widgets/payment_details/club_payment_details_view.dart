@@ -28,11 +28,12 @@ class ClubPaymentDetailsView extends StatelessWidget {
     final clubProvider = context.watch<ClubProvider>();
     final detailsProvider = context.watch<ClubPaymentDetailsProvider>();
     final member = clubProvider.memberById(userId);
-    final allPayments = detailsProvider.memberPayments(clubProvider.payments);
+    final accessiblePayments = clubProvider.visiblePayments;
+    final allPayments = detailsProvider.memberPayments(accessiblePayments);
     final visiblePayments = detailsProvider.filteredPayments(
-      clubProvider.payments,
+      accessiblePayments,
     );
-    final summary = detailsProvider.summary(clubProvider.payments);
+    final summary = detailsProvider.summary(accessiblePayments);
     final displayName = member?.name.trim().isNotEmpty == true
         ? member!.name.trim()
         : fallbackName?.trim().isNotEmpty == true
@@ -69,7 +70,7 @@ class ClubPaymentDetailsView extends StatelessWidget {
                   onMoreFilters: () => _showFilters(
                     context,
                     detailsProvider,
-                    detailsProvider.availableMonths(clubProvider.payments),
+                    detailsProvider.availableMonths(accessiblePayments),
                   ),
                 ),
               ),

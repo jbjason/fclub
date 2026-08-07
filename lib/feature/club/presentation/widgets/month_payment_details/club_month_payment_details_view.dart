@@ -21,17 +21,16 @@ class ClubMonthPaymentDetailsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final clubProvider = context.watch<ClubProvider>();
     final detailsProvider = context.watch<ClubMonthPaymentDetailsProvider>();
-    final allPayments = detailsProvider.monthPayments(clubProvider.payments);
+    final accessiblePayments = clubProvider.visiblePayments;
+    final allPayments = detailsProvider.monthPayments(accessiblePayments);
     final visiblePayments = detailsProvider.filteredPayments(
-      clubProvider.payments,
+      accessiblePayments,
     );
     final summary = detailsProvider.summary(
-      payments: clubProvider.payments,
-      memberCount: clubProvider.members.length,
+      payments: accessiblePayments,
+      memberCount: clubProvider.isAdmin ? clubProvider.members.length : 1,
     );
-    final paymentUserIds = detailsProvider.paymentUserIds(
-      clubProvider.payments,
-    );
+    final paymentUserIds = detailsProvider.paymentUserIds(accessiblePayments);
     final filterMembers = clubProvider.members
         .where((member) => paymentUserIds.contains(member.id))
         .toList(growable: false);

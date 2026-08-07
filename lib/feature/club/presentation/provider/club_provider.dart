@@ -48,6 +48,16 @@ class ClubProvider with ChangeNotifier {
   List<ClubPayment> get payments => List.unmodifiable(_payments);
   List<ClubPayment> get filteredPayments =>
       List.unmodifiable(_filteredPayments);
+  List<ClubPayment> get visiblePayments => paymentsVisibleTo(
+    _payments,
+    isAdmin: isAdmin,
+    memberId: currentMember?.id ?? currentUserId,
+  );
+  List<ClubPayment> get visibleFilteredPayments => paymentsVisibleTo(
+    _filteredPayments,
+    isAdmin: isAdmin,
+    memberId: currentMember?.id ?? currentUserId,
+  );
   List<ClubMember> get members => List.unmodifiable(_members);
   List<ClubMemberCandidate> get availableMembers =>
       List.unmodifiable(_availableMembers);
@@ -298,6 +308,21 @@ class ClubProvider with ChangeNotifier {
 
   static String monthKey(DateTime month) =>
       '${month.year.toString().padLeft(4, '0')}-${month.month.toString().padLeft(2, '0')}';
+
+  static List<ClubPayment> paymentsVisibleTo(
+    Iterable<ClubPayment> payments, {
+    required bool isAdmin,
+    required String? memberId,
+  }) {
+    if (isAdmin) return List<ClubPayment>.unmodifiable(payments);
+    if (memberId == null || memberId.isEmpty) return const [];
+    return List<ClubPayment>.unmodifiable(
+      payments.where(
+        (payment) =>
+            payment.status == PaymentStatus.paid || payment.userId == memberId,
+      ),
+    );
+  }
 
   void _completeInitialLoad() {
     _isLoading = false;

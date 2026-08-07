@@ -49,16 +49,99 @@ void main() {
       expect(next.paymentMethod, PaymentMethod.mobileWallet);
     },
   );
+
+  test('admin can see every member payment in every status', () {
+    final payments = [
+      _payment(
+        id: 'own-pending',
+        userId: 'member-1',
+        amount: 5000,
+        status: PaymentStatus.pending,
+      ),
+      _payment(
+        id: 'other-rejected',
+        userId: 'member-2',
+        amount: 2500,
+        status: PaymentStatus.rejected,
+      ),
+    ];
+
+    final visible = ClubProvider.paymentsVisibleTo(
+      payments,
+      isAdmin: true,
+      memberId: 'member-1',
+    );
+
+    expect(visible.map((payment) => payment.id), [
+      'own-pending',
+      'other-rejected',
+    ]);
+  });
+
+  test('member sees every paid payment and only their own other statuses', () {
+    final payments = [
+      _payment(
+        id: 'own-paid',
+        userId: 'member-1',
+        amount: 5000,
+        status: PaymentStatus.paid,
+      ),
+      _payment(
+        id: 'own-pending',
+        userId: 'member-1',
+        amount: 5000,
+        status: PaymentStatus.pending,
+      ),
+      _payment(
+        id: 'own-rejected',
+        userId: 'member-1',
+        amount: 2500,
+        status: PaymentStatus.rejected,
+      ),
+      _payment(
+        id: 'other-paid',
+        userId: 'member-2',
+        amount: 5000,
+        status: PaymentStatus.paid,
+      ),
+      _payment(
+        id: 'other-pending',
+        userId: 'member-2',
+        amount: 5000,
+        status: PaymentStatus.pending,
+      ),
+      _payment(
+        id: 'other-rejected',
+        userId: 'member-2',
+        amount: 2500,
+        status: PaymentStatus.rejected,
+      ),
+    ];
+
+    final visible = ClubProvider.paymentsVisibleTo(
+      payments,
+      isAdmin: false,
+      memberId: 'member-1',
+    );
+
+    expect(visible.map((payment) => payment.id), [
+      'own-paid',
+      'own-pending',
+      'own-rejected',
+      'other-paid',
+    ]);
+  });
 }
 
 ClubPayment _payment({
   required String id,
+  String? userId,
   required double amount,
   required PaymentStatus status,
 }) {
   return ClubPayment(
     id: id,
-    userId: 'member-$id',
+    userId: userId ?? 'member-$id',
     amount: amount,
     month: '2026-08',
     status: status,

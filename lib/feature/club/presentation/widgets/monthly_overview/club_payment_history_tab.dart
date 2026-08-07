@@ -15,6 +15,7 @@ class ClubPaymentHistoryTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ClubProvider>();
+    final visiblePayments = provider.visibleFilteredPayments;
     return Column(
       children: [
         ClubPaymentFilterBar(
@@ -25,7 +26,7 @@ class ClubPaymentHistoryTab extends StatelessWidget {
         Expanded(
           child: provider.isFiltering
               ? const Center(child: CircularProgressIndicator())
-              : provider.filteredPayments.isEmpty
+              : visiblePayments.isEmpty
               ? ClubStatePanel(
                   icon: provider.filter.isEmpty
                       ? Icons.receipt_long_rounded
@@ -45,9 +46,9 @@ class ClubPaymentHistoryTab extends StatelessWidget {
                   onRefresh: () => provider.initialize(force: true),
                   child: ListView.builder(
                     padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 100.h),
-                    itemCount: provider.filteredPayments.length,
+                    itemCount: visiblePayments.length,
                     itemBuilder: (context, index) {
-                      final payment = provider.filteredPayments[index];
+                      final payment = visiblePayments[index];
                       return ClubPaymentCard(
                         payment: payment,
                         member: provider.memberById(payment.userId),
