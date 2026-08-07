@@ -10,6 +10,12 @@
   "auth_email_invalid": "Enter a valid email address.",
   "auth_password_required": "Password is required.",
   "auth_password_length": "Password must be at least 6 characters.",
+  "auth_forgot_password": "Forgot password?",
+  "auth_reset_password_title": "Reset your password",
+  "auth_reset_password_description": "Enter your account email. Firebase will send a secure link where you can choose a new password.",
+  "auth_send_reset_link": "Send reset link",
+  "auth_back_to_sign_in": "Back to sign in",
+  "auth_reset_email_sent": "Password reset link sent. Check your email inbox.",
 
   "group_gateway_brand_label": "GROUP SPACES",
   "group_gateway_eyebrow": "YOUR FUNDORA SPACE",

@@ -10,6 +10,12 @@
   "auth_email_invalid": "সঠিক ইমেইল ঠিকানা লিখুন।",
   "auth_password_required": "পাসওয়ার্ড প্রয়োজন।",
   "auth_password_length": "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।",
+  "auth_forgot_password": "পাসওয়ার্ড ভুলে গেছেন?",
+  "auth_reset_password_title": "পাসওয়ার্ড রিসেট করুন",
+  "auth_reset_password_description": "আপনার অ্যাকাউন্টের ইমেইল লিখুন। নতুন পাসওয়ার্ড বেছে নেওয়ার জন্য ফায়ারবেস একটি নিরাপদ লিংক পাঠাবে।",
+  "auth_send_reset_link": "রিসেট লিংক পাঠান",
+  "auth_back_to_sign_in": "সাইন ইনে ফিরে যান",
+  "auth_reset_email_sent": "পাসওয়ার্ড রিসেট লিংক পাঠানো হয়েছে। আপনার ইমেইল ইনবক্স দেখুন।",
 
   "group_gateway_brand_label": "গ্রুপ স্পেস",
   "group_gateway_eyebrow": "আপনার ফান্ডোরা স্পেস",

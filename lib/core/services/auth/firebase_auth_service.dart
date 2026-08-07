@@ -30,6 +30,10 @@ class FirebaseAuthService {
     );
   }
 
+  Future<void> sendPasswordResetEmail({required String email}) {
+    return _firebaseAuth.sendPasswordResetEmail(email: email);
+  }
+
   Future<void> signOut() {
     return _firebaseAuth.signOut();
   }

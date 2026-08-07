@@ -1,9 +1,10 @@
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/services/locale_service.dart';
+import 'package:fclub/core/util/my_dialog.dart';
+import 'package:fclub/feature/auth/data/model/auth_action_result.dart';
 import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:fclub/feature/auth/presentation/widgets/auth_buttons.dart';
+import 'package:fclub/feature/auth/presentation/widgets/auth_password_reset_sheet.dart';
 import 'package:fclub/feature/auth/presentation/widgets/auth_top_text.dart';
 import 'package:fclub/feature/auth/presentation/widgets/auth_textfield.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,6 @@ class AuthBody extends StatefulWidget {
 
 class _AuthBodyState extends State<AuthBody> {
   bool isLogIn = true;
-  File? _userImageFile;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class _AuthBodyState extends State<AuthBody> {
           key: viewModel.formKey,
           child: Column(
             children: [
-              AuthTopText(isLogin: isLogIn, pickedImage: _pickedImage),
+              AuthTopText(isLogin: isLogIn, pickedImage: (_) {}),
               Padding(
                 padding: const EdgeInsets.only(
                   left: 8,
@@ -43,6 +43,9 @@ class _AuthBodyState extends State<AuthBody> {
                       controller: viewModel.emailController,
                       title: 'email_address'.tr(),
                       prefixIcon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.email],
                       validator: viewModel.validateEmail,
                     ),
                     const SizedBox(height: 10),
@@ -60,8 +63,27 @@ class _AuthBodyState extends State<AuthBody> {
                       title: 'password'.tr(),
                       prefixIcon: Icons.lock_outline,
                       isPassword: true,
+                      textInputAction: TextInputAction.done,
+                      autofillHints: const [AutofillHints.password],
                       validator: viewModel.validatePassword,
                     ),
+                    if (isLogIn)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: viewModel.isLoading
+                              ? null
+                              : () => _showPasswordReset(context, viewModel),
+                          child: Text(
+                            'auth_forgot_password'.tr(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
                     const SizedBox(height: 30),
                     AuthButtons(
                       isLoading: viewModel.isLoading,
@@ -80,7 +102,26 @@ class _AuthBodyState extends State<AuthBody> {
     );
   }
 
-  void _pickedImage(File image) => _userImageFile = image;
+  Future<void> _showPasswordReset(
+    BuildContext context,
+    SignInProvider provider,
+  ) async {
+    FocusScope.of(context).unfocus();
+    final result = await showModalBottomSheet<AuthActionResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => AuthPasswordResetSheet(
+        initialEmail: provider.emailController.text,
+        onSubmit: provider.sendPasswordResetEmail,
+      ),
+    );
+    if (!context.mounted || result == null || !result.isSuccess) return;
+    MyDialog().showSuccessToast(
+      msg: 'auth_reset_email_sent'.tr(),
+      context: context,
+    );
+  }
 
   Future<void> _onSubmit(BuildContext context) async {
     final provider = context.read<SignInProvider>();

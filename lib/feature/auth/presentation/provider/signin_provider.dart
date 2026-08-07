@@ -76,6 +76,20 @@ class SignInProvider with ChangeNotifier {
     }
   }
 
+  Future<AuthActionResult> sendPasswordResetEmail(String email) async {
+    final validationError = validateEmail(email);
+    if (validationError != null) {
+      return AuthActionResult.failure(validationError);
+    }
+
+    try {
+      await _authRepository.sendPasswordResetEmail(email: email);
+      return AuthActionResult.success();
+    } catch (error) {
+      return AuthActionResult.failure(_toMessage(error));
+    }
+  }
+
   Future<AuthActionResult> signOut() async {
     _isSigningOut = true;
     notifyListeners();

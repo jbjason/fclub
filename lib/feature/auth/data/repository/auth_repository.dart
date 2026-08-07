@@ -100,6 +100,16 @@ class AuthRepository {
     }
   }
 
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    try {
+      await _firebaseAuthService.sendPasswordResetEmail(
+        email: email.trim().toLowerCase(),
+      );
+    } on FirebaseAuthException catch (exception) {
+      throw Exception(_mapFirebaseAuthException(exception));
+    }
+  }
+
   Future<void> signOut() async {
     await _firebaseAuthService.signOut();
     await _clearLocalSession();

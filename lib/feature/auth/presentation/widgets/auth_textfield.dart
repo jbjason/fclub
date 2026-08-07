@@ -9,6 +9,10 @@ class AuthTextField extends StatefulWidget {
     required this.prefixIcon,
     required this.validator,
     this.isPassword = false,
+    this.keyboardType,
+    this.textInputAction,
+    this.autofillHints,
+    this.onFieldSubmitted,
     super.key,
   });
   final TextEditingController controller;
@@ -16,6 +20,10 @@ class AuthTextField extends StatefulWidget {
   final IconData prefixIcon;
   final FormFieldValidator<String> validator;
   final bool isPassword;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final Iterable<String>? autofillHints;
+  final ValueChanged<String>? onFieldSubmitted;
 
   @override
   State<AuthTextField> createState() => _AuthTextFieldState();
@@ -49,6 +57,9 @@ class _AuthTextFieldState extends State<AuthTextField> {
           child: TextFormField(
             controller: widget.controller,
             obscureText: widget.isPassword && _obscureText,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            autofillHints: widget.autofillHints,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.symmetric(horizontal: 20),
@@ -80,6 +91,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
             //   fontSize: 14,
             // ),
             validator: widget.validator,
+            onFieldSubmitted: widget.onFieldSubmitted,
             onTapUpOutside: (event) => FocusScope.of(context).unfocus(),
           ),
         ),
