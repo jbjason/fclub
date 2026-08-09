@@ -2,7 +2,6 @@ import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/feature/club/data/model/club_member.dart';
 import 'package:fclub/feature/club/data/model/club_payment.dart';
-import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/club/presentation/widgets/add_entry/club_payment_member_picker.dart';
 import 'package:fclub/feature/club/presentation/widgets/add_entry/club_payment_method_selector.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_card_shell.dart';
@@ -29,6 +28,7 @@ class ClubPaymentForm extends StatefulWidget {
     required this.isSubmitting,
     required this.onSubmit,
     required this.onManageMembers,
+    required this.suggestedAmount,
     this.initialMonth,
   });
 
@@ -39,6 +39,7 @@ class ClubPaymentForm extends StatefulWidget {
   final DateTime? initialMonth;
   final ClubPaymentFormSubmit onSubmit;
   final VoidCallback onManageMembers;
+  final double suggestedAmount;
 
   @override
   State<ClubPaymentForm> createState() => _ClubPaymentFormState();
@@ -46,9 +47,7 @@ class ClubPaymentForm extends StatefulWidget {
 
 class _ClubPaymentFormState extends State<ClubPaymentForm> {
   final _formKey = GlobalKey<FormState>();
-  final _amountController = TextEditingController(
-    text: ClubProvider.monthlyContribution.toStringAsFixed(0),
-  );
+  late final TextEditingController _amountController;
   final _noteController = TextEditingController();
 
   String? _memberId;
@@ -58,6 +57,9 @@ class _ClubPaymentFormState extends State<ClubPaymentForm> {
   @override
   void initState() {
     super.initState();
+    _amountController = TextEditingController(
+      text: widget.suggestedAmount.toStringAsFixed(0),
+    );
     final now = DateTime.now();
     final initial = widget.initialMonth ?? now;
     _month = DateTime(initial.year, initial.month);
@@ -187,7 +189,7 @@ class _ClubPaymentFormState extends State<ClubPaymentForm> {
           SizedBox(height: 8.h),
           DropdownButtonFormField<DateTime>(
             initialValue: _month,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Contribution month',
               prefixIcon: Icon(Icons.calendar_month_rounded),
             ),
@@ -210,10 +212,11 @@ class _ClubPaymentFormState extends State<ClubPaymentForm> {
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
             ],
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Amount (৳)',
               prefixIcon: Icon(Icons.savings_rounded),
-              helperText: 'Monthly target is ৳5,000 per member',
+              helperText:
+                  'Monthly target is ৳${widget.suggestedAmount.toStringAsFixed(0)} per member',
             ),
             validator: (value) {
               final amount = double.tryParse(value?.trim() ?? '');

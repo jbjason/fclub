@@ -72,10 +72,6 @@ class ClubPaymentHistoryTab extends StatelessWidget {
                               payment,
                               status,
                             ),
-                        onDelete: () => ClubPaymentReviewActions.confirmDelete(
-                          context,
-                          payment,
-                        ),
                       );
                     },
                   ),

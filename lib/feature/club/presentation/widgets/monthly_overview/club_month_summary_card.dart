@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
-import 'package:fclub/feature/club/data/model/club_constants.dart';
 import 'package:fclub/feature/club/data/model/club_month_summary.dart';
 import 'package:fclub/feature/club/presentation/widgets/club_card_shell.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +51,9 @@ class ClubMonthSummaryCard extends StatelessWidget {
                         namedArgs: {
                           'count': '${summary.memberCount}',
                           'amount': CurrencyFormatter.format(
-                            ClubConstants.monthlyTargetPerMember,
+                            summary.memberCount == 0
+                                ? 0
+                                : summary.target / summary.memberCount,
                           ),
                         },
                       ),

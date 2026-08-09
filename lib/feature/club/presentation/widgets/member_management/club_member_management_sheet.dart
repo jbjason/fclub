@@ -136,6 +136,7 @@ class _ClubMemberManagementSheetState extends State<ClubMemberManagementSheet> {
                       member: member,
                       isAdmin: member.id == provider.adminId,
                       canManage: !provider.isSubmitting,
+                      canTransferAdmin: provider.isProjectAdmin,
                       onTransferAdmin: () => _confirmTransfer(context, member),
                       onRemove: () => _confirmRemove(context, member),
                     ),

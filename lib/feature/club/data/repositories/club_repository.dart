@@ -1,15 +1,30 @@
 import 'package:fclub/feature/club/data/model/club_member.dart';
 import 'package:fclub/feature/club/data/model/club_payment.dart';
 import 'package:fclub/feature/club/data/model/club_payment_filter.dart';
+import 'package:fclub/feature/club/data/model/club_project.dart';
 
 abstract interface class ClubRepository {
+  Future<ClubProject?> findProject({required String groupId});
+
+  Future<String?> getGroupAdminId({required String groupId});
+
+  Future<ClubProject> createProject({
+    required String groupId,
+    required String name,
+    required String adminId,
+    required double monthlyTargetPerMember,
+  });
+
   Stream<List<ClubPayment>> watchPayments({
     required String groupId,
     required String projectId,
     ClubPaymentFilter filter = const ClubPaymentFilter(),
   });
 
-  Stream<List<ClubMember>> watchMembers({required String groupId});
+  Stream<List<ClubMember>> watchMembers({
+    required String groupId,
+    required String projectId,
+  });
 
   Stream<String?> watchAdminId({
     required String groupId,
@@ -18,6 +33,7 @@ abstract interface class ClubRepository {
 
   Future<List<ClubMemberCandidate>> getAvailableMembers({
     required String groupId,
+    required String projectId,
   });
 
   Future<void> createPayment({
@@ -40,19 +56,15 @@ abstract interface class ClubRepository {
     required String reviewedBy,
   });
 
-  Future<void> deletePayment({
-    required String groupId,
-    required String projectId,
-    required String paymentId,
-  });
-
   Future<void> addMember({
     required String groupId,
+    required String projectId,
     required ClubMemberCandidate member,
   });
 
   Future<void> removeMember({
     required String groupId,
+    required String projectId,
     required String memberId,
   });
 

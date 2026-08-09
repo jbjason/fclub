@@ -45,7 +45,7 @@ void main() {
     expect(data, isNot(contains('role')));
   });
 
-  test('monthly summary uses a 5000 target for every member', () {
+  test('monthly summary uses the project target for every participant', () {
     final payments = [
       _payment(id: 'paid', amount: 5000, status: PaymentStatus.paid),
       _payment(id: 'pending', amount: 5000, status: PaymentStatus.pending),
@@ -55,7 +55,7 @@ void main() {
     final summary = ClubMonthSummary.calculate(
       month: DateTime(2026, 8),
       memberCount: 3,
-      perMemberTarget: ClubProvider.monthlyContribution,
+      perMemberTarget: 5000,
       payments: payments,
     );
 
@@ -114,7 +114,7 @@ void main() {
     ]);
   });
 
-  test('member sees every paid payment and only their own other statuses', () {
+  test('participant sees only their own transactions', () {
     final payments = [
       _payment(
         id: 'own-paid',
@@ -164,7 +164,6 @@ void main() {
       'own-paid',
       'own-pending',
       'own-rejected',
-      'other-paid',
     ]);
   });
 }

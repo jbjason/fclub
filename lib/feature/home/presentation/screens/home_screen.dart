@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final locker = context.read<LockerProvider>();
       await contacts.loadContacts();
       await club.initialize();
-      await locker.seedDemoData();
+      await locker.initialize();
     });
   }
 

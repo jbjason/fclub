@@ -83,7 +83,6 @@ void main() {
             memberById: (_) => _member,
             onPaymentTap: (_) {},
             onStatusChanged: (_, _) {},
-            onDelete: (_) {},
           ),
         ],
       ),

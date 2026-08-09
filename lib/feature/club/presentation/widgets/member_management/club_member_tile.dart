@@ -12,6 +12,7 @@ class ClubMemberTile extends StatelessWidget {
     required this.member,
     required this.isAdmin,
     required this.canManage,
+    this.canTransferAdmin = true,
     required this.onTransferAdmin,
     required this.onRemove,
   });
@@ -19,6 +20,7 @@ class ClubMemberTile extends StatelessWidget {
   final ClubMember member;
   final bool isAdmin;
   final bool canManage;
+  final bool canTransferAdmin;
   final VoidCallback onTransferAdmin;
   final VoidCallback onRemove;
 
@@ -75,19 +77,20 @@ class ClubMemberTile extends StatelessWidget {
                 }
               },
               itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: _ClubMemberAction.transferAdmin,
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.admin_panel_settings_rounded,
-                        color: MyColor.primary,
-                      ),
-                      SizedBox(width: 10.w),
-                      Expanded(child: Text('club_transfer_admin'.tr())),
-                    ],
+                if (canTransferAdmin)
+                  PopupMenuItem(
+                    value: _ClubMemberAction.transferAdmin,
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.admin_panel_settings_rounded,
+                          color: MyColor.primary,
+                        ),
+                        SizedBox(width: 10.w),
+                        Expanded(child: Text('club_transfer_admin'.tr())),
+                      ],
+                    ),
                   ),
-                ),
                 PopupMenuItem(
                   value: _ClubMemberAction.remove,
                   child: Row(

@@ -19,7 +19,8 @@ import 'package:fclub/feature/home/data/datasources/group_selection_local_data_s
 import 'package:fclub/feature/home/data/group_session_hive_box.dart';
 import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
 import 'package:fclub/feature/kurbani/data/kurbani_hive_boxes.dart';
-import 'package:fclub/feature/locker/data/locker_hive_box.dart';
+import 'package:fclub/feature/locker/data/repositories/firestore_locker_repository.dart';
+import 'package:fclub/feature/locker/data/repositories/locker_repository.dart';
 import 'package:fclub/feature/locker/presentation/provider/locker_provider.dart';
 import 'package:fclub/feature/pack_check/data/pack_check_hive_boxes.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
@@ -41,7 +42,6 @@ void main() async {
   await TourHiveBoxes.openBoxes();
   await KurbaniHiveBoxes.openBoxes();
   await PackCheckHiveBoxes.openBoxes();
-  await LockerHiveBox.openBoxes();
   await SettingsHiveBox.openBox();
   await EasyLocalization.ensureInitialized();
   runApp(const MyApp());
@@ -78,6 +78,9 @@ class MyApp extends StatelessWidget {
           ),
           Provider<GroupRepository>(create: (_) => FirestoreGroupRepository()),
           Provider<ClubRepository>(create: (_) => FirestoreClubRepository()),
+          Provider<LockerRepository>(
+            create: (_) => FirestoreLockerRepository(),
+          ),
           ChangeNotifierProvider(
             create: (context) =>
                 AuthSessionProvider(context.read<AuthRepository>()),
@@ -99,7 +102,11 @@ class MyApp extends StatelessWidget {
             ),
           ),
           ChangeNotifierProvider(
-            create: (context) => LockerProvider(context.read<ClubProvider>()),
+            create: (context) => LockerProvider(
+              repository: context.read<LockerRepository>(),
+              groupSession: context.read<GroupSessionProvider>(),
+              authService: context.read<FirebaseAuthService>(),
+            ),
           ),
           Provider<SettingsRepository>(create: (_) => SettingsRepository()),
           ChangeNotifierProvider(

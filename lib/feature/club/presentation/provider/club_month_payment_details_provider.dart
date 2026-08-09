@@ -33,11 +33,12 @@ class ClubMonthPaymentDetailsProvider with ChangeNotifier {
   ClubMonthSummary summary({
     required Iterable<ClubPayment> payments,
     required int memberCount,
+    required double perMemberTarget,
   }) {
     return ClubMonthSummary.calculate(
       month: month,
       memberCount: memberCount,
-      perMemberTarget: ClubProvider.monthlyContribution,
+      perMemberTarget: perMemberTarget,
       payments: payments,
     );
   }

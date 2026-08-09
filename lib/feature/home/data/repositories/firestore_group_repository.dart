@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fclub/feature/club/data/model/club_constants.dart';
 import 'package:fclub/feature/home/data/models/create_group_request.dart';
 import 'package:fclub/feature/home/data/models/created_group.dart';
 import 'package:fclub/feature/home/data/models/group_failure.dart';
@@ -40,19 +39,13 @@ class FirestoreGroupRepository implements GroupRepository {
             return;
           }
 
-          final groupFuture = groupReference.get();
-          final clubFuture = groupReference
-              .collection('projects')
-              .doc(ClubConstants.projectId)
-              .get();
-          final group = await groupFuture;
-          final club = await clubFuture;
+          final group = await groupReference.get();
           if (!group.exists || group.data() == null) return;
           final data = group.data()!;
           groupsById[group.id] = UserGroup(
             id: group.id,
             name: _stringValue(data['name'], fallback: 'Fundora Group'),
-            isAdmin: _adminId(club) == userId,
+            isAdmin: _stringValue(data['createdBy'], fallback: '') == userId,
           );
         }),
       );
@@ -89,19 +82,13 @@ class FirestoreGroupRepository implements GroupRepository {
           .get();
       if (!membership.exists || membership.data() == null) return null;
 
-      final groupFuture = groupReference.get();
-      final clubFuture = groupReference
-          .collection('projects')
-          .doc(ClubConstants.projectId)
-          .get();
-      final group = await groupFuture;
-      final club = await clubFuture;
+      final group = await groupReference.get();
       if (!group.exists || group.data() == null) return null;
       final data = group.data()!;
       return UserGroup(
         id: group.id,
         name: _stringValue(data['name'], fallback: 'Fundora Group'),
-        isAdmin: _adminId(club) == userId,
+        isAdmin: _stringValue(data['createdBy'], fallback: '') == userId,
       );
     } on FirebaseException catch (error) {
       throw _mapFirebaseFailure(error, loadingGroups: true);
@@ -169,14 +156,6 @@ class FirestoreGroupRepository implements GroupRepository {
         'createdAt': FieldValue.serverTimestamp(),
         'id': groupDocument.id,
       });
-      batch.set(
-        groupDocument.collection('projects').doc(ClubConstants.projectId),
-        createClubProjectData(
-          adminId: request.creator.id,
-          createdAt: FieldValue.serverTimestamp(),
-        ),
-      );
-
       final membersById = <String, GroupUser>{
         for (final member in request.members) member.id: member,
         request.creator.id: request.creator,
@@ -208,19 +187,6 @@ class FirestoreGroupRepository implements GroupRepository {
     } catch (error) {
       throw GroupFailure(GroupFailureCode.unknown, error);
     }
-  }
-
-  static Map<String, Object> createClubProjectData({
-    required String adminId,
-    required Object createdAt,
-  }) {
-    return {
-      'id': ClubConstants.projectId,
-      'name': 'Fundora Club',
-      'adminId': adminId,
-      'monthlyTargetPerMember': ClubConstants.monthlyTargetPerMember,
-      'createdAt': createdAt,
-    };
   }
 
   static Map<String, Object> createMemberData({
@@ -324,11 +290,6 @@ class FirestoreGroupRepository implements GroupRepository {
 
   String _stringValue(Object? value, {required String fallback}) {
     return value is String && value.trim().isNotEmpty ? value.trim() : fallback;
-  }
-
-  String? _adminId(DocumentSnapshot<Map<String, dynamic>> project) {
-    final value = project.data()?['adminId'];
-    return value is String && value.trim().isNotEmpty ? value.trim() : null;
   }
 
   GroupFailure _mapFirebaseFailure(

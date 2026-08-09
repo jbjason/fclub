@@ -47,7 +47,6 @@ void main() {
         isAdmin: false,
         onTap: () => tapped = true,
         onStatusChanged: (_) {},
-        onDelete: () {},
       ),
     );
 

@@ -1,6 +1,6 @@
 enum PaymentStatus {
   pending('pending'),
-  paid('paid'),
+  paid('approved'),
   rejected('rejected');
 
   const PaymentStatus(this.value);
@@ -8,6 +8,7 @@ enum PaymentStatus {
   final String value;
 
   static PaymentStatus fromValue(Object? value) {
+    if (value == 'paid') return PaymentStatus.paid;
     return PaymentStatus.values.firstWhere(
       (status) => status.value == value,
       orElse: () => PaymentStatus.pending,

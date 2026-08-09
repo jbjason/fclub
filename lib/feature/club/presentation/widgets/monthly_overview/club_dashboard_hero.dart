@@ -1,10 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/club/data/model/club_month_summary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 
 class ClubDashboardHero extends StatelessWidget {
   const ClubDashboardHero({
@@ -20,150 +20,315 @@ class ClubDashboardHero extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 14.h),
-      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26.r),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF5A37D6), Color(0xFF7A55E8), Color(0xFF009F9A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        borderRadius: BorderRadius.circular(28.r),
         boxShadow: [
           BoxShadow(
-            color: MyColor.primary.withValues(alpha: .25),
-            blurRadius: 28,
-            offset: const Offset(0, 12),
+            color: MyColor.primary.withValues(alpha: .3),
+            blurRadius: 32,
+            spreadRadius: -8,
+            offset: const Offset(0, 15),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28.r),
+        child: Stack(
+          children: [
+            const Positioned.fill(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .16),
-                  borderRadius: BorderRadius.circular(30.r),
-                  border: Border.all(color: Colors.white.withValues(alpha: .2)),
-                ),
-                child: Text(
-                  DateFormat('MMMM yyyy').format(summary.month).toUpperCase(),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: MyString.poppinsBold,
-                    fontSize: 9.sp,
-                    letterSpacing: 1,
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF36117A),
+                      Color(0xFF7138D0),
+                      Color(0xFF007F88),
+                    ],
+                    stops: [0, .55, 1],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
               ),
-              const Spacer(),
-              Icon(
-                isAdmin
-                    ? Icons.admin_panel_settings_rounded
-                    : Icons.groups_rounded,
-                color: Colors.white,
-                size: 20.r,
+            ),
+            Positioned(
+              right: -42.r,
+              top: -55.r,
+              child: _HeroOrb(
+                size: 190.r,
+                color: MyColor.cyanGlow.withValues(alpha: .26),
               ),
-              SizedBox(width: 6.w),
-              Text(
-                isAdmin ? 'Admin view' : 'Member view',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: .9),
-                  fontFamily: MyString.rubikMedium,
-                  fontSize: 10.sp,
+            ),
+            Positioned(
+              left: -62.r,
+              bottom: -84.r,
+              child: _HeroOrb(
+                size: 200.r,
+                color: MyColor.violetGlow.withValues(alpha: .25),
+              ),
+            ),
+            Positioned(
+              right: 17.w,
+              top: 54.h,
+              child: Transform.rotate(
+                angle: -.12,
+                child: Icon(
+                  Icons.savings_rounded,
+                  color: Colors.white.withValues(alpha: .075),
+                  size: 96.r,
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 14.h),
-          Text(
-            CurrencyFormatter.format(summary.collected),
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: MyString.poppinsBold,
-              fontSize: 28.sp,
-              fontWeight: FontWeight.w800,
             ),
-          ),
-          Text(
-            'collected of ${CurrencyFormatter.format(summary.target)} target',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: .78),
-              fontFamily: MyString.rubikRegular,
-              fontSize: 11.sp,
-            ),
-          ),
-          SizedBox(height: 15.h),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20.r),
-            child: LinearProgressIndicator(
-              value: summary.progress,
-              minHeight: 8.h,
-              backgroundColor: Colors.white.withValues(alpha: .18),
-              valueColor: const AlwaysStoppedAnimation(Colors.white),
-            ),
-          ),
-          SizedBox(height: 14.h),
-          Row(
-            children: [
-              _HeroMetric(
-                label: 'Outstanding',
-                value: CurrencyFormatter.format(summary.outstanding),
+            Padding(
+              padding: EdgeInsets.all(19.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 5.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: .14),
+                          borderRadius: BorderRadius.circular(30.r),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: .18),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.calendar_month_rounded,
+                              color: Colors.white.withValues(alpha: .88),
+                              size: 12.r,
+                            ),
+                            SizedBox(width: 5.w),
+                            Text(
+                              DateFormat(
+                                'MMMM yyyy',
+                                context.locale.toString(),
+                              ).format(summary.month).toUpperCase(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: MyString.poppinsBold,
+                                fontSize: 8.5.sp,
+                                letterSpacing: .8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Spacer(),
+                      Icon(
+                        isAdmin
+                            ? Icons.verified_user_rounded
+                            : Icons.groups_rounded,
+                        color: Colors.white,
+                        size: 18.r,
+                      ),
+                      SizedBox(width: 5.w),
+                      Text(
+                        (isAdmin ? 'club_admin_view' : 'club_member_view').tr(),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: .86),
+                          fontFamily: MyString.rubikMedium,
+                          fontSize: 9.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 17.h),
+                  Text(
+                    'club_total_collected'.tr(),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: .62),
+                      fontFamily: MyString.rubikMedium,
+                      fontSize: 8.5.sp,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.3,
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    CurrencyFormatter.format(summary.collected),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: MyString.poppinsBold,
+                      fontSize: 29.sp,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -.7,
+                    ),
+                  ),
+                  Text(
+                    'club_collective_target'.tr(
+                      namedArgs: {
+                        'amount': CurrencyFormatter.format(summary.target),
+                      },
+                    ),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: .72),
+                      fontFamily: MyString.rubikRegular,
+                      fontSize: 10.sp,
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  Row(
+                    children: [
+                      Text(
+                        'club_funded_percent'.tr(
+                          namedArgs: {
+                            'percent': '${(summary.progress * 100).round()}',
+                          },
+                        ),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: .78),
+                          fontFamily: MyString.rubikMedium,
+                          fontSize: 9.sp,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'club_members_count'.tr(
+                          namedArgs: {'count': '${summary.memberCount}'},
+                        ),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: .62),
+                          fontFamily: MyString.rubikRegular,
+                          fontSize: 8.5.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 7.h),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20.r),
+                    child: LinearProgressIndicator(
+                      value: summary.progress,
+                      minHeight: 7.h,
+                      backgroundColor: Colors.white.withValues(alpha: .16),
+                      valueColor: const AlwaysStoppedAnimation(
+                        MyColor.cyanGlow,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 15.h),
+                  Row(
+                    children: [
+                      _HeroMetric(
+                        icon: Icons.schedule_rounded,
+                        label: 'club_outstanding'.tr(),
+                        value: CurrencyFormatter.format(summary.outstanding),
+                        color: const Color(0xFFFFC2D0),
+                      ),
+                      _divider(),
+                      _HeroMetric(
+                        icon: Icons.hourglass_top_rounded,
+                        label: 'club_pending_review'.tr(),
+                        value: CurrencyFormatter.format(summary.pending),
+                        color: const Color(0xFFFFD58A),
+                      ),
+                      _divider(),
+                      _HeroMetric(
+                        icon: Icons.people_alt_rounded,
+                        label: 'club_members'.tr(),
+                        value: '${summary.memberCount}',
+                        color: const Color(0xFF8EF2F6),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              _divider(),
-              _HeroMetric(
-                label: 'Pending review',
-                value: CurrencyFormatter.format(summary.pending),
-              ),
-              _divider(),
-              _HeroMetric(label: 'Members', value: '${summary.memberCount}'),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _divider() => Container(
-    height: 30.h,
+    height: 34.h,
     width: 1,
-    margin: EdgeInsets.symmetric(horizontal: 10.w),
-    color: Colors.white.withValues(alpha: .2),
+    margin: EdgeInsets.symmetric(horizontal: 8.w),
+    color: Colors.white.withValues(alpha: .16),
   );
 }
 
-class _HeroMetric extends StatelessWidget {
-  const _HeroMetric({required this.label, required this.value});
+class _HeroOrb extends StatelessWidget {
+  const _HeroOrb({required this.size, required this.color});
 
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(colors: [color, color.withValues(alpha: 0)]),
+      ),
+    );
+  }
+}
+
+class _HeroMetric extends StatelessWidget {
+  const _HeroMetric({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final IconData icon;
   final String label;
   final String value;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: MyString.poppinsBold,
-              fontSize: 11.sp,
+          Container(
+            width: 28.r,
+            height: 28.r,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: .12),
+              borderRadius: BorderRadius.circular(9.r),
             ),
+            child: Icon(icon, color: color, size: 13.r),
           ),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: .7),
-              fontFamily: MyString.rubikRegular,
-              fontSize: 8.sp,
+          SizedBox(width: 6.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: color,
+                    fontFamily: MyString.poppinsBold,
+                    fontSize: 9.5.sp,
+                  ),
+                ),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: .58),
+                    fontFamily: MyString.rubikRegular,
+                    fontSize: 7.3.sp,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

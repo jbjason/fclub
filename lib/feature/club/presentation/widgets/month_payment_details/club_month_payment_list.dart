@@ -15,7 +15,6 @@ class ClubMonthPaymentList extends StatelessWidget {
     required this.memberById,
     required this.onPaymentTap,
     required this.onStatusChanged,
-    required this.onDelete,
   });
 
   final List<ClubPayment> payments;
@@ -23,7 +22,6 @@ class ClubMonthPaymentList extends StatelessWidget {
   final ClubMember? Function(String memberId) memberById;
   final ValueChanged<ClubPayment> onPaymentTap;
   final ClubMonthPaymentStatusChanged onStatusChanged;
-  final ValueChanged<ClubPayment> onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +36,6 @@ class ClubMonthPaymentList extends StatelessWidget {
             isAdmin: isAdmin,
             onTap: () => onPaymentTap(payment),
             onStatusChanged: (status) => onStatusChanged(payment, status),
-            onDelete: () => onDelete(payment),
           );
         }, childCount: payments.length),
       ),

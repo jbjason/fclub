@@ -29,6 +29,7 @@ class ClubMonthPaymentDetailsView extends StatelessWidget {
     final summary = detailsProvider.summary(
       payments: accessiblePayments,
       memberCount: clubProvider.isAdmin ? clubProvider.members.length : 1,
+      perMemberTarget: clubProvider.monthlyTargetPerMember,
     );
     final paymentUserIds = detailsProvider.paymentUserIds(accessiblePayments);
     final filterMembers = clubProvider.members
@@ -111,8 +112,6 @@ class ClubMonthPaymentDetailsView extends StatelessWidget {
                         payment,
                         status,
                       ),
-                  onDelete: (payment) =>
-                      ClubPaymentReviewActions.confirmDelete(context, payment),
                 ),
             ],
           ),

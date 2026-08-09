@@ -1,41 +1,128 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fclub/feature/club/data/model/club_member_model.dart';
 import 'package:fclub/feature/club/data/model/club_payment_model.dart';
-import 'package:fclub/feature/club/data/model/club_constants.dart';
 import 'package:fclub/feature/club/data/model/club_failure.dart';
 import 'package:fclub/feature/club/data/model/club_member.dart';
 import 'package:fclub/feature/club/data/model/club_payment.dart';
 import 'package:fclub/feature/club/data/model/club_payment_filter.dart';
+import 'package:fclub/feature/club/data/model/club_project.dart';
+import 'package:fclub/feature/club/data/model/club_project_model.dart';
 import 'package:fclub/feature/club/data/repositories/club_repository.dart';
 
 class FirestoreClubRepository implements ClubRepository {
   FirestoreClubRepository({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  static const String clubProjectId = ClubConstants.projectId;
-
   final FirebaseFirestore _firestore;
+
+  static const String projectDocumentId = 'club';
+
+  CollectionReference<Map<String, dynamic>> _projects(String groupId) {
+    return _firestore.collection('groups').doc(groupId).collection('projects');
+  }
 
   DocumentReference<Map<String, dynamic>> _project(
     String groupId,
     String projectId,
   ) {
-    return _firestore
-        .collection('groups')
-        .doc(groupId)
-        .collection('projects')
-        .doc(projectId);
+    return _projects(groupId).doc(projectId);
   }
 
-  CollectionReference<Map<String, dynamic>> _payments(
+  CollectionReference<Map<String, dynamic>> _transactions(
     String groupId,
     String projectId,
   ) {
-    return _project(groupId, projectId).collection('payments');
+    return _project(groupId, projectId).collection('transactions');
   }
 
-  CollectionReference<Map<String, dynamic>> _members(String groupId) {
+  CollectionReference<Map<String, dynamic>> _groupMembers(String groupId) {
     return _firestore.collection('groups').doc(groupId).collection('members');
+  }
+
+  CollectionReference<Map<String, dynamic>> _participants(
+    String groupId,
+    String projectId,
+  ) {
+    return _project(groupId, projectId).collection('participants');
+  }
+
+  @override
+  Future<ClubProject?> findProject({required String groupId}) async {
+    try {
+      return ClubProjectModel.fromFirestore(
+        await _project(groupId, projectDocumentId).get(),
+      );
+    } on FirebaseException catch (error) {
+      throw _failure(error);
+    }
+  }
+
+  @override
+  Future<String?> getGroupAdminId({required String groupId}) async {
+    try {
+      final snapshot = await _firestore.collection('groups').doc(groupId).get();
+      final value = snapshot.data()?['createdBy'];
+      return value is String && value.trim().isNotEmpty ? value.trim() : null;
+    } on FirebaseException catch (error) {
+      throw _failure(error);
+    }
+  }
+
+  @override
+  Future<ClubProject> createProject({
+    required String groupId,
+    required String name,
+    required String adminId,
+    required double monthlyTargetPerMember,
+  }) async {
+    final member = _groupMembers(groupId).doc(adminId);
+    final project = _projects(groupId).doc(projectDocumentId);
+    final participant = project.collection('participants').doc(adminId);
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final existing = await transaction.get(project);
+        if (existing.exists) {
+          throw const ClubFailure('This group already has a Club project.');
+        }
+        final memberSnapshot = await transaction.get(member);
+        final memberData = memberSnapshot.data();
+        if (!memberSnapshot.exists || memberData == null) {
+          throw const ClubFailure('Only a group member can create a Club.');
+        }
+        transaction.set(
+          project,
+          createProjectData(
+            name: name,
+            adminId: adminId,
+            monthlyTargetPerMember: monthlyTargetPerMember,
+            createdAt: FieldValue.serverTimestamp(),
+          ),
+        );
+        transaction.set(participant, {
+          'id': adminId,
+          'username': _memberText(memberData, const [
+            'username',
+            'displayName',
+          ]),
+          'email': _normalizedEmail(memberData['email']),
+          'profilePic': _memberText(memberData, const [
+            'profilePic',
+            'photoUrl',
+          ]),
+          'joinedAt': FieldValue.serverTimestamp(),
+        });
+      });
+      return ClubProject(
+        id: project.id,
+        name: name.trim(),
+        adminId: adminId,
+        monthlyTargetPerMember: monthlyTargetPerMember,
+      );
+    } on ClubFailure {
+      rethrow;
+    } on FirebaseException catch (error) {
+      throw _failure(error);
+    }
   }
 
   @override
@@ -44,7 +131,10 @@ class FirestoreClubRepository implements ClubRepository {
     required String projectId,
     ClubPaymentFilter filter = const ClubPaymentFilter(),
   }) async* {
-    Query<Map<String, dynamic>> query = _payments(groupId, projectId);
+    Query<Map<String, dynamic>> query = _transactions(
+      groupId,
+      projectId,
+    ).where('type', isEqualTo: 'contribution');
     if (filter.userId != null) {
       query = query.where('userId', isEqualTo: filter.userId);
     }
@@ -76,9 +166,15 @@ class FirestoreClubRepository implements ClubRepository {
   }
 
   @override
-  Stream<List<ClubMember>> watchMembers({required String groupId}) async* {
+  Stream<List<ClubMember>> watchMembers({
+    required String groupId,
+    required String projectId,
+  }) async* {
     try {
-      await for (final snapshot in _members(groupId).snapshots()) {
+      await for (final snapshot in _participants(
+        groupId,
+        projectId,
+      ).snapshots()) {
         final members = snapshot.docs
             .map(ClubMemberModel.fromFirestore)
             .toList(growable: false);
@@ -110,20 +206,21 @@ class FirestoreClubRepository implements ClubRepository {
   @override
   Future<List<ClubMemberCandidate>> getAvailableMembers({
     required String groupId,
+    required String projectId,
   }) async {
     try {
-      final memberSnapshot = await _members(groupId).get();
-      final existingIds = memberSnapshot.docs
+      final participantSnapshot = await _participants(groupId, projectId).get();
+      final existingIds = participantSnapshot.docs
           .map((document) => document.id)
           .toSet();
-      final existingEmails = memberSnapshot.docs
+      final existingEmails = participantSnapshot.docs
           .map((document) => _normalizedEmail(document.data()['email']))
           .where((email) => email.isNotEmpty)
           .toSet();
-      final usersSnapshot = await _firestore.collection('users').get();
+      final groupMembersSnapshot = await _groupMembers(groupId).get();
       final seenEmails = <String>{...existingEmails};
       final candidates = <ClubMemberCandidate>[];
-      for (final document in usersSnapshot.docs) {
+      for (final document in groupMembersSnapshot.docs) {
         if (existingIds.contains(document.id)) continue;
         final candidate = ClubMemberModel.candidateFromFirestore(document);
         final email = _normalizedEmail(candidate.email);
@@ -153,9 +250,9 @@ class FirestoreClubRepository implements ClubRepository {
     String? note,
   }) async {
     try {
-      final document = _payments(groupId, projectId).doc();
+      final document = _transactions(groupId, projectId).doc();
       await document.set({
-        'id': document.id,
+        'type': 'contribution',
         'userId': userId,
         'amount': amount,
         'month': month,
@@ -192,20 +289,7 @@ class FirestoreClubRepository implements ClubRepository {
               'reviewedBy': reviewedBy,
               'reviewedAt': FieldValue.serverTimestamp(),
             };
-      await _payments(groupId, projectId).doc(paymentId).update(review);
-    } on FirebaseException catch (error) {
-      throw _failure(error);
-    }
-  }
-
-  @override
-  Future<void> deletePayment({
-    required String groupId,
-    required String projectId,
-    required String paymentId,
-  }) async {
-    try {
-      await _payments(groupId, projectId).doc(paymentId).delete();
+      await _transactions(groupId, projectId).doc(paymentId).update(review);
     } on FirebaseException catch (error) {
       throw _failure(error);
     }
@@ -214,17 +298,24 @@ class FirestoreClubRepository implements ClubRepository {
   @override
   Future<void> addMember({
     required String groupId,
+    required String projectId,
     required ClubMemberCandidate member,
   }) async {
     try {
-      await _members(groupId)
-          .doc(member.id)
-          .set(
-            createMemberData(
-              member: member,
-              joinedAt: FieldValue.serverTimestamp(),
-            ),
-          );
+      final groupMember = await _groupMembers(groupId).doc(member.id).get();
+      final memberData = groupMember.data();
+      if (!groupMember.exists || memberData == null) {
+        throw const ClubFailure('Choose an existing group member.');
+      }
+      await _participants(groupId, projectId).doc(member.id).set({
+        'id': member.id,
+        'username': _memberText(memberData, const ['username', 'displayName']),
+        'email': _normalizedEmail(memberData['email']),
+        'profilePic': _memberText(memberData, const ['profilePic', 'photoUrl']),
+        'joinedAt': FieldValue.serverTimestamp(),
+      });
+    } on ClubFailure {
+      rethrow;
     } on FirebaseException catch (error) {
       throw _failure(error);
     }
@@ -233,10 +324,11 @@ class FirestoreClubRepository implements ClubRepository {
   @override
   Future<void> removeMember({
     required String groupId,
+    required String projectId,
     required String memberId,
   }) async {
     try {
-      await _members(groupId).doc(memberId).delete();
+      await _participants(groupId, projectId).doc(memberId).delete();
     } on FirebaseException catch (error) {
       throw _failure(error);
     }
@@ -250,7 +342,7 @@ class FirestoreClubRepository implements ClubRepository {
     required String newAdminId,
   }) async {
     final project = _project(groupId, projectId);
-    final newAdmin = _members(groupId).doc(newAdminId);
+    final newAdmin = _participants(groupId, projectId).doc(newAdminId);
     try {
       await _firestore.runTransaction((transaction) async {
         final projectSnapshot = await transaction.get(project);
@@ -287,6 +379,20 @@ class FirestoreClubRepository implements ClubRepository {
     };
   }
 
+  static Map<String, Object> createProjectData({
+    required String name,
+    required String adminId,
+    required double monthlyTargetPerMember,
+    required Object createdAt,
+  }) {
+    return {
+      'name': name.trim(),
+      'adminId': adminId,
+      'createdAt': createdAt,
+      'monthlyTargetPerMember': monthlyTargetPerMember,
+    };
+  }
+
   Object? _cleanNote(String? note) {
     final value = note?.trim();
     return value == null || value.isEmpty ? null : value;
@@ -294,6 +400,14 @@ class FirestoreClubRepository implements ClubRepository {
 
   String _normalizedEmail(Object? email) {
     return email is String ? email.trim().toLowerCase() : '';
+  }
+
+  String _memberText(Map<String, dynamic> data, List<String> keys) {
+    for (final key in keys) {
+      final value = data[key];
+      if (value is String && value.trim().isNotEmpty) return value.trim();
+    }
+    return '';
   }
 
   ClubFailure _failure(FirebaseException error) {

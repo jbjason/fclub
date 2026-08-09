@@ -68,7 +68,11 @@ void main() {
         month: DateTime(2026, 8),
       );
 
-      final summary = provider.summary(payments: payments, memberCount: 2);
+      final summary = provider.summary(
+        payments: payments,
+        memberCount: 2,
+        perMemberTarget: 5000,
+      );
 
       expect(summary.target, 10000);
       expect(summary.collected, 5000);

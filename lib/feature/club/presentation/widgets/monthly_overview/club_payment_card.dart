@@ -11,7 +11,7 @@ import 'package:fclub/feature/club/presentation/widgets/club_status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-enum _PaymentAction { pending, paid, rejected, delete }
+enum _PaymentAction { pending, paid, rejected }
 
 class ClubPaymentCard extends StatelessWidget {
   const ClubPaymentCard({
@@ -20,7 +20,6 @@ class ClubPaymentCard extends StatelessWidget {
     required this.member,
     required this.isAdmin,
     required this.onStatusChanged,
-    required this.onDelete,
     this.onTap,
   });
 
@@ -28,7 +27,6 @@ class ClubPaymentCard extends StatelessWidget {
   final ClubMember? member;
   final bool isAdmin;
   final ValueChanged<PaymentStatus> onStatusChanged;
-  final VoidCallback onDelete;
   final VoidCallback? onTap;
 
   @override
@@ -102,8 +100,6 @@ class ClubPaymentCard extends StatelessWidget {
                         onStatusChanged(PaymentStatus.paid);
                       case _PaymentAction.rejected:
                         onStatusChanged(PaymentStatus.rejected);
-                      case _PaymentAction.delete:
-                        onDelete();
                     }
                   },
                   itemBuilder: (_) => [
@@ -128,15 +124,6 @@ class ClubPaymentCard extends StatelessWidget {
                       child: _MenuRow(
                         icon: Icons.cancel_rounded,
                         label: 'club_reject_payment'.tr(),
-                        color: MyColor.error,
-                      ),
-                    ),
-                    const PopupMenuDivider(),
-                    PopupMenuItem(
-                      value: _PaymentAction.delete,
-                      child: _MenuRow(
-                        icon: Icons.delete_outline_rounded,
-                        label: 'club_delete_record'.tr(),
                         color: MyColor.error,
                       ),
                     ),

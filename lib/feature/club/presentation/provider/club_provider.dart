@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:fclub/core/services/auth/firebase_auth_service.dart';
-import 'package:fclub/feature/club/data/model/club_constants.dart';
 import 'package:fclub/feature/club/data/model/club_failure.dart';
 import 'package:fclub/feature/club/data/model/club_member.dart';
 import 'package:fclub/feature/club/data/model/club_month_summary.dart';
 import 'package:fclub/feature/club/data/model/club_payment.dart';
 import 'package:fclub/feature/club/data/model/club_payment_filter.dart';
+import 'package:fclub/feature/club/data/model/club_project.dart';
 import 'package:fclub/feature/club/data/repositories/club_repository.dart';
 import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
 import 'package:flutter/foundation.dart';
@@ -19,10 +19,6 @@ class ClubProvider with ChangeNotifier {
   }) : _repository = repository,
        _groupSession = groupSession,
        _authService = authService;
-
-  static const double monthlyContribution =
-      ClubConstants.monthlyTargetPerMember;
-  static const String projectId = ClubConstants.projectId;
 
   final ClubRepository _repository;
   final GroupSessionProvider _groupSession;
@@ -39,6 +35,8 @@ class ClubProvider with ChangeNotifier {
   List<ClubMemberCandidate> _availableMembers = const [];
   ClubPaymentFilter _filter = const ClubPaymentFilter();
   String? _adminId;
+  String? _groupAdminId;
+  ClubProject? _project;
   String? _loadedGroupId;
   String? _loadError;
   String? _actionError;
@@ -49,6 +47,8 @@ class ClubProvider with ChangeNotifier {
   bool _hasAdminSnapshot = false;
   bool _hasMembersSnapshot = false;
   bool _hasPaymentsSnapshot = false;
+  bool _hasPaymentScope = false;
+  String? _paymentScopeUserId;
 
   List<ClubPayment> get payments => List.unmodifiable(_payments);
   List<ClubPayment> get filteredPayments =>
@@ -74,6 +74,9 @@ class ClubProvider with ChangeNotifier {
   String? get loadError => _loadError;
   String? get actionError => _actionError;
   String? get adminId => _adminId;
+  ClubProject? get project => _project;
+  String get projectName => _project?.name ?? 'Club';
+  double get monthlyTargetPerMember => _project?.monthlyTargetPerMember ?? 0;
   String? get currentUserId => _authService.currentUser?.uid;
   String? get currentUserEmail =>
       _authService.currentUser?.email?.trim().toLowerCase();
@@ -85,16 +88,16 @@ class ClubProvider with ChangeNotifier {
     for (final member in _members) {
       if (member.id == userId) return member;
     }
-    final email = currentUserEmail;
-    if (email != null && email.isNotEmpty) {
-      for (final member in _members) {
-        if (member.email.trim().toLowerCase() == email) return member;
-      }
-    }
     return null;
   }
 
-  bool get isAdmin => isClubAdmin(adminId: _adminId, userId: currentUserId);
+  bool get isProjectAdmin =>
+      isClubAdmin(adminId: _adminId, userId: currentUserId);
+  bool get isGroupAdmin =>
+      isClubAdmin(adminId: _groupAdminId, userId: currentUserId);
+  bool get isAdmin => isProjectAdmin || isGroupAdmin;
+  bool get canManageParticipants => isAdmin;
+  bool get canAccessProject => isAdmin || currentMember != null;
 
   ClubMember? memberById(String id) {
     for (final member in _members) {
@@ -111,8 +114,8 @@ class ClubProvider with ChangeNotifier {
     final now = DateTime.now();
     return ClubMonthSummary.calculate(
       month: DateTime(now.year, now.month),
-      memberCount: _members.length,
-      perMemberTarget: monthlyContribution,
+      memberCount: isAdmin ? _members.length : (currentMember == null ? 0 : 1),
+      perMemberTarget: monthlyTargetPerMember,
       payments: _payments,
     );
   }
@@ -128,8 +131,10 @@ class ClubProvider with ChangeNotifier {
         .map(
           (month) => ClubMonthSummary.calculate(
             month: month,
-            memberCount: _members.length,
-            perMemberTarget: monthlyContribution,
+            memberCount: isAdmin
+                ? _members.length
+                : (currentMember == null ? 0 : 1),
+            perMemberTarget: monthlyTargetPerMember,
             payments: _payments,
           ),
         )
@@ -164,37 +169,58 @@ class ClubProvider with ChangeNotifier {
     _filteredPayments = const [];
     _members = const [];
     _adminId = null;
+    _groupAdminId = null;
+    _project = null;
     _filter = const ClubPaymentFilter();
     _hasAdminSnapshot = false;
     _hasMembersSnapshot = false;
     _hasPaymentsSnapshot = false;
+    _hasPaymentScope = false;
+    _paymentScopeUserId = null;
     _isLoading = true;
     _loadError = null;
     _actionError = null;
     notifyListeners();
 
-    _membersSubscription = _repository.watchMembers(groupId: groupId).listen((
-      members,
-    ) {
-      _members = members;
-      _hasMembersSnapshot = true;
-      _completeInitialLoad();
-    }, onError: _handleLoadError);
+    try {
+      _groupAdminId = await _repository.getGroupAdminId(groupId: groupId);
+      _project = await _repository.findProject(groupId: groupId);
+    } catch (error) {
+      _handleLoadError(error);
+      return;
+    }
+    final activeProject = _project;
+    if (activeProject == null) {
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+    _adminId = activeProject.adminId;
+
+    _membersSubscription = _repository
+        .watchMembers(groupId: groupId, projectId: activeProject.id)
+        .listen((members) {
+          _members = members;
+          _hasMembersSnapshot = true;
+          _completeInitialLoad();
+        }, onError: _handleLoadError);
     _adminSubscription = _repository
-        .watchAdminId(groupId: groupId, projectId: projectId)
+        .watchAdminId(groupId: groupId, projectId: activeProject.id)
         .listen((adminId) {
+          final wasAdmin = isAdmin;
           _adminId = adminId;
           _hasAdminSnapshot = true;
           _completeInitialLoad();
+          if (wasAdmin != isAdmin) {
+            unawaited(
+              _restartPaymentsForRole(
+                groupId: groupId,
+                projectId: activeProject.id,
+              ),
+            );
+          }
         }, onError: _handleLoadError);
-    _paymentsSubscription = _repository
-        .watchPayments(groupId: groupId, projectId: projectId)
-        .listen((payments) {
-          _payments = payments;
-          if (_filter.isEmpty) _filteredPayments = payments;
-          _hasPaymentsSnapshot = true;
-          _completeInitialLoad();
-        }, onError: _handleLoadError);
+    _listenToPayments(groupId: groupId, projectId: activeProject.id);
   }
 
   Future<void> setFilter(ClubPaymentFilter filter) async {
@@ -213,8 +239,15 @@ class ClubProvider with ChangeNotifier {
     final groupId = _requireGroupId();
     _isFiltering = true;
     notifyListeners();
+    final effectiveFilter = isAdmin
+        ? filter
+        : filter.copyWith(userId: _requireUserId());
     _filteredSubscription = _repository
-        .watchPayments(groupId: groupId, projectId: projectId, filter: filter)
+        .watchPayments(
+          groupId: groupId,
+          projectId: _requireProjectId(),
+          filter: effectiveFilter,
+        )
         .listen(
           (payments) {
             _filteredPayments = payments;
@@ -244,7 +277,7 @@ class ClubProvider with ChangeNotifier {
     await _runAction(
       () => _repository.createPayment(
         groupId: _requireGroupId(),
-        projectId: projectId,
+        projectId: _requireProjectId(),
         userId: selectedMemberId,
         amount: amount,
         month: monthKey(month),
@@ -264,21 +297,10 @@ class ClubProvider with ChangeNotifier {
     await _runAction(
       () => _repository.updatePaymentStatus(
         groupId: _requireGroupId(),
-        projectId: projectId,
+        projectId: _requireProjectId(),
         paymentId: paymentId,
         status: status,
         reviewedBy: _requireUserId(),
-      ),
-    );
-  }
-
-  Future<void> deletePayment(String paymentId) async {
-    _requireAdmin();
-    await _runAction(
-      () => _repository.deletePayment(
-        groupId: _requireGroupId(),
-        projectId: projectId,
-        paymentId: paymentId,
       ),
     );
   }
@@ -291,6 +313,7 @@ class ClubProvider with ChangeNotifier {
     try {
       _availableMembers = await _repository.getAvailableMembers(
         groupId: _requireGroupId(),
+        projectId: _requireProjectId(),
       );
     } catch (error) {
       _actionError = _message(error);
@@ -303,7 +326,11 @@ class ClubProvider with ChangeNotifier {
   Future<void> addMember(ClubMemberCandidate member) async {
     _requireAdmin();
     await _runAction(
-      () => _repository.addMember(groupId: _requireGroupId(), member: member),
+      () => _repository.addMember(
+        groupId: _requireGroupId(),
+        projectId: _requireProjectId(),
+        member: member,
+      ),
     );
     await loadAvailableMembers();
   }
@@ -316,6 +343,7 @@ class ClubProvider with ChangeNotifier {
     await _runAction(
       () => _repository.removeMember(
         groupId: _requireGroupId(),
+        projectId: _requireProjectId(),
         memberId: member.id,
       ),
     );
@@ -323,7 +351,7 @@ class ClubProvider with ChangeNotifier {
   }
 
   Future<void> transferAdmin(ClubMember member) async {
-    _requireAdmin();
+    _requireProjectAdmin();
     final currentAdminId = _requireUserId();
     if (member.id == _adminId) {
       throw const ClubFailure('This member is already the Club admin.');
@@ -334,13 +362,40 @@ class ClubProvider with ChangeNotifier {
     await _runAction(
       () => _repository.transferAdmin(
         groupId: _requireGroupId(),
-        projectId: projectId,
+        projectId: _requireProjectId(),
         currentAdminId: currentAdminId,
         newAdminId: member.id,
       ),
     );
     _adminId = member.id;
+    unawaited(
+      _restartPaymentsForRole(
+        groupId: _requireGroupId(),
+        projectId: _requireProjectId(),
+      ),
+    );
     notifyListeners();
+  }
+
+  Future<void> createProject({
+    required String name,
+    required double monthlyTargetPerMember,
+  }) async {
+    if (!isGroupAdmin) {
+      throw const ClubFailure('Only the group admin can create a Club.');
+    }
+    if (name.trim().isEmpty || monthlyTargetPerMember <= 0) {
+      throw const ClubFailure('Enter a name and a valid monthly target.');
+    }
+    await _runAction(() async {
+      await _repository.createProject(
+        groupId: _requireGroupId(),
+        name: name,
+        adminId: _requireUserId(),
+        monthlyTargetPerMember: monthlyTargetPerMember,
+      );
+    });
+    await initialize(force: true);
   }
 
   void clearActionError() {
@@ -360,10 +415,7 @@ class ClubProvider with ChangeNotifier {
     if (isAdmin) return List<ClubPayment>.unmodifiable(payments);
     if (memberId == null || memberId.isEmpty) return const [];
     return List<ClubPayment>.unmodifiable(
-      payments.where(
-        (payment) =>
-            payment.status == PaymentStatus.paid || payment.userId == memberId,
-      ),
+      payments.where((payment) => payment.userId == memberId),
     );
   }
 
@@ -380,6 +432,40 @@ class ClubProvider with ChangeNotifier {
       _isLoading = false;
     }
     notifyListeners();
+  }
+
+  void _listenToPayments({required String groupId, required String projectId}) {
+    final scopeUserId = isAdmin ? null : _requireUserId();
+    _hasPaymentScope = true;
+    _paymentScopeUserId = scopeUserId;
+    _paymentsSubscription = _repository
+        .watchPayments(
+          groupId: groupId,
+          projectId: projectId,
+          filter: scopeUserId == null
+              ? const ClubPaymentFilter()
+              : ClubPaymentFilter(userId: scopeUserId),
+        )
+        .listen((payments) {
+          _payments = payments;
+          if (_filter.isEmpty) _filteredPayments = payments;
+          _hasPaymentsSnapshot = true;
+          _completeInitialLoad();
+        }, onError: _handleLoadError);
+  }
+
+  Future<void> _restartPaymentsForRole({
+    required String groupId,
+    required String projectId,
+  }) async {
+    final nextScope = isAdmin ? null : _requireUserId();
+    if (_hasPaymentScope && _paymentScopeUserId == nextScope) return;
+    await _paymentsSubscription?.cancel();
+    await _filteredSubscription?.cancel();
+    _paymentsSubscription = null;
+    _filteredSubscription = null;
+    _filter = const ClubPaymentFilter();
+    _listenToPayments(groupId: groupId, projectId: projectId);
   }
 
   void _handleLoadError(Object error) {
@@ -419,9 +505,23 @@ class ClubProvider with ChangeNotifier {
     return userId;
   }
 
+  String _requireProjectId() {
+    final projectId = _project?.id;
+    if (projectId == null || projectId.isEmpty) {
+      throw const ClubFailure('Create or select a Club project first.');
+    }
+    return projectId;
+  }
+
   void _requireAdmin() {
     if (!isAdmin) {
-      throw const ClubFailure('Only a group admin can do this.');
+      throw const ClubFailure('Only a project or group admin can do this.');
+    }
+  }
+
+  void _requireProjectAdmin() {
+    if (!isProjectAdmin) {
+      throw const ClubFailure('Only the current project admin can do this.');
     }
   }
 

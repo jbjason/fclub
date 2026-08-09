@@ -22,6 +22,7 @@ class ClubAddEntryScreen extends StatelessWidget {
         isAdmin: provider.isAdmin,
         isSubmitting: provider.isSubmitting,
         initialMonth: initialMonth,
+        suggestedAmount: provider.monthlyTargetPerMember,
         onManageMembers: () => showModalBottomSheet<void>(
           context: context,
           isScrollControlled: true,

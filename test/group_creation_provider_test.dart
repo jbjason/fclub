@@ -106,19 +106,6 @@ void main() {
     expect(pin, matches(RegExp(r'^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{3}$')));
   });
 
-  test('Club project stores the creator as adminId', () {
-    final createdAt = DateTime(2026, 8, 7);
-
-    final data = FirestoreGroupRepository.createClubProjectData(
-      adminId: signedInUser.id,
-      createdAt: createdAt,
-    );
-
-    expect(data['id'], 'club');
-    expect(data['adminId'], signedInUser.id);
-    expect(data['createdAt'], createdAt);
-  });
-
   test('group member documents do not store a role', () {
     final joinedAt = DateTime(2026, 8, 7);
 
