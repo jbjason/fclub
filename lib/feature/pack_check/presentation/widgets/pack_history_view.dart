@@ -1,121 +1,62 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fclub/core/constants/my_string.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/model/pack_session.dart';
 import '../provider/pack_check_provider.dart';
 import 'pack_history_tile.dart';
+import 'shared/pack_card_shell.dart';
+import 'shared/pack_palette.dart';
+import 'shared/pack_section_header.dart';
 
-/// Full history list widget.
-///
-/// - [onCreateNew] is null when an active session already exists (button is
-///   shown but disabled with a visual indicator).
-/// - [onView] is called with the tapped session to open a detail sheet.
-/// - [onDelete] is called with the session id to trigger a confirmation.
 class PackHistoryView extends StatelessWidget {
   const PackHistoryView({
-    required this.isDark,
+    super.key,
     this.onCreateNew,
     this.onView,
     this.onDelete,
-    super.key,
   });
 
-  final bool isDark;
   final VoidCallback? onCreateNew;
   final void Function(PackSession)? onView;
   final void Function(String id)? onDelete;
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary =
-        isDark ? Colors.white : const Color(0xFF1A0A3D);
-    final textHint =
-        isDark ? Colors.white30 : const Color(0xFFB8A8DC);
+    final provider = context.watch<PackCheckProvider>();
+    final history = provider.history;
 
-    return Consumer<PackCheckProvider>(
-      builder: (_, provider, __) {
-        final history = provider.history;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Create new button
-            if (onCreateNew != null)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: _CreateNewButton(onTap: onCreateNew!, isDark: isDark),
-              )
-            else
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: _CreateNewButton(
-                  onTap: () {},
-                  isDark: isDark,
-                  disabled: true,
-                ),
-              ),
-            SizedBox(height: 20.h),
-
-            // ── History heading
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: Row(
-                children: [
-                  Text(
-                    'pack_past_sessions'.tr(),
-                    style: TextStyle(
-                      fontFamily: 'Poppins_Bold',
-                      fontSize: 14.sp,
-                      color: textPrimary,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (history.isNotEmpty)
-                    GestureDetector(
-                      onTap: () =>
-                          _confirmClearHistory(context, provider),
-                      child: Text(
-                        'pack_clear_history'.tr(),
-                        style: TextStyle(
-                          fontFamily: 'Poppins_Regular',
-                          fontSize: 11.sp,
-                          color: textHint,
-                        ),
-                      ),
-                    ),
-                ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _CreateSessionButton(onTap: onCreateNew),
+        const SizedBox(height: 20),
+        PackSectionHeader(
+          title: 'pack_past_sessions'.tr(),
+          trailingLabel: history.isEmpty ? null : 'pack_clear_history'.tr(),
+          onTrailingTap: history.isEmpty
+              ? null
+              : () => _confirmClearHistory(context, provider),
+        ),
+        const SizedBox(height: 8),
+        if (history.isEmpty)
+          const Expanded(child: _EmptyHistory())
+        else
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.only(top: 3, bottom: 28),
+              itemCount: history.length,
+              itemBuilder: (_, index) => PackHistoryTile(
+                session: history[index],
+                onView: onView == null ? null : () => onView!(history[index]),
+                onDelete: onDelete == null
+                    ? null
+                    : () => onDelete!(history[index].id),
               ),
             ),
-            SizedBox(height: 8.h),
-
-            // ── List or empty state
-            Expanded(
-              child: history.isEmpty
-                  ? _EmptyHistory(isDark: isDark)
-                  : Scrollbar(
-                      thumbVisibility: true,
-                      radius: const Radius.circular(8),
-                      child: ListView.builder(
-                        padding: EdgeInsets.only(bottom: 32.h),
-                        itemCount: history.length,
-                        itemBuilder: (_, i) => PackHistoryTile(
-                          session: history[i],
-                          isDark: isDark,
-                          onView: onView != null
-                              ? () => onView!(history[i])
-                              : null,
-                          onDelete: onDelete != null
-                              ? () => onDelete!(history[i].id)
-                              : null,
-                        ),
-                      ),
-                    ),
-            ),
-          ],
-        );
-      },
+          ),
+      ],
     );
   }
 
@@ -123,165 +64,138 @@ class PackHistoryView extends StatelessWidget {
     BuildContext context,
     PackCheckProvider provider,
   ) async {
-    final bgColor =
-        isDark ? const Color(0xFF12102A) : Colors.white;
-    final textColor =
-        isDark ? Colors.white : const Color(0xFF1A0A3D);
-    final subColor =
-        isDark ? Colors.white54 : const Color(0xFF7B6EA0);
-
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: bgColor,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r)),
+      builder: (dialogContext) => AlertDialog(
+        icon: const Icon(
+          Icons.history_toggle_off_rounded,
+          color: PackPalette.rose,
+        ),
         title: Text(
           'pack_clear_history_title'.tr(),
-          style: TextStyle(
-              color: textColor, fontFamily: 'Poppins_Bold'),
+          style: const TextStyle(fontFamily: MyString.poppinsBold),
         ),
         content: Text(
           'pack_clear_history_body'.tr(),
-          style: TextStyle(
-              color: subColor,
-              fontFamily: 'Poppins_Regular',
-              height: 1.5),
+          style: const TextStyle(
+            fontFamily: MyString.rubikRegular,
+            height: 1.5,
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'cancel'.tr(),
-              style: TextStyle(
-                color: isDark
-                    ? Colors.white38
-                    : const Color(0xFF9E93C8),
-              ),
-            ),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text('cancel'.tr()),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              'pack_clear'.tr(),
-              style: TextStyle(
-                color: Color(0xFFF43F5E),
-                fontFamily: 'Poppins_Bold',
-              ),
-            ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: FilledButton.styleFrom(backgroundColor: PackPalette.rose),
+            child: Text('pack_clear'.tr()),
           ),
         ],
       ),
     );
-    if (confirmed == true) {
-      await provider.clearHistory();
-    }
+    if (confirmed == true) await provider.clearHistory();
   }
 }
 
-// ── Create new button ─────────────────────────────────────────────────────────
+class _CreateSessionButton extends StatelessWidget {
+  const _CreateSessionButton({this.onTap});
 
-class _CreateNewButton extends StatelessWidget {
-  const _CreateNewButton({
-    required this.onTap,
-    required this.isDark,
-    this.disabled = false,
-  });
-
-  final VoidCallback onTap;
-  final bool isDark;
-  final bool disabled;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: disabled ? null : onTap,
-      child: Opacity(
-        opacity: disabled ? 0.4 : 1.0,
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
-            gradient: const LinearGradient(
-              colors: [Color(0xFFA855F7), Color(0xFF06B6D4)],
-            ),
-            boxShadow: disabled
-                ? null
-                : [
-                    BoxShadow(
-                      color: const Color(0xFFA855F7).withOpacity(0.38),
-                      blurRadius: 18,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                disabled
-                    ? Icons.lock_outline_rounded
-                    : Icons.add_circle_outline_rounded,
-                color: Colors.white,
-                size: 20.r,
-              ),
-              SizedBox(width: 8.w),
-              Text(
-                disabled
-                    ? 'pack_finish_active_first'.tr()
-                    : 'pack_start_session'.tr(),
-                style: TextStyle(
-                  fontFamily: 'Poppins_Bold',
-                  fontSize: 15.sp,
-                  color: Colors.white,
-                  letterSpacing: 0.3,
+  Widget build(BuildContext context) => Opacity(
+    opacity: onTap == null ? .48 : 1,
+    child: Container(
+      width: double.infinity,
+      height: 58,
+      decoration: BoxDecoration(
+        gradient: PackPalette.actionGradient,
+        borderRadius: BorderRadius.circular(19),
+        boxShadow: onTap == null
+            ? null
+            : [
+                BoxShadow(
+                  color: PackPalette.violet.withValues(alpha: .25),
+                  blurRadius: 22,
+                  offset: const Offset(0, 9),
                 ),
-              ),
-            ],
+              ],
+      ),
+      child: FilledButton.icon(
+        onPressed: onTap,
+        style: FilledButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(19),
+          ),
+        ),
+        icon: Icon(
+          onTap == null ? Icons.lock_outline_rounded : Icons.add_rounded,
+        ),
+        label: Text(
+          onTap == null
+              ? 'pack_finish_active_first'.tr()
+              : 'pack_start_session'.tr(),
+          style: const TextStyle(
+            fontFamily: MyString.poppinsBold,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
-// ── Empty history state ───────────────────────────────────────────────────────
-
 class _EmptyHistory extends StatelessWidget {
-  const _EmptyHistory({required this.isDark});
-
-  final bool isDark;
+  const _EmptyHistory();
 
   @override
   Widget build(BuildContext context) {
-    final color = isDark ? Colors.white12 : const Color(0xFFD0C8F0);
-    final textColor = isDark ? Colors.white24 : const Color(0xFFB8A8DC);
-
+    final colors = Theme.of(context).colorScheme;
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.history_rounded, size: 44.r, color: color),
-          SizedBox(height: 10.h),
-          Text(
-            'pack_no_past_sessions'.tr(),
-            style: TextStyle(
-              fontFamily: 'Poppins_Medium',
-              fontSize: 13.sp,
-              color: textColor,
+      child: PackCardShell(
+        accent: PackPalette.cyan,
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 62,
+              height: 62,
+              decoration: BoxDecoration(
+                gradient: PackPalette.actionGradient,
+                borderRadius: BorderRadius.circular(21),
+              ),
+              child: const Icon(
+                Icons.travel_explore_rounded,
+                color: Colors.white,
+              ),
             ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            'pack_no_past_sessions_subtitle'.tr(),
-            style: TextStyle(
-              fontFamily: 'Poppins_Regular',
-              fontSize: 11.sp,
-              color: textColor,
+            const SizedBox(height: 15),
+            Text(
+              'pack_no_past_sessions'.tr(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: MyString.poppinsBold,
+                fontSize: 15,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 5),
+            Text(
+              'pack_no_past_sessions_subtitle'.tr(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: colors.onSurfaceVariant,
+                fontFamily: MyString.rubikRegular,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

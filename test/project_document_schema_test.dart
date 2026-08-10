@@ -1,5 +1,6 @@
 import 'package:fclub/feature/club/data/repositories/firestore_club_repository.dart';
 import 'package:fclub/feature/locker/data/repositories/firestore_locker_repository.dart';
+import 'package:fclub/feature/kurbani/data/repositories/firestore_kurbani_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -27,6 +28,20 @@ void main() {
     );
 
     expect(data['name'], 'Shared Treasury');
+    expect(data, isNot(contains('type')));
+  });
+
+  test('Kurbani uses its type as the deterministic project document ID', () {
+    expect(FirestoreKurbaniRepository.projectDocumentId, 'kurbani');
+
+    final data = FirestoreKurbaniRepository.createProjectData(
+      name: '  Eid Circle  ',
+      adminId: 'admin-id',
+      createdAt: DateTime(2026, 8, 10),
+    );
+
+    expect(data['name'], 'Eid Circle');
+    expect(data['status'], 'active');
     expect(data, isNot(contains('type')));
   });
 }

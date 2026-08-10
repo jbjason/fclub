@@ -18,7 +18,8 @@ import 'package:fclub/feature/home/data/repositories/group_repository.dart';
 import 'package:fclub/feature/home/data/datasources/group_selection_local_data_source.dart';
 import 'package:fclub/feature/home/data/group_session_hive_box.dart';
 import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
-import 'package:fclub/feature/kurbani/data/kurbani_hive_boxes.dart';
+import 'package:fclub/feature/kurbani/data/repositories/firestore_kurbani_repository.dart';
+import 'package:fclub/feature/kurbani/data/repositories/kurbani_repository.dart';
 import 'package:fclub/feature/locker/data/repositories/firestore_locker_repository.dart';
 import 'package:fclub/feature/locker/data/repositories/locker_repository.dart';
 import 'package:fclub/feature/locker/presentation/provider/locker_provider.dart';
@@ -40,7 +41,6 @@ void main() async {
   await GlobalContactsHiveBox.openBox();
   await GroupSessionHiveBox.openBox();
   await TourHiveBoxes.openBoxes();
-  await KurbaniHiveBoxes.openBoxes();
   await PackCheckHiveBoxes.openBoxes();
   await SettingsHiveBox.openBox();
   await EasyLocalization.ensureInitialized();
@@ -81,6 +81,9 @@ class MyApp extends StatelessWidget {
           Provider<LockerRepository>(
             create: (_) => FirestoreLockerRepository(),
           ),
+          Provider<KurbaniRepository>(
+            create: (_) => FirestoreKurbaniRepository(),
+          ),
           ChangeNotifierProvider(
             create: (context) =>
                 AuthSessionProvider(context.read<AuthRepository>()),
@@ -91,8 +94,11 @@ class MyApp extends StatelessWidget {
                 TourProvider(context.read<GlobalContactsProvider>()),
           ),
           ChangeNotifierProvider(
-            create: (context) =>
-                KurbaniProvider(context.read<GlobalContactsProvider>()),
+            create: (context) => KurbaniProvider(
+              repository: context.read<KurbaniRepository>(),
+              groupSession: context.read<GroupSessionProvider>(),
+              authService: context.read<FirebaseAuthService>(),
+            ),
           ),
           ChangeNotifierProvider(
             create: (context) => ClubProvider(

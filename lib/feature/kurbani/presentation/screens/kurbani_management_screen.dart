@@ -1,26 +1,20 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
-import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
-import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_add_animal_part_sheet.dart';
-import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_add_expense_sheet.dart';
-import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_member_manage_sheet.dart';
-import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_stat_card.dart';
-import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_tab_header_delegate.dart';
-import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_tabs.dart';
+import 'package:fclub/core/widgets/feature_ambient_background.dart';
+import 'package:fclub/feature/kurbani/presentation/provider/kurbani_event_provider.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/management/animal_parts/kurbani_add_animal_part_sheet.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/management/animal_parts/kurbani_animal_parts_tab.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/management/expenses/kurbani_add_expense_sheet.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/management/expenses/kurbani_expense_tab.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/management/kurbani_event_hero.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/management/kurbani_event_tab_bar.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/management/participants/kurbani_participant_management_sheet.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/management/settlement/kurbani_settlement_tab.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/shared/kurbani_palette.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/shared/kurbani_state_panel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-// ── Kurbani theme constants ────────────────────────────────────────────────
-const _kDeepEmerald = Color(0xFF064E3B);
-const _kGold = Color(0xFFF59E0B);
-const _kEmerald = Color(0xFF10B981);
-const _kRose = Color(0xFFEF4444);
-const _kViolet = Color(0xFF6D28D9);
-const _kCyan = Color(0xFF0891B2);
-
-/// Full management screen for an active Kurbani session.
-/// Navigated to from [KurbaniHistoryScreen].
 class KurbaniManagementScreen extends StatefulWidget {
   const KurbaniManagementScreen({super.key});
 
@@ -32,312 +26,210 @@ class KurbaniManagementScreen extends StatefulWidget {
 class _KurbaniManagementScreenState extends State<KurbaniManagementScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController = TabController(
-    length: 2,
+    length: 3,
     vsync: this,
-  );
+  )..addListener(_onTabChanged);
+  int _tabIndex = 0;
 
-  final _costScrollController = ScrollController();
-  final _animalScrollController = ScrollController();
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<KurbaniEventProvider>().initialize();
+    });
+  }
 
   @override
   void dispose() {
-    _tabController.dispose();
-    _costScrollController.dispose();
-    _animalScrollController.dispose();
+    _tabController
+      ..removeListener(_onTabChanged)
+      ..dispose();
     super.dispose();
   }
 
-  // ── FAB ───────────────────────────────────────────────────
-
-  void _showMemberManageSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const KurbaniMemberManageSheet(),
-    );
-  }
-
-  void _showAddExpenseSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const KurbaniAddExpenseSheet(),
-    );
-  }
-
-  void _showAddAnimalPartSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const KurbaniAddAnimalPartSheet(),
-    );
-  }
-
-  void _onFabPressed() {
-    if (_tabController.index == 0) {
-      _showAddExpenseSheet();
-    } else {
-      _showAddAnimalPartSheet();
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging && _tabIndex != _tabController.index) {
+      setState(() => _tabIndex = _tabController.index);
     }
   }
 
-  // ── Build ─────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<KurbaniProvider>();
-    final summary = provider.summary;
-
+    final provider = context.watch<KurbaniEventProvider>();
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: NestedScrollView(
-        headerSliverBuilder: (context, _) => [
-          // ── Hero app bar ──────────────────────────────────
-          SliverAppBar(
-            pinned: true,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            flexibleSpace: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF064E3B),
-                    Color(0xFF1A3A6B),
-                    Color(0xFF1E1B4B),
-                  ],
-                  stops: [0.0, 0.55, 1.0],
-                ),
-              ),
-            ),
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Colors.white70,
-                size: 20.r,
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 38.r,
-                  height: 38.r,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        _kGold.withValues(alpha: 0.3),
-                        _kGold.withValues(alpha: 0.05),
-                      ],
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.nightlight_round,
-                    size: 20.r,
-                    color: _kGold,
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      provider.groupName,
-                      style: TextStyle(
-                        fontFamily: MyString.poppinsBold,
-                        fontSize: 14.sp,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        height: 1.1,
-                      ),
-                    ),
-                    Text(
-                      '${provider.members.length} ${'members'.tr()} · ${'kurbani_eid'.tr()}',
-                      style: TextStyle(
-                        fontFamily: MyString.rubikRegular,
-                        fontSize: 10.sp,
-                        color: Colors.white60,
-                        height: 1.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  Icons.people_alt_rounded,
-                  color: Colors.white,
-                  size: 22.r,
-                ),
-                onPressed: _showMemberManageSheet,
-                tooltip: 'manage_members'.tr(),
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.tune_rounded,
-                  color: Colors.white.withValues(alpha: 0.9),
-                  size: 22.r,
-                ),
-                onPressed: () => _showBudgetDialog(context, provider),
-              ),
-            ],
-          ),
-
-          // ── Stat cards row ────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
-              child: Row(
-                children: [
-                  KurbaniStatCard(
-                    label: 'budget'.tr(),
-                    amount: summary.totalBudget,
-                    icon: Icons.savings_rounded,
-                    color: _kViolet,
-                  ),
-                  SizedBox(width: 8.w),
-                  KurbaniStatCard(
-                    label: 'spent'.tr(),
-                    amount: summary.totalSpent,
-                    icon: Icons.shopping_bag_rounded,
-                    color: _kCyan,
-                  ),
-                  SizedBox(width: 8.w),
-                  KurbaniStatCard(
-                    label: summary.isDeficit ? 'deficit'.tr() : 'surplus'.tr(),
-                    amount: summary.balance.abs(),
-                    icon: summary.isDeficit
-                        ? Icons.trending_down_rounded
-                        : Icons.trending_up_rounded,
-                    color: summary.isDeficit ? _kRose : _kEmerald,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // ── Pinned tab bar ────────────────────────────────
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: KurbaniTabHeaderDelegate(
-              TabBar(
-                controller: _tabController,
-                labelColor: _kDeepEmerald,
-                unselectedLabelColor: Theme.of(context).colorScheme.outline,
-                indicatorColor: _kDeepEmerald,
-                indicatorWeight: 2.5,
-                labelStyle: TextStyle(
-                  fontFamily: MyString.poppinsBold,
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w700,
-                ),
-                unselectedLabelStyle: TextStyle(
-                  fontFamily: MyString.rubikRegular,
-                  fontSize: 13.sp,
-                ),
-                tabs: [
-                  Tab(
-                    icon: const Icon(Icons.receipt_rounded, size: 18),
-                    text: 'kurbani_cost_split'.tr(),
-                  ),
-                  Tab(
-                    icon: const Icon(Icons.set_meal_rounded, size: 18),
-                    text: 'kurbani_animal_parts'.tr(),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-        body: TabBarView(
-          controller: _tabController,
+      appBar: AppBar(
+        backgroundColor: Theme.of(
+          context,
+        ).colorScheme.surface.withValues(alpha: .92),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            KurbaniCostTab(
-              provider: provider,
-              summary: summary,
-              scrollController: _costScrollController,
+            Text(
+              provider.event.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            KurbaniAnimalTab(
-              provider: provider,
-              scrollController: _animalScrollController,
+            Text(
+              'kurbani_event_kicker'.tr(),
+              style: const TextStyle(
+                color: KurbaniPalette.gold,
+                fontFamily: MyString.rubikMedium,
+                fontSize: 8,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.4,
+              ),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _onFabPressed,
-        backgroundColor: _kDeepEmerald,
-        foregroundColor: Colors.white,
-        icon: Icon(Icons.add_rounded, size: 22.r),
-        label: AnimatedBuilder(
-          animation: _tabController,
-          builder: (context, child) => Text(
-            _tabController.index == 0 ? 'add_expense'.tr() : 'kurbani_add_part'.tr(),
-            style: TextStyle(fontFamily: MyString.poppinsBold, fontSize: 13.sp),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── Budget edit dialog ─────────────────────────────────────
-
-  void _showBudgetDialog(BuildContext context, KurbaniProvider provider) {
-    final controller = TextEditingController(
-      text: provider.budgetPerMember.toStringAsFixed(0),
-    );
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        title: Text(
-          'kurbani_budget_per_member'.tr(),
-          style: TextStyle(fontFamily: MyString.poppinsBold, fontSize: 16.sp),
-        ),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            prefixText: '৳ ',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-          ),
-        ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('cancel'.tr()),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final v = double.tryParse(controller.text.trim());
-              if (v != null) provider.updateBudgetPerMember(v);
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _kDeepEmerald,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.r),
-              ),
+          if (provider.canEdit)
+            IconButton.filledTonal(
+              tooltip: 'kurbani_manage_participants'.tr(),
+              onPressed: _openParticipants,
+              icon: const Icon(Icons.group_add_rounded),
             ),
-            child: Text('save'.tr()),
-          ),
+          const SizedBox(width: 8),
         ],
       ),
+      body: SafeArea(
+        child: FeatureAmbientBackground(
+          accent: KurbaniPalette.emerald,
+          secondaryAccent: KurbaniPalette.violet,
+          child: _body(provider),
+        ),
+      ),
+      floatingActionButton: provider.canEdit && _tabIndex != 1
+          ? FloatingActionButton.extended(
+              backgroundColor: _tabIndex == 0
+                  ? KurbaniPalette.cyan
+                  : KurbaniPalette.gold,
+              foregroundColor: _tabIndex == 0
+                  ? Colors.white
+                  : KurbaniPalette.midnight,
+              onPressed: provider.isSubmitting
+                  ? null
+                  : _tabIndex == 0
+                  ? _openExpense
+                  : _openAnimalPart,
+              icon: const Icon(Icons.add_rounded),
+              label: Text(
+                _tabIndex == 0 ? 'add_expense'.tr() : 'kurbani_add_part'.tr(),
+              ),
+            )
+          : null,
     );
   }
-}
 
+  Widget _body(KurbaniEventProvider provider) {
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (provider.loadError != null) {
+      return KurbaniStatePanel(
+        icon: Icons.cloud_off_rounded,
+        title: 'kurbani_load_error_title'.tr(),
+        message: provider.loadError!.tr(),
+        actionLabel: 'group_retry'.tr(),
+        onAction: provider.initialize,
+      );
+    }
+    if (!provider.canAccess) {
+      return KurbaniStatePanel(
+        icon: Icons.lock_outline_rounded,
+        title: 'project_access_required'.tr(),
+        message: 'kurbani_access_required_message'.tr(),
+      );
+    }
+    return Column(
+      children: [
+        KurbaniEventHero(
+          event: provider.event,
+          summary: provider.summary,
+          participantCount: provider.participants.length,
+        ),
+        KurbaniEventTabBar(controller: _tabController),
+        const SizedBox(height: 4),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              KurbaniExpenseTab(provider: provider, onDelete: _deleteExpense),
+              KurbaniSettlementTab(provider: provider),
+              KurbaniAnimalPartsTab(
+                provider: provider,
+                onDelete: _deleteAnimalPart,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _openParticipants() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: .6),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: context.read<KurbaniEventProvider>(),
+        child: const KurbaniParticipantManagementSheet(),
+      ),
+    );
+  }
+
+  void _openExpense() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: .6),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: context.read<KurbaniEventProvider>(),
+        child: const KurbaniAddExpenseSheet(),
+      ),
+    );
+  }
+
+  void _openAnimalPart() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: .6),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: context.read<KurbaniEventProvider>(),
+        child: const KurbaniAddAnimalPartSheet(),
+      ),
+    );
+  }
+
+  void _deleteExpense(String expenseId) {
+    _runAction(
+      () => context.read<KurbaniEventProvider>().deleteExpense(expenseId),
+    );
+  }
+
+  void _deleteAnimalPart(String partId) {
+    _runAction(
+      () => context.read<KurbaniEventProvider>().deleteAnimalPart(partId),
+    );
+  }
+
+  Future<void> _runAction(Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (_) {
+      if (!mounted) return;
+      final key = context.read<KurbaniEventProvider>().actionError;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text((key ?? 'kurbani_error_unknown').tr())),
+      );
+    }
+  }
+}

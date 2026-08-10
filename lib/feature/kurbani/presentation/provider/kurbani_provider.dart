@@ -1,256 +1,276 @@
-import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
-import 'package:fclub/feature/kurbani/data/kurbani_calculator.dart';
-import 'package:fclub/feature/kurbani/data/kurbani_hive_boxes.dart';
-import 'package:fclub/feature/kurbani/data/model/kurbani_animal_part_model.dart';
-import 'package:fclub/feature/kurbani/data/model/kurbani_expense_model.dart';
-import 'package:fclub/feature/kurbani/data/model/kurbani_member_model.dart';
-import 'package:fclub/feature/kurbani/data/model/kurbani_session.dart';
-import 'package:fclub/feature/kurbani/data/model/kurbani_summary.dart';
+import 'dart:async';
+
+import 'package:fclub/core/services/auth/firebase_auth_service.dart';
+import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
+import 'package:fclub/feature/kurbani/data/models/kurbani_event.dart';
+import 'package:fclub/feature/kurbani/data/models/kurbani_failure.dart';
+import 'package:fclub/feature/kurbani/data/models/kurbani_participant.dart';
+import 'package:fclub/feature/kurbani/data/models/kurbani_project.dart';
+import 'package:fclub/feature/kurbani/data/repositories/kurbani_repository.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:uuid/uuid.dart';
 
 class KurbaniProvider with ChangeNotifier {
-  KurbaniProvider(this._globalContacts)
-      : _sessionsBox = Hive.box<KurbaniSession>(KurbaniHiveBoxes.sessionsBox) {
-    _load();
+  KurbaniProvider({
+    required KurbaniRepository repository,
+    required GroupSessionProvider groupSession,
+    required FirebaseAuthService authService,
+  }) : _repository = repository,
+       _groupSession = groupSession,
+       _authService = authService;
+
+  final KurbaniRepository _repository;
+  final GroupSessionProvider _groupSession;
+  final FirebaseAuthService _authService;
+
+  StreamSubscription<KurbaniProject?>? _projectSubscription;
+  StreamSubscription<List<KurbaniEvent>>? _eventSubscription;
+  KurbaniProject? _project;
+  List<KurbaniEvent> _events = const [];
+  List<KurbaniParticipant> _groupMembers = const [];
+  String? _groupAdminId;
+  String? _loadedGroupId;
+  String? _loadError;
+  String? _actionError;
+  bool _isLoading = false;
+  bool _isSubmitting = false;
+  bool _isLoadingMembers = false;
+  bool _hasProjectSnapshot = false;
+  bool _hasEventSnapshot = false;
+
+  KurbaniProject? get project => _project;
+  String get projectName => _project?.name ?? 'Kurbani';
+  List<KurbaniEvent> get events => List.unmodifiable(_events);
+  List<KurbaniParticipant> get groupMembers => List.unmodifiable(_groupMembers);
+  KurbaniEvent? get activeEvent {
+    for (final event in _events) {
+      if (event.isActive) return event;
+    }
+    return null;
   }
 
-  final Box<KurbaniSession> _sessionsBox;
-  final GlobalContactsProvider _globalContacts;
-  final _uuid = const Uuid();
+  List<KurbaniEvent> get completedEvents =>
+      List.unmodifiable(_events.where((event) => !event.isActive));
+  String? get currentUserId => _authService.currentUser?.uid;
+  String? get activeGroupId => _groupSession.groupId;
+  bool get isGroupAdmin =>
+      _groupAdminId?.isNotEmpty == true && _groupAdminId == currentUserId;
+  bool get isProjectAdmin =>
+      _project?.adminId.isNotEmpty == true &&
+      _project?.adminId == currentUserId;
+  bool get canManage => isGroupAdmin || isProjectAdmin;
+  bool get isLoading => _isLoading;
+  bool get isSubmitting => _isSubmitting;
+  bool get isLoadingMembers => _isLoadingMembers;
+  String? get loadError => _loadError;
+  String? get actionError => _actionError;
 
-  KurbaniSession? _activeSession;
-  List<KurbaniSession> _history = [];
+  Future<void> initialize({bool force = false}) async {
+    final groupId = activeGroupId;
+    if (groupId == null || groupId.isEmpty) {
+      _setLoadError('kurbani_error_choose_group');
+      return;
+    }
+    if (currentUserId == null || currentUserId!.isEmpty) {
+      _setLoadError('kurbani_error_signed_out');
+      return;
+    }
+    if (!force && _loadedGroupId == groupId && _projectSubscription != null) {
+      return;
+    }
 
-  // ── Init ──────────────────────────────────────────────────────────────────
-
-  void _load() {
-    final all = _sessionsBox.values.toList();
-    final active = all.where((s) => !s.isCompleted).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    _activeSession = active.isNotEmpty ? active.first : null;
-    _history = all.where((s) => s.isCompleted).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    await _cancelSubscriptions();
+    _loadedGroupId = groupId;
+    _project = null;
+    _events = const [];
+    _groupMembers = const [];
+    _groupAdminId = null;
+    _loadError = null;
+    _actionError = null;
+    _isLoading = true;
+    _hasProjectSnapshot = false;
+    _hasEventSnapshot = false;
     notifyListeners();
+
+    try {
+      _groupAdminId = await _repository.getGroupAdminId(groupId: groupId);
+      _project = await _repository.findProject(groupId: groupId);
+    } catch (error) {
+      _setLoadError(_message(error));
+      return;
+    }
+
+    if (_project == null) {
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    _projectSubscription = _repository.watchProject(groupId: groupId).listen((
+      project,
+    ) {
+      _project = project;
+      _hasProjectSnapshot = true;
+      _completeInitialLoad();
+    }, onError: _handleLoadError);
+    _eventSubscription = _repository.watchEvents(groupId: groupId).listen((
+      events,
+    ) {
+      _events = events;
+      _hasEventSnapshot = true;
+      _completeInitialLoad();
+    }, onError: _handleLoadError);
   }
 
-  // ── Public getters ─────────────────────────────────────────────────────────
-
-  bool get hasActiveSession => _activeSession != null;
-  KurbaniSession? get activeSession => _activeSession;
-  List<KurbaniSession> get history => List.unmodifiable(_history);
-
-  // ── Delegated getters for active session ──────────────────────────────────
-
-  String get groupName => _activeSession?.groupName ?? '';
-  double get budgetPerMember => _activeSession?.budgetPerMember ?? 3000.0;
-
-  List<KurbaniMemberModel> get members =>
-      List<KurbaniMemberModel>.from(_activeSession?.members ?? []);
-
-  List<KurbaniExpenseModel> get expenses {
-    final list =
-        List<KurbaniExpenseModel>.from(_activeSession?.expenses ?? []);
-    list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    return list;
-  }
-
-  List<KurbaniAnimalPartModel> get animalParts {
-    final list =
-        List<KurbaniAnimalPartModel>.from(_activeSession?.animalParts ?? []);
-    list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    return list;
-  }
-
-  KurbaniSummary get summary => KurbaniCalculator.calculate(
-        members: members,
-        expenses: expenses,
-        budgetPerMember: budgetPerMember,
-      );
-
-  double get totalAnimalWeight =>
-      animalParts.fold<double>(0, (s, p) => s + p.weightKg);
-
-  // ── Session lifecycle ──────────────────────────────────────────────────────
-
-  Future<void> createSession({
-    required String groupName,
-    required double budgetPerMember,
-    required List<String> selectedContactIds,
-  }) async {
-    final meId = _globalContacts.meContact?.id;
-    final ids = [
-      if (meId != null && !selectedContactIds.contains(meId)) meId,
-      ...selectedContactIds,
-    ];
-
-    final members = ids.map((id) {
-      final contact = _globalContacts.contactById(id);
-      if (contact == null) return null;
-      return KurbaniMemberModel(
-        id: contact.id,
-        name: contact.isMe ? 'You (${contact.name})' : contact.name,
-        avatarColorIndex: contact.avatarColorIndex,
-        contribution: budgetPerMember,
-      );
-    }).whereType<KurbaniMemberModel>().toList();
-
-    final session = KurbaniSession(
-      id: _uuid.v4(),
-      groupName: groupName,
-      budgetPerMember: budgetPerMember,
-      createdAt: DateTime.now(),
-      members: members,
-      expenses: [],
-      animalParts: [],
+  Future<void> createProject({required String name}) async {
+    _requireGroupAdmin();
+    if (name.trim().isEmpty) {
+      throw const KurbaniFailure('kurbani_error_project_name');
+    }
+    await _runAction(
+      () => _repository.createProject(
+        groupId: _requireGroupId(),
+        name: name,
+        adminId: _requireUserId(),
+      ),
     );
-    await _sessionsBox.put(session.id, session);
-    _activeSession = session;
+    await initialize(force: true);
+  }
+
+  Future<void> loadGroupMembers() async {
+    _requireAdmin();
+    _isLoadingMembers = true;
+    _actionError = null;
     notifyListeners();
+    try {
+      _groupMembers = await _repository.getGroupMembers(
+        groupId: _requireGroupId(),
+      );
+    } catch (error) {
+      _actionError = _message(error);
+    } finally {
+      _isLoadingMembers = false;
+      notifyListeners();
+    }
   }
 
-  Future<void> finishSession() async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.isCompleted = true;
-    await _sessionsBox.put(session.id, session);
-    _load();
-  }
-
-  Future<void> deleteSession(String sessionId) async {
-    await _sessionsBox.delete(sessionId);
-    _history.removeWhere((s) => s.id == sessionId);
-    if (_activeSession?.id == sessionId) _activeSession = null;
-    notifyListeners();
-  }
-
-  // ── Members in active session ──────────────────────────────────────────────
-
-  Future<void> addMember(String name) async {
-    final session = _activeSession;
-    if (session == null) return;
-    final colorIndex = session.members.length % _avatarGradientCount;
-    session.members.add(KurbaniMemberModel(
-      id: _uuid.v4(),
-      name: name,
-      avatarColorIndex: colorIndex,
-      contribution: session.budgetPerMember,
-    ));
-    await _sessionsBox.put(session.id, session);
-    notifyListeners();
-  }
-
-  Future<void> updateContribution(String memberId, double amount) async {
-    final session = _activeSession;
-    if (session == null) return;
-    final idx = session.members.indexWhere((m) => m.id == memberId);
-    if (idx == -1) return;
-    session.members[idx].contribution = amount;
-    await _sessionsBox.put(session.id, session);
-    notifyListeners();
-  }
-
-  Future<void> addMemberFromContact(String contactId) async {
-    final session = _activeSession;
-    if (session == null) return;
-    if (session.members.any((m) => m.id == contactId)) return;
-    final contact = _globalContacts.contactById(contactId);
-    if (contact == null) return;
-    final colorIndex = session.members.length % _avatarGradientCount;
-    session.members.add(KurbaniMemberModel(
-      id: contact.id,
-      name: contact.isMe ? 'You (${contact.name})' : contact.name,
-      avatarColorIndex: colorIndex,
-      contribution: session.budgetPerMember,
-    ));
-    await _sessionsBox.put(session.id, session);
-    notifyListeners();
-  }
-
-  Future<void> deleteMember(String memberId) async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.members.removeWhere((m) => m.id == memberId);
-    await _sessionsBox.put(session.id, session);
-    notifyListeners();
-  }
-
-  // ── Expenses ───────────────────────────────────────────────────────────────
-
-  Future<void> addExpense({
-    required String title,
-    required double amount,
-    required String paidByMemberId,
-    String? note,
+  Future<KurbaniEvent> createEvent({
+    required String name,
+    required Set<String> participantIds,
+    required double contribution,
   }) async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.expenses.add(KurbaniExpenseModel(
-      id: _uuid.v4(),
-      title: title,
-      amount: amount,
-      paidByMemberId: paidByMemberId,
-      timestamp: DateTime.now(),
-      note: note,
-    ));
-    await _sessionsBox.put(session.id, session);
+    _requireAdmin();
+    if (activeEvent != null) {
+      throw const KurbaniFailure('kurbani_error_active_event_exists');
+    }
+    if (name.trim().isEmpty) {
+      throw const KurbaniFailure('kurbani_error_event_name');
+    }
+    if (participantIds.isEmpty) {
+      throw const KurbaniFailure('kurbani_error_participants_required');
+    }
+    if (contribution <= 0) {
+      throw const KurbaniFailure('kurbani_error_contribution');
+    }
+    KurbaniEvent? result;
+    await _runAction(() async {
+      result = await _repository.createEvent(
+        groupId: _requireGroupId(),
+        name: name,
+        participantIds: participantIds.toList(growable: false),
+        contribution: contribution,
+      );
+    });
+    return result!;
+  }
+
+  Future<void> completeEvent(String eventId) async {
+    _requireAdmin();
+    await _runAction(
+      () => _repository.updateEventStatus(
+        groupId: _requireGroupId(),
+        eventId: eventId,
+        status: KurbaniEventStatus.completed,
+      ),
+    );
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    _requireAdmin();
+    await _runAction(
+      () =>
+          _repository.deleteEvent(groupId: _requireGroupId(), eventId: eventId),
+    );
+  }
+
+  Future<void> _runAction(Future<void> Function() action) async {
+    _isSubmitting = true;
+    _actionError = null;
+    notifyListeners();
+    try {
+      await action();
+    } catch (error) {
+      _actionError = _message(error);
+      rethrow;
+    } finally {
+      _isSubmitting = false;
+      notifyListeners();
+    }
+  }
+
+  void _completeInitialLoad() {
+    if (_hasProjectSnapshot && _hasEventSnapshot) _isLoading = false;
     notifyListeners();
   }
 
-  Future<void> deleteExpense(String expenseId) async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.expenses.removeWhere((e) => e.id == expenseId);
-    await _sessionsBox.put(session.id, session);
+  void _handleLoadError(Object error) => _setLoadError(_message(error));
+
+  void _setLoadError(String key) {
+    _loadError = key;
+    _isLoading = false;
     notifyListeners();
   }
 
-  // ── Animal parts ───────────────────────────────────────────────────────────
-
-  Future<void> addAnimalPart({
-    required String partName,
-    required double weightKg,
-    String? note,
-  }) async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.animalParts.add(KurbaniAnimalPartModel(
-      id: _uuid.v4(),
-      partName: partName,
-      weightKg: weightKg,
-      timestamp: DateTime.now(),
-      note: note,
-    ));
-    await _sessionsBox.put(session.id, session);
-    notifyListeners();
+  String _requireGroupId() {
+    final value = activeGroupId;
+    if (value == null || value.isEmpty) {
+      throw const KurbaniFailure('kurbani_error_choose_group');
+    }
+    return value;
   }
 
-  Future<void> deleteAnimalPart(String partId) async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.animalParts.removeWhere((p) => p.id == partId);
-    await _sessionsBox.put(session.id, session);
-    notifyListeners();
+  String _requireUserId() {
+    final value = currentUserId;
+    if (value == null || value.isEmpty) {
+      throw const KurbaniFailure('kurbani_error_signed_out');
+    }
+    return value;
   }
 
-  // ── Settings on active session ─────────────────────────────────────────────
-
-  Future<void> updateBudgetPerMember(double amount) async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.budgetPerMember = amount;
-    await _sessionsBox.put(session.id, session);
-    notifyListeners();
+  void _requireGroupAdmin() {
+    if (!isGroupAdmin) {
+      throw const KurbaniFailure('kurbani_error_group_admin_create');
+    }
   }
 
-  Future<void> updateGroupName(String name) async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.groupName = name;
-    await _sessionsBox.put(session.id, session);
-    notifyListeners();
+  void _requireAdmin() {
+    if (!canManage) {
+      throw const KurbaniFailure('kurbani_error_admin_only');
+    }
+  }
+
+  String _message(Object error) =>
+      error is KurbaniFailure ? error.messageKey : 'kurbani_error_unknown';
+
+  Future<void> _cancelSubscriptions() async {
+    await _projectSubscription?.cancel();
+    await _eventSubscription?.cancel();
+    _projectSubscription = null;
+    _eventSubscription = null;
+  }
+
+  @override
+  void dispose() {
+    unawaited(_cancelSubscriptions());
+    super.dispose();
   }
 }
-
-const int _avatarGradientCount = 7;

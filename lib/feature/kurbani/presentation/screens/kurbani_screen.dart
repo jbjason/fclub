@@ -1,24 +1,23 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
-import 'package:fclub/core/util/currency_formatter.dart';
-import 'package:fclub/core/services/contacts/app_contact.dart';
-import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
-import 'package:fclub/feature/kurbani/data/model/kurbani_session.dart';
+import 'package:fclub/core/services/auth/firebase_auth_service.dart';
+import 'package:fclub/core/widgets/feature_ambient_background.dart';
+import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
+import 'package:fclub/feature/kurbani/data/models/kurbani_event.dart';
+import 'package:fclub/feature/kurbani/data/repositories/kurbani_repository.dart';
+import 'package:fclub/feature/kurbani/presentation/provider/kurbani_event_provider.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
 import 'package:fclub/feature/kurbani/presentation/screens/kurbani_management_screen.dart';
-import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_card_shell.dart';
-import 'package:fclub/feature/kurbani/presentation/widgets/kurbani_member_card.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/overview/kurbani_event_card.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/overview/kurbani_event_setup_sheet.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/overview/kurbani_overview_hero.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/overview/kurbani_project_setup_panel.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/shared/kurbani_palette.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/shared/kurbani_section_header.dart';
+import 'package:fclub/feature/kurbani/presentation/widgets/shared/kurbani_state_panel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-// ── Kurbani colour constants ───────────────────────────────────────────────
-const _kDeepEmerald = Color(0xFF064E3B);
-const _kGold = Color(0xFFF59E0B);
-const _kEmerald = Color(0xFF10B981);
-const _kRose = Color(0xFFEF4444);
-
-/// Shows the annual Kurbani log and lets the user start a new session.
 class KurbaniScreen extends StatefulWidget {
   const KurbaniScreen({super.key});
 
@@ -31,1413 +30,251 @@ class _KurbaniScreenState extends State<KurbaniScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<GlobalContactsProvider>().loadContacts();
+      if (mounted) context.read<KurbaniProvider>().initialize();
     });
   }
 
-  // ── Navigation ─────────────────────────────────────────────────────────────
-
-  static void goToManagement(BuildContext context) {
-    Navigator.push(
-      context,
-      PageRouteBuilder<void>(
-        pageBuilder: (_, _, _) => const KurbaniManagementScreen(),
-        transitionsBuilder: (_, anim, _, child) => SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(1, 0),
-            end: Offset.zero,
-          ).animate(
-              CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
-          child: child,
-        ),
-      ),
-    );
-  }
-
-  // ── New session flow ───────────────────────────────────────────────────────
-
-  Future<void> _startNewSession(KurbaniProvider provider) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _NewKurbaniSheet(provider: provider),
-    );
-
-    // If a session was just created, navigate to management
-    if (mounted && provider.hasActiveSession) {
-      goToManagement(context);
-    }
-  }
-
-  // ── Finish confirm ─────────────────────────────────────────────────────────
-
-  Future<void> _confirmFinish(KurbaniProvider provider) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: Text(
-          'kurbani_finish_title'.tr(),
-          style: TextStyle(
-              fontFamily: MyString.poppinsBold, fontSize: 16.sp),
-        ),
-        content: Text(
-          'kurbani_finish_body'.tr(),
-          style: TextStyle(
-              fontFamily: MyString.rubikRegular,
-              fontSize: 13.sp,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('cancel'.tr()),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _kEmerald,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r)),
-            ),
-            child: Text('finish'.tr()),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      await provider.finishSession();
-    }
-  }
-
-  // ── Delete confirm ─────────────────────────────────────────────────────────
-
-  Future<void> _confirmDelete(
-      KurbaniProvider provider, String id) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: Text(
-          'tour_delete_confirm_title'.tr(),
-          style: TextStyle(
-              fontFamily: MyString.poppinsBold, fontSize: 16.sp),
-        ),
-        content: Text(
-          'kurbani_delete_body'.tr(),
-          style: TextStyle(
-              fontFamily: MyString.rubikRegular,
-              fontSize: 13.sp,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('cancel'.tr()),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _kRose,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r)),
-            ),
-            child: Text('delete'.tr()),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      await provider.deleteSession(id);
-    }
-  }
-
-  // ── Build ──────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<KurbaniProvider>();
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Consumer<KurbaniProvider>(
-        builder: (ctx, provider, _) {
-          return Column(
-            children: [
-              _KurbaniHistoryAppBar(onBack: () => Navigator.pop(context)),
-              SizedBox(height: 8.h),
-
-              // ── Active session resume card ─────────────────
-              if (provider.hasActiveSession) ...[
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: _ActiveSessionCard(
-                    session: provider.activeSession!,
-                    onResume: () => goToManagement(ctx),
-                    onFinish: () => _confirmFinish(provider),
-                    onDelete: () =>
-                        _confirmDelete(provider, provider.activeSession!.id),
-                  ),
-                ),
-                SizedBox(height: 12.h),
-              ],
-
-              // ── History list ───────────────────────────────
-              Expanded(
-                child: provider.history.isEmpty && !provider.hasActiveSession
-                    ? _EmptyHistoryState(
-                        onNew: () => _startNewSession(provider))
-                    : ListView.builder(
-                        padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 100.h),
-                        itemCount: provider.history.length,
-                        itemBuilder: (_, i) {
-                          final session = provider.history[i];
-                          return _HistoryCard(
-                            session: session,
-                            onDelete: () =>
-                                _confirmDelete(provider, session.id),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          );
-        },
-      ),
-      floatingActionButton: Consumer<KurbaniProvider>(
-        builder: (ctx, provider, _) => FloatingActionButton.extended(
-          onPressed: provider.hasActiveSession
-              ? null
-              : () => _startNewSession(provider),
-          backgroundColor:
-              provider.hasActiveSession ? Colors.grey.shade400 : _kDeepEmerald,
-          foregroundColor: Colors.white,
-          icon: const Icon(Icons.add_rounded),
-          label: Text(
-            'kurbani_new'.tr(),
-            style: TextStyle(
-                fontFamily: MyString.poppinsBold, fontSize: 13.sp),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── App bar ────────────────────────────────────────────────────────────────
-
-class _KurbaniHistoryAppBar extends StatelessWidget {
-  const _KurbaniHistoryAppBar({required this.onBack});
-  final VoidCallback onBack;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF064E3B), Color(0xFF1A3A6B), Color(0xFF1E1B4B)],
-          stops: [0.0, 0.55, 1.0],
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(8.w, 4.h, 16.w, 16.h),
-          child: Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white70, size: 20.r),
-                onPressed: onBack,
-              ),
-              SizedBox(width: 4.w),
-              // Crescent icon
-              Container(
-                width: 38.r,
-                height: 38.r,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(colors: [
-                    _kGold.withValues(alpha: 0.3),
-                    _kGold.withValues(alpha: 0.05),
-                  ]),
-                ),
-                child: Icon(Icons.nightlight_round,
-                    size: 20.r, color: _kGold),
-              ),
-              SizedBox(width: 10.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'kurbani_feature_title'.tr(),
-                    style: TextStyle(
-                      fontFamily: MyString.poppinsBold,
-                      fontSize: 18.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      height: 1.1,
-                    ),
-                  ),
-                  Text(
-                    'kurbani_annual_log'.tr(),
-                    style: TextStyle(
-                      fontFamily: MyString.rubikRegular,
-                      fontSize: 11.sp,
-                      color: Colors.white54,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Active session banner ──────────────────────────────────────────────────
-
-class _ActiveSessionCard extends StatelessWidget {
-  const _ActiveSessionCard({
-    required this.session,
-    required this.onResume,
-    required this.onFinish,
-    required this.onDelete,
-  });
-
-  final KurbaniSession session;
-  final VoidCallback onResume;
-  final VoidCallback onFinish;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return KurbaniCardShell(
-      accent: _kDeepEmerald,
-      glow: true,
-      onTap: onResume,
-      borderRadius: BorderRadius.circular(18.r),
-      padding: EdgeInsets.all(14.r),
-      child: Row(
-        children: [
-          KurbaniCardIcon(
-            icon: Icons.nightlight_round,
-            accent: _kDeepEmerald,
-            size: 44,
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 7.w, vertical: 2.h),
-                  decoration: BoxDecoration(
-                    color: _kGold.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(6.r),
-                  ),
-                  child: Text(
-                    'in_progress'.tr(),
-                    style: TextStyle(
-                      fontFamily: MyString.poppinsBold,
-                      fontSize: 9.sp,
-                      color: _kGold,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  session.groupName,
-                  style: TextStyle(
-                    fontFamily: MyString.poppinsBold,
-                    fontSize: 14.sp,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                Text(
-                  'kurbani_active_subtitle'.tr(namedArgs: {'count': session.members.length.toString(), 'spent': CurrencyFormatter.format(session.totalSpent)}),
-                  style: TextStyle(
-                    fontFamily: MyString.rubikRegular,
-                    fontSize: 11.sp,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: _kDeepEmerald,
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Text(
-              'resume'.tr(),
-              style: TextStyle(
-                fontFamily: MyString.poppinsBold,
-                fontSize: 12.sp,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          SizedBox(width: 4.w),
-          PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert_rounded,
-                color: colorScheme.onSurfaceVariant, size: 18.r),
-            padding: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14.r)),
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: 'finish',
-                child: Row(
-                  children: [
-                    Icon(Icons.done_all_rounded,
-                        color: _kEmerald, size: 18.r),
-                    SizedBox(width: 10.w),
-                    Text(
-                      'finish_session'.tr(),
-                      style: TextStyle(
-                        fontFamily: MyString.poppinsMedium,
-                        fontSize: 13.sp,
-                        color: _kEmerald,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete_outline_rounded,
-                        color: _kRose, size: 18.r),
-                    SizedBox(width: 10.w),
-                    Text(
-                      'delete_session'.tr(),
-                      style: TextStyle(
-                        fontFamily: MyString.poppinsMedium,
-                        fontSize: 13.sp,
-                        color: _kRose,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            onSelected: (v) {
-              if (v == 'finish') onFinish();
-              if (v == 'delete') onDelete();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── History card ───────────────────────────────────────────────────────────
-
-class _HistoryCard extends StatelessWidget {
-  const _HistoryCard({required this.session, required this.onDelete});
-
-  final KurbaniSession session;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final spent = session.totalSpent;
-    final budget = session.totalBudget;
-    final progress =
-        budget > 0 ? (spent / budget).clamp(0.0, 1.0) : 0.0;
-    final isOver = spent > budget;
-    final progressColor = isOver ? _kRose : _kEmerald;
-
-    return KurbaniCardShell(
-      accent: _kDeepEmerald,
-      margin: EdgeInsets.only(bottom: 12.h),
-      borderRadius: BorderRadius.circular(18.r),
-      padding: EdgeInsets.all(16.r),
-      onTap: () => _KurbaniHistoryDetailSheet.show(context, session),
-      child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Header row ───────────────────────────────
-                Row(
-                  children: [
-                    KurbaniCardIcon(
-                      icon: Icons.nightlight_round,
-                      accent: _kDeepEmerald,
-                      size: 36,
-                    ),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            session.groupName,
-                            style: TextStyle(
-                              fontFamily: MyString.poppinsBold,
-                              fontSize: 14.sp,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                          Text(
-                            DateFormat('d MMM y').format(session.createdAt),
-                            style: TextStyle(
-                              fontFamily: MyString.rubikRegular,
-                              fontSize: 11.sp,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Delete
-                    IconButton(
-                      onPressed: onDelete,
-                      icon: Icon(Icons.delete_outline_rounded,
-                          color: colorScheme.onSurfaceVariant, size: 20.r),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12.h),
-
-                // ── Spending progress bar ─────────────────────
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'spent'.tr(),
-                                style: TextStyle(
-                                  fontFamily: MyString.rubikRegular,
-                                  fontSize: 11.sp,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              Text(
-                                '${CurrencyFormatter.format(spent)} / ${CurrencyFormatter.format(budget)}',
-                                style: TextStyle(
-                                  fontFamily: MyString.poppinsBold,
-                                  fontSize: 11.sp,
-                                  color: isOver ? _kRose : _kDeepEmerald,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 6.h),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4.r),
-                            child: LinearProgressIndicator(
-                              value: progress,
-                              minHeight: 6.h,
-                              backgroundColor:
-                                  colorScheme.surfaceContainerHighest,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  progressColor),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12.h),
-
-                // ── Chips row ─────────────────────────────────
-                Row(
-                  children: [
-                    _InfoChip(
-                      icon: Icons.people_rounded,
-                      label: 'kurbani_members_count'.tr(namedArgs: {'count': session.members.length.toString()}),
-                      color: const Color(0xFF6D28D9),
-                    ),
-                    SizedBox(width: 8.w),
-                    _InfoChip(
-                      icon: Icons.receipt_long_rounded,
-                      label: 'kurbani_expenses_count'.tr(namedArgs: {'count': session.expenses.length.toString()}),
-                      color: const Color(0xFF0891B2),
-                    ),
-                    SizedBox(width: 8.w),
-                    _InfoChip(
-                      icon: Icons.set_meal_rounded,
-                      label: 'kurbani_parts_count'.tr(namedArgs: {'count': session.animalParts.length.toString()}),
-                      color: _kEmerald,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-    );
-  }
-}
-
-// ── Info chip ──────────────────────────────────────────────────────────────
-
-class _InfoChip extends StatelessWidget {
-  const _InfoChip(
-      {required this.icon, required this.label, required this.color});
-  final IconData icon;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12.r, color: color),
-          SizedBox(width: 4.w),
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: MyString.rubikRegular,
-              fontSize: 10.sp,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Empty state ────────────────────────────────────────────────────────────
-
-class _EmptyHistoryState extends StatelessWidget {
-  const _EmptyHistoryState({required this.onNew});
-  final VoidCallback onNew;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.nightlight_round,
-              size: 64.r, color: _kDeepEmerald.withValues(alpha: 0.2)),
-          SizedBox(height: 16.h),
-          Text(
-            'kurbani_no_records'.tr(),
-            style: TextStyle(
-              fontFamily: MyString.poppinsBold,
-              fontSize: 16.sp,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'kurbani_empty_subtitle'.tr(),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: MyString.rubikRegular,
-              fontSize: 13.sp,
-              color: colorScheme.onSurfaceVariant,
-              height: 1.5,
-            ),
-          ),
-          SizedBox(height: 24.h),
-          ElevatedButton.icon(
-            onPressed: onNew,
-            icon: const Icon(Icons.add_rounded),
-            label: Text(
-              'kurbani_start'.tr(),
-              style: TextStyle(
-                  fontFamily: MyString.poppinsBold, fontSize: 13.sp),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _kDeepEmerald,
-              foregroundColor: Colors.white,
-              padding:
-                  EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── History detail bottom sheet ────────────────────────────────────────────
-
-class _KurbaniHistoryDetailSheet {
-  static void show(
-      BuildContext context, KurbaniSession session) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _HistoryDetailSheetContent(session: session),
-    );
-  }
-}
-
-class _HistoryDetailSheetContent extends StatelessWidget {
-  const _HistoryDetailSheetContent({required this.session});
-  final KurbaniSession session;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final spent = session.totalSpent;
-    final budget = session.totalBudget;
-    final progress =
-        budget > 0 ? (spent / budget).clamp(0.0, 1.0) : 0.0;
-    final isOver = spent > budget;
-
-    return DraggableScrollableSheet(
-      initialChildSize: 0.75,
-      maxChildSize: 0.95,
-      minChildSize: 0.4,
-      builder: (_, controller) => Container(
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius:
-              BorderRadius.vertical(top: Radius.circular(28.r)),
-        ),
-        child: ListView(
-          controller: controller,
-          padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 32.h),
-          children: [
-            // drag handle
-            Center(
-              child: Container(
-                margin: EdgeInsets.only(top: 12.h, bottom: 16.h),
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              ),
-            ),
-
-            // Title
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(10.r),
-                  decoration: BoxDecoration(
-                    color: _kDeepEmerald.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.nightlight_round,
-                      color: _kDeepEmerald, size: 22.r),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        session.groupName,
-                        style: TextStyle(
-                          fontFamily: MyString.poppinsBold,
-                          fontSize: 16.sp,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      Text(
-                        DateFormat('EEEE, d MMMM y')
-                            .format(session.createdAt),
-                        style: TextStyle(
-                          fontFamily: MyString.rubikRegular,
-                          fontSize: 11.sp,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20.h),
-
-            // Budget summary
-            _DetailSection(
-              title: 'budget_summary'.tr(),
-              child: Column(
-                children: [
-                  _SummaryRow(
-                    label: 'kurbani_budget_per_member'.tr(),
-                    value: CurrencyFormatter.format(session.budgetPerMember),
-                  ),
-                  _SummaryRow(
-                    label: 'total_budget'.tr(),
-                    value: CurrencyFormatter.format(budget),
-                  ),
-                  _SummaryRow(
-                    label: 'total_spent'.tr(),
-                    value: CurrencyFormatter.format(spent),
-                    valueColor: isOver ? _kRose : _kDeepEmerald,
-                  ),
-                  SizedBox(height: 10.h),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4.r),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 8.h,
-                      backgroundColor: colorScheme.surfaceContainerHighest,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                          isOver ? _kRose : _kEmerald),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 16.h),
-
-            // Members
-            _DetailSection(
-              title: 'kurbani_members_section'.tr(namedArgs: {'count': session.members.length.toString()}),
-              child: Column(
-                children: session.members.map((m) {
-                  final initials =
-                      m.name.trim().split(' ').length >= 2
-                          ? '${m.name.split(' ')[0][0]}${m.name.split(' ')[1][0]}'
-                              .toUpperCase()
-                          : m.name.substring(0, 1).toUpperCase();
-                  final gradients = kurbaniAvatarGradients[
-                      m.avatarColorIndex %
-                          kurbaniAvatarGradients.length];
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 8.h),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 34.r,
-                          height: 34.r,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: gradients,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              initials,
-                              style: TextStyle(
-                                fontFamily: MyString.poppinsBold,
-                                fontSize: 11.sp,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Expanded(
-                          child: Text(
-                            m.name,
-                            style: TextStyle(
-                              fontFamily: MyString.rubikRegular,
-                              fontSize: 13.sp,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          CurrencyFormatter.format(m.contribution),
-                          style: TextStyle(
-                            fontFamily: MyString.poppinsBold,
-                            fontSize: 12.sp,
-                            color: _kDeepEmerald,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            SizedBox(height: 16.h),
-
-            // Expenses
-            _DetailSection(
-              title: 'kurbani_expenses_section'.tr(namedArgs: {'count': session.expenses.length.toString()}),
-              child: Column(
-                children: session.expenses.map((e) {
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 8.h),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            e.title,
-                            style: TextStyle(
-                              fontFamily: MyString.rubikRegular,
-                              fontSize: 13.sp,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          CurrencyFormatter.format(e.amount),
-                          style: TextStyle(
-                            fontFamily: MyString.poppinsBold,
-                            fontSize: 12.sp,
-                            color: _kRose,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DetailSection extends StatelessWidget {
-  const _DetailSection({required this.title, required this.child});
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontFamily: MyString.poppinsBold,
-            fontSize: 13.sp,
-            color: _kDeepEmerald,
-            letterSpacing: 0.3,
-          ),
-        ),
-        SizedBox(height: 10.h),
-        Container(
-          padding: EdgeInsets.all(14.r),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(14.r),
-          ),
-          child: child,
-        ),
-      ],
-    );
-  }
-}
-
-class _SummaryRow extends StatelessWidget {
-  const _SummaryRow(
-      {required this.label, required this.value, this.valueColor});
-  final String label;
-  final String value;
-  final Color? valueColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: EdgeInsets.only(bottom: 6.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label,
-              style: TextStyle(
-                  fontFamily: MyString.rubikRegular,
-                  fontSize: 12.sp,
-                  color: colorScheme.onSurfaceVariant)),
-          Text(value,
-              style: TextStyle(
-                  fontFamily: MyString.poppinsBold,
-                  fontSize: 12.sp,
-                  color: valueColor ?? colorScheme.onSurface)),
-        ],
-      ),
-    );
-  }
-}
-
-// ── New Kurbani bottom sheet ───────────────────────────────────────────────
-
-class _NewKurbaniSheet extends StatefulWidget {
-  const _NewKurbaniSheet({required this.provider});
-  final KurbaniProvider provider;
-
-  @override
-  State<_NewKurbaniSheet> createState() => _NewKurbaniSheetState();
-}
-
-class _NewKurbaniSheetState extends State<_NewKurbaniSheet> {
-  int _step = 0;
-
-  // Step 1
-  late final TextEditingController _groupNameCtrl;
-  final _budgetCtrl = TextEditingController(text: '3000');
-  final _formKey = GlobalKey<FormState>();
-
-  // Step 2
-  final Set<String> _selectedIds = {};
-
-  @override
-  void initState() {
-    super.initState();
-    _groupNameCtrl = TextEditingController(text: 'kurbani_default_title'.tr());
-  }
-
-  @override
-  void dispose() {
-    _groupNameCtrl.dispose();
-    _budgetCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final budget = double.tryParse(_budgetCtrl.text.trim()) ?? 3000;
-    await widget.provider.createSession(
-      groupName: _groupNameCtrl.text.trim(),
-      budgetPerMember: budget,
-      selectedContactIds: _selectedIds.toList(),
-    );
-    if (mounted) Navigator.pop(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius:
-              BorderRadius.vertical(top: Radius.circular(28.r)),
-        ),
-        child: Column(
+      appBar: AppBar(
+        backgroundColor: Theme.of(
+          context,
+        ).colorScheme.surface.withValues(alpha: .92),
+        title: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag handle
-            Center(
-              child: Container(
-                margin: EdgeInsets.only(top: 12.h, bottom: 4.h),
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              ),
-            ),
-
-            // Header
-            _SheetHeader(
-              step: _step,
-              onBack: _step == 1
-                  ? () => setState(() => _step = 0)
-                  : null,
-            ),
-
-            if (_step == 0)
-              _StepOneContent(
-                formKey: _formKey,
-                groupNameCtrl: _groupNameCtrl,
-                budgetCtrl: _budgetCtrl,
-                onNext: () {
-                  if (_formKey.currentState!.validate()) {
-                    setState(() => _step = 1);
-                  }
-                },
-              )
-            else
-              _StepTwoContent(
-                contacts: context.watch<GlobalContactsProvider>().contacts,
-                meId: context.watch<GlobalContactsProvider>().meContact?.id,
-                selectedIds: _selectedIds,
-                onToggle: (id) =>
-                    setState(() => _selectedIds.contains(id)
-                        ? _selectedIds.remove(id)
-                        : _selectedIds.add(id)),
-                onSubmit: _submit,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Sheet header ───────────────────────────────────────────────────────────
-
-class _SheetHeader extends StatelessWidget {
-  const _SheetHeader({required this.step, this.onBack});
-  final int step;
-  final VoidCallback? onBack;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
-      child: Row(
-        children: [
-          if (onBack != null) ...[
-            GestureDetector(
-              onTap: onBack,
-              child: Icon(Icons.arrow_back_ios_new_rounded,
-                  color: _kDeepEmerald, size: 18.r),
-            ),
-            SizedBox(width: 8.w),
-          ],
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  step == 0 ? 'kurbani_new'.tr() : 'kurbani_select_participants'.tr(),
-                  style: TextStyle(
-                    fontFamily: MyString.poppinsBold,
-                    fontSize: 17.sp,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                Text(
-                  step == 0
-                      ? 'kurbani_step1'.tr()
-                      : 'kurbani_step2'.tr(),
-                  style: TextStyle(
-                    fontFamily: MyString.rubikRegular,
-                    fontSize: 11.sp,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // step indicators
-          Row(
-            children: List.generate(2, (i) {
-              return Container(
-                margin: EdgeInsets.only(left: 4.w),
-                width: 22.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: i == step
-                      ? _kDeepEmerald
-                      : _kDeepEmerald.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Step 1 — Group details ─────────────────────────────────────────────────
-
-class _StepOneContent extends StatelessWidget {
-  const _StepOneContent({
-    required this.formKey,
-    required this.groupNameCtrl,
-    required this.budgetCtrl,
-    required this.onNext,
-  });
-  final GlobalKey<FormState> formKey;
-  final TextEditingController groupNameCtrl;
-  final TextEditingController budgetCtrl;
-  final VoidCallback onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
-      child: Form(
-        key: formKey,
-        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _FieldLabel('kurbani_group_label'.tr()),
-            SizedBox(height: 6.h),
-            TextFormField(
-              controller: groupNameCtrl,
-              style: TextStyle(
-                  fontFamily: MyString.poppinsRegular, fontSize: 14.sp),
-              decoration: _inputDeco(context,
-                  hint: 'kurbani_group_name_hint'.tr(),
-                  icon: Icons.nightlight_round),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'required'.tr() : null,
+            Text(
+              provider.project?.name ?? 'kurbani_feature_title'.tr(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            SizedBox(height: 16.h),
-            _FieldLabel('kurbani_budget_per_member'.tr()),
-            SizedBox(height: 6.h),
-            TextFormField(
-              controller: budgetCtrl,
-              keyboardType: TextInputType.number,
-              style: TextStyle(
-                  fontFamily: MyString.poppinsRegular, fontSize: 14.sp),
-              decoration: _inputDeco(context,
-                  hint: '3000', icon: Icons.savings_rounded),
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'required'.tr();
-                if (double.tryParse(v.trim()) == null) {
-                  return 'enter_valid_amount'.tr();
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 24.h),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onNext,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _kDeepEmerald,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r)),
-                ),
-                child: Text(
-                  'kurbani_next_step'.tr(),
-                  style: TextStyle(
-                      fontFamily: MyString.poppinsBold, fontSize: 14.sp),
-                ),
+            Text(
+              'kurbani_page_kicker'.tr(),
+              style: const TextStyle(
+                color: KurbaniPalette.emerald,
+                fontFamily: MyString.rubikMedium,
+                fontSize: 8,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
               ),
             ),
           ],
         ),
       ),
+      body: SafeArea(
+        child: FeatureAmbientBackground(
+          accent: KurbaniPalette.emerald,
+          secondaryAccent: KurbaniPalette.violet,
+          child: _body(provider),
+        ),
+      ),
+      floatingActionButton:
+          provider.project != null &&
+              provider.canManage &&
+              provider.activeEvent == null
+          ? FloatingActionButton.extended(
+              backgroundColor: KurbaniPalette.emerald,
+              foregroundColor: Colors.white,
+              onPressed: provider.isSubmitting ? null : _openEventSetup,
+              icon: const Icon(Icons.add_rounded),
+              label: Text('kurbani_new_event'.tr()),
+            )
+          : null,
     );
   }
-}
 
-// ── Step 2 — Member selection ──────────────────────────────────────────────
+  Widget _body(KurbaniProvider provider) {
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (provider.loadError != null) {
+      return KurbaniStatePanel(
+        icon: Icons.cloud_off_rounded,
+        title: 'kurbani_load_error_title'.tr(),
+        message: provider.loadError!.tr(),
+        actionLabel: 'group_retry'.tr(),
+        onAction: () => provider.initialize(force: true),
+      );
+    }
+    if (provider.project == null) return const KurbaniProjectSetupPanel();
 
-class _StepTwoContent extends StatelessWidget {
-  const _StepTwoContent({
-    required this.contacts,
-    required this.meId,
-    required this.selectedIds,
-    required this.onToggle,
-    required this.onSubmit,
-  });
-  final List<AppContact> contacts;
-  final String? meId;
-  final Set<String> selectedIds;
-  final void Function(String id) onToggle;
-  final VoidCallback onSubmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final selectedCount =
-        selectedIds.length + 1; // +1 for "me" (always included)
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Contact list
-        ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 340.h),
-          child: ListView.builder(
-            shrinkWrap: true,
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            itemCount: contacts.length,
-            itemBuilder: (_, i) {
-              final c = contacts[i];
-              final isMe = c.id == meId;
-              final isSelected = isMe || selectedIds.contains(c.id);
-              final gradients = kurbaniAvatarGradients[
-                  c.avatarColorIndex % kurbaniAvatarGradients.length];
-              final initials = c.name.trim().split(' ').length >= 2
-                  ? '${c.name.split(' ')[0][0]}${c.name.split(' ')[1][0]}'
-                      .toUpperCase()
-                  : c.name.substring(0, 1).toUpperCase();
-
-              return GestureDetector(
-                onTap: isMe ? null : () => onToggle(c.id),
-                child: Container(
-                  margin: EdgeInsets.only(bottom: 8.h),
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 12.w, vertical: 10.h),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? _kDeepEmerald.withValues(alpha: 0.06)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: isSelected
-                          ? _kDeepEmerald.withValues(alpha: 0.3)
-                          : Colors.transparent,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 36.r,
-                        height: 36.r,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: gradients,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            initials,
-                            style: TextStyle(
-                              fontFamily: MyString.poppinsBold,
-                              fontSize: 12.sp,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              c.name,
-                              style: TextStyle(
-                                fontFamily: MyString.poppinsBold,
-                                fontSize: 13.sp,
-                                color: colorScheme.onSurface,
-                              ),
-                            ),
-                            if (isMe)
-                              Text(
-                                'creator_always_included'.tr(),
-                                style: TextStyle(
-                                  fontFamily: MyString.rubikRegular,
-                                  fontSize: 10.sp,
-                                  color: _kGold,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      if (isMe)
-                        Icon(Icons.star_rounded,
-                            color: _kGold, size: 18.r)
-                      else if (isSelected)
-                        Icon(Icons.check_circle_rounded,
-                            color: _kDeepEmerald, size: 20.r)
-                      else
-                        Icon(Icons.radio_button_unchecked_rounded,
-                            color: colorScheme.outlineVariant, size: 20.r),
-                    ],
-                  ),
-                ),
-              );
-            },
+    final active = provider.activeEvent;
+    final completed = provider.completedEvents;
+    return RefreshIndicator(
+      onRefresh: () => provider.initialize(force: true),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 110),
+        children: [
+          KurbaniOverviewHero(
+            projectName: provider.projectName,
+            activeEvent: active,
+            completedCount: completed.length,
           ),
-        ),
-
-        // Submit
-        Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onSubmit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _kDeepEmerald,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 14.h),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r)),
-              ),
+          const SizedBox(height: 24),
+          KurbaniSectionHeader(
+            title: 'kurbani_current_event'.tr(),
+            subtitle: active == null
+                ? 'kurbani_no_current_event'.tr()
+                : 'kurbani_current_event_hint'.tr(),
+            icon: Icons.auto_awesome_rounded,
+            accent: KurbaniPalette.emerald,
+          ),
+          const SizedBox(height: 11),
+          if (active == null)
+            KurbaniStatePanel(
+              icon: Icons.nightlight_outlined,
+              title: 'kurbani_ready_for_event'.tr(),
+              message: provider.canManage
+                  ? 'kurbani_ready_admin_message'.tr()
+                  : 'kurbani_ready_member_message'.tr(),
+            )
+          else
+            KurbaniEventCard(
+              event: active,
+              canManage: provider.canManage,
+              onOpen: () => _openManagement(active),
+              onComplete: () => _confirmComplete(active),
+              onDelete: () => _confirmDelete(active),
+            ),
+          const SizedBox(height: 25),
+          KurbaniSectionHeader(
+            title: 'kurbani_event_history'.tr(),
+            subtitle: 'kurbani_history_count'.tr(
+              namedArgs: {'count': '${completed.length}'},
+            ),
+            icon: Icons.history_rounded,
+            accent: KurbaniPalette.violet,
+          ),
+          const SizedBox(height: 11),
+          if (completed.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 28),
               child: Text(
-                'kurbani_create'.tr(namedArgs: {'count': selectedCount.toString()}),
+                'kurbani_no_history'.tr(),
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontFamily: MyString.poppinsBold, fontSize: 14.sp),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontFamily: MyString.rubikRegular,
+                  fontSize: 12,
+                ),
+              ),
+            )
+          else
+            ...completed.map(
+              (event) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: KurbaniEventCard(
+                  event: event,
+                  canManage: provider.canManage,
+                  onOpen: () => _openManagement(event),
+                  onDelete: () => _confirmDelete(event),
+                ),
               ),
             ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-InputDecoration _inputDeco(BuildContext context,
-    {required String hint, required IconData icon}) {
-  final colorScheme = Theme.of(context).colorScheme;
-  return InputDecoration(
-    hintText: hint,
-    prefixIcon: Icon(icon, size: 18, color: _kDeepEmerald),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: colorScheme.outlineVariant),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: colorScheme.outlineVariant),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: _kDeepEmerald, width: 1.5),
-    ),
-    filled: true,
-    fillColor: colorScheme.surfaceContainerHighest,
-    contentPadding:
-        const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-  );
-}
-
-class _FieldLabel extends StatelessWidget {
-  const _FieldLabel(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontFamily: MyString.poppinsBold,
-        fontSize: 12.sp,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ],
       ),
     );
+  }
+
+  Future<void> _openEventSetup() async {
+    final event = await showModalBottomSheet<KurbaniEvent>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: .6),
+      builder: (_) => const KurbaniEventSetupSheet(),
+    );
+    if (event != null && mounted) _openManagement(event);
+  }
+
+  void _openManagement(KurbaniEvent event) {
+    final repository = context.read<KurbaniRepository>();
+    final groupSession = context.read<GroupSessionProvider>();
+    final authService = context.read<FirebaseAuthService>();
+    Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => KurbaniEventProvider(
+            repository: repository,
+            groupSession: groupSession,
+            authService: authService,
+            event: event,
+          ),
+          child: const KurbaniManagementScreen(),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmComplete(KurbaniEvent event) async {
+    final confirmed = await _confirm(
+      title: 'kurbani_finish_title'.tr(),
+      message: 'kurbani_finish_body'.tr(),
+      confirmLabel: 'kurbani_finish'.tr(),
+      destructive: false,
+    );
+    if (confirmed != true || !mounted) return;
+    await _run(() => context.read<KurbaniProvider>().completeEvent(event.id));
+  }
+
+  Future<void> _confirmDelete(KurbaniEvent event) async {
+    final confirmed = await _confirm(
+      title: 'kurbani_delete_title'.tr(namedArgs: {'name': event.name}),
+      message: 'kurbani_delete_body'.tr(),
+      confirmLabel: 'delete'.tr(),
+      destructive: true,
+    );
+    if (confirmed != true || !mounted) return;
+    await _run(() => context.read<KurbaniProvider>().deleteEvent(event.id));
+  }
+
+  Future<bool?> _confirm({
+    required String title,
+    required String message,
+    required String confirmLabel,
+    required bool destructive,
+  }) => showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      icon: Icon(
+        destructive ? Icons.delete_outline_rounded : Icons.task_alt_rounded,
+        color: destructive ? KurbaniPalette.rose : KurbaniPalette.emerald,
+      ),
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: Text('cancel'.tr()),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: destructive
+                ? KurbaniPalette.rose
+                : KurbaniPalette.emerald,
+          ),
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: Text(confirmLabel),
+        ),
+      ],
+    ),
+  );
+
+  Future<void> _run(Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (_) {
+      if (!mounted) return;
+      final key = context.read<KurbaniProvider>().actionError;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text((key ?? 'kurbani_error_unknown').tr())),
+      );
+    }
   }
 }

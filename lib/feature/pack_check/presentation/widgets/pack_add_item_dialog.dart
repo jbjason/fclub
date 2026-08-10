@@ -1,25 +1,24 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fclub/core/constants/my_string.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/pack_item_icons.dart';
 import '../provider/pack_check_provider.dart';
+import 'shared/pack_palette.dart';
 
-/// Bottom-sheet dialog to add a custom item — either icon-based or photo-based.
 class PackAddItemDialog extends StatefulWidget {
   const PackAddItemDialog({super.key});
 
-  /// Opens the dialog as a modal bottom sheet.
-  /// Captures the provider before the new route is pushed so the sheet's
-  /// isolated widget-tree can still access [PackCheckProvider].
   static Future<void> show(BuildContext context) {
     final provider = context.read<PackCheckProvider>();
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: .58),
       builder: (_) => ChangeNotifierProvider.value(
         value: provider,
         child: const PackAddItemDialog(),
@@ -32,232 +31,274 @@ class PackAddItemDialog extends StatefulWidget {
 }
 
 class _PackAddItemDialogState extends State<PackAddItemDialog> {
-  final _nameCtrl = TextEditingController();
+  final _nameController = TextEditingController();
   IconData _selectedIcon = Icons.star_rounded;
-
-  static const _iconChoices = PackItemIcons.choices;
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
+  Future<void> _submit({ImageSource? source}) async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty && source == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('pack_enter_name_error'.tr())));
+      return;
+    }
+    final provider = context.read<PackCheckProvider>();
+    Navigator.pop(context);
+    if (source == null) {
+      await provider.addCustomItem(name: name, icon: _selectedIcon);
+    } else {
+      await provider.addPhotoItem(
+        name: name.isEmpty ? 'pack_custom_fallback'.tr() : name,
+        source: source,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF13102C), Color(0xFF0A0E27)],
-          ),
-          border: Border(
-            top: BorderSide(color: Colors.white.withOpacity(0.08), width: 1),
-          ),
-        ),
-        padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 28.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Handle
-            Center(
-              child: Container(
-                width: 36.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(2.r),
+    final colors = Theme.of(context).colorScheme;
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: Material(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        clipBehavior: Clip.antiAlias,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 10, 12, 18),
+                decoration: const BoxDecoration(
+                  gradient: PackPalette.heroGradient,
                 ),
-              ),
-            ),
-            SizedBox(height: 16.h),
-            // Title
-            ShaderMask(
-              shaderCallback: (b) => const LinearGradient(
-                colors: [Color(0xFFA855F7), Color(0xFF06B6D4)],
-              ).createShader(b),
-              child: Text(
-                'pack_add_custom_item'.tr(),
-                style: TextStyle(
-                  fontFamily: 'Poppins_Bold',
-                  fontSize: 18.sp,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            SizedBox(height: 16.h),
-            // Name field
-            TextField(
-              controller: _nameCtrl,
-              style: const TextStyle(color: Colors.white),
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                hintText: 'pack_item_name_hint'.tr(),
-                hintStyle: const TextStyle(color: Colors.white38),
-                filled: true,
-                fillColor: Colors.white.withOpacity(0.05),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: const BorderSide(color: Color(0xFFA855F7), width: 1.5),
-                ),
-              ),
-            ),
-            SizedBox(height: 16.h),
-            // Icon selector
-            Text(
-              'pack_choose_icon'.tr(),
-              style: TextStyle(
-                fontFamily: 'Poppins_Medium',
-                fontSize: 12.sp,
-                color: Colors.white60,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            SizedBox(
-              height: 52.h,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: _iconChoices.length,
-                separatorBuilder: (_, __) => SizedBox(width: 8.w),
-                itemBuilder: (_, i) {
-                  final icon = _iconChoices[i];
-                  final selected = icon == _selectedIcon;
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedIcon = icon),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      width: 48.r,
-                      height: 48.r,
+                child: Column(
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 4,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12.r),
-                        gradient: selected
-                            ? const LinearGradient(
-                                colors: [Color(0xFFA855F7), Color(0xFF06B6D4)],
-                              )
-                            : null,
-                        color: selected ? null : Colors.white.withOpacity(0.07),
-                        border: Border.all(
-                          color: selected
-                              ? Colors.transparent
-                              : Colors.white.withOpacity(0.1),
-                          width: 1,
+                        color: Colors.white.withValues(alpha: .3),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: .12),
+                            borderRadius: BorderRadius.circular(17),
+                          ),
+                          child: const Icon(
+                            Icons.add_photo_alternate_rounded,
+                            color: PackPalette.cyan,
+                          ),
+                        ),
+                        const SizedBox(width: 13),
+                        Expanded(
+                          child: Text(
+                            'pack_add_custom_item'.tr(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontFamily: MyString.poppinsBold,
+                              fontSize: 19,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close_rounded),
+                          color: Colors.white70,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _nameController,
+                      autofocus: true,
+                      textCapitalization: TextCapitalization.words,
+                      style: const TextStyle(fontFamily: MyString.rubikMedium),
+                      decoration: InputDecoration(
+                        hintText: 'pack_item_name_hint'.tr(),
+                        prefixIcon: const Icon(Icons.label_outline_rounded),
+                        filled: true,
+                        fillColor: colors.surfaceContainerHighest,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide(
+                            color: colors.outlineVariant.withValues(alpha: .5),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: const BorderSide(
+                            color: PackPalette.violet,
+                            width: 1.4,
+                          ),
                         ),
                       ),
-                      child: Icon(icon, color: Colors.white, size: 22.r),
                     ),
-                  );
-                },
+                    const SizedBox(height: 17),
+                    Text(
+                      'pack_choose_icon'.tr(),
+                      style: const TextStyle(
+                        fontFamily: MyString.poppinsBold,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 54,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: PackItemIcons.choices.length,
+                        separatorBuilder: (_, index) =>
+                            const SizedBox(width: 8),
+                        itemBuilder: (_, index) {
+                          final icon = PackItemIcons.choices[index];
+                          final selected = icon == _selectedIcon;
+                          return InkWell(
+                            onTap: () => setState(() => _selectedIcon = icon),
+                            borderRadius: BorderRadius.circular(16),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              width: 52,
+                              decoration: BoxDecoration(
+                                gradient: selected
+                                    ? PackPalette.actionGradient
+                                    : null,
+                                color: selected
+                                    ? null
+                                    : colors.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: selected
+                                      ? Colors.transparent
+                                      : colors.outlineVariant.withValues(
+                                          alpha: .5,
+                                        ),
+                                ),
+                              ),
+                              child: Icon(
+                                icon,
+                                color: selected
+                                    ? Colors.white
+                                    : colors.onSurfaceVariant,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _ActionTile(
+                            icon: Icons.add_circle_outline_rounded,
+                            label: 'pack_add_icon_item'.tr(),
+                            color: PackPalette.violet,
+                            onTap: _submit,
+                          ),
+                        ),
+                        const SizedBox(width: 9),
+                        Expanded(
+                          child: _ActionTile(
+                            icon: Icons.camera_alt_rounded,
+                            label: 'pack_take_photo'.tr(),
+                            color: PackPalette.cyan,
+                            onTap: () => _submit(source: ImageSource.camera),
+                          ),
+                        ),
+                        const SizedBox(width: 9),
+                        Expanded(
+                          child: _ActionTile(
+                            icon: Icons.photo_library_rounded,
+                            label: 'pack_from_gallery'.tr(),
+                            color: PackPalette.emerald,
+                            onTap: () => _submit(source: ImageSource.gallery),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 20.h),
-            // Action buttons
-            Row(
-              children: [
-                Expanded(
-                  child: _ActionButton(
-                    label: 'pack_add_icon_item'.tr(),
-                    icon: Icons.add_circle_outline_rounded,
-                    gradient: const [Color(0xFFA855F7), Color(0xFF7C3AED)],
-                    onTap: () => _submit(context, usePhoto: false),
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                Expanded(
-                  child: _ActionButton(
-                    label: 'pack_take_photo'.tr(),
-                    icon: Icons.camera_alt_rounded,
-                    gradient: const [Color(0xFF06B6D4), Color(0xFF0891B2)],
-                    onTap: () => _submit(context, usePhoto: true, source: ImageSource.camera),
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                Expanded(
-                  child: _ActionButton(
-                    label: 'pack_from_gallery'.tr(),
-                    icon: Icons.photo_library_rounded,
-                    gradient: const [Color(0xFF10B981), Color(0xFF059669)],
-                    onTap: () => _submit(context, usePhoto: true, source: ImageSource.gallery),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  Future<void> _submit(
-    BuildContext context, {
-    required bool usePhoto,
-    ImageSource source = ImageSource.camera,
-  }) async {
-    final name = _nameCtrl.text.trim();
-    if (name.isEmpty && !usePhoto) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('pack_enter_name_error'.tr())),
-      );
-      return;
-    }
-    Navigator.pop(context);
-    final provider = context.read<PackCheckProvider>();
-    if (usePhoto) {
-      await provider.addPhotoItem(name: name.isEmpty ? 'pack_custom_fallback'.tr() : name, source: source);
-    } else {
-      await provider.addCustomItem(name: name, icon: _selectedIcon);
-    }
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.label,
+class _ActionTile extends StatelessWidget {
+  const _ActionTile({
     required this.icon,
-    required this.gradient,
+    required this.label,
+    required this.color,
     required this.onTap,
   });
 
-  final String label;
   final IconData icon;
-  final List<Color> gradient;
+  final String label;
+  final Color color;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
+  Widget build(BuildContext context) => Material(
+    color: color.withValues(alpha: .11),
+    borderRadius: BorderRadius.circular(17),
+    child: InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(17),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 11.h),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.r),
-          gradient: LinearGradient(colors: gradient),
+          borderRadius: BorderRadius.circular(17),
+          border: Border.all(color: color.withValues(alpha: .3)),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: Colors.white, size: 18.r),
-            SizedBox(height: 3.h),
+            Icon(icon, color: color, size: 21),
+            const SizedBox(height: 5),
             Text(
               label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Poppins_Medium',
-                fontSize: 9.5.sp,
-                color: Colors.white,
+              style: const TextStyle(
+                fontFamily: MyString.rubikMedium,
+                fontSize: 9,
+                height: 1.2,
               ),
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }

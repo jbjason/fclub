@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fclub/core/constants/my_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -39,7 +40,9 @@ class PackChecklistTile extends StatelessWidget {
               ? LinearGradient(
                   colors: [
                     packCheckAccentEnd.withValues(alpha: isDark ? 0.18 : 0.10),
-                    packCheckAccentStart.withValues(alpha: isDark ? 0.12 : 0.06),
+                    packCheckAccentStart.withValues(
+                      alpha: isDark ? 0.12 : 0.06,
+                    ),
                   ],
                 )
               : null,
@@ -52,7 +55,9 @@ class PackChecklistTile extends StatelessWidget {
           boxShadow: checked
               ? [
                   BoxShadow(
-                    color: packCheckAccentEnd.withValues(alpha: isDark ? 0.22 : 0.12),
+                    color: packCheckAccentEnd.withValues(
+                      alpha: isDark ? 0.22 : 0.12,
+                    ),
                     blurRadius: 10,
                   ),
                 ]
@@ -68,7 +73,7 @@ class PackChecklistTile extends StatelessWidget {
               child: Text(
                 item.name,
                 style: TextStyle(
-                  fontFamily: 'Poppins_Medium',
+                  fontFamily: MyString.rubikMedium,
                   fontSize: 14.sp,
                   color: checked
                       ? colorScheme.onSurface
@@ -90,8 +95,7 @@ class PackChecklistTile extends StatelessWidget {
                     : null,
                 border: checked
                     ? null
-                    : Border.all(
-                        color: colorScheme.outlineVariant, width: 1.5),
+                    : Border.all(color: colorScheme.outlineVariant, width: 1.5),
               ),
               child: checked
                   ? Icon(Icons.check_rounded, color: Colors.white, size: 14.r)
@@ -121,6 +125,11 @@ class _TileVisual extends StatelessWidget {
           width: 32.r,
           height: 32.r,
           fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Icon(
+            Icons.broken_image_outlined,
+            color: colorScheme.onSurfaceVariant,
+            size: 24.r,
+          ),
         ),
       );
     }

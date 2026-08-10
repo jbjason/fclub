@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fclub/core/constants/my_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -48,9 +49,10 @@ class _PackItemCardState extends State<PackItemCard>
       lowerBound: 0.0,
       upperBound: 0.08,
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.92).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.92,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -80,7 +82,8 @@ class _PackItemCardState extends State<PackItemCard>
       onLongPress: widget.onLongPress,
       child: AnimatedBuilder(
         animation: _scale,
-        builder: (_, child) => Transform.scale(scale: _scale.value, child: child),
+        builder: (_, child) =>
+            Transform.scale(scale: _scale.value, child: child),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
@@ -92,8 +95,12 @@ class _PackItemCardState extends State<PackItemCard>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      packCheckAccentStart.withValues(alpha: isDark ? 0.20 : 0.10),
-                      packCheckAccentEnd.withValues(alpha: isDark ? 0.12 : 0.05),
+                      packCheckAccentStart.withValues(
+                        alpha: isDark ? 0.20 : 0.10,
+                      ),
+                      packCheckAccentEnd.withValues(
+                        alpha: isDark ? 0.12 : 0.05,
+                      ),
                     ],
                   )
                 : null,
@@ -106,7 +113,9 @@ class _PackItemCardState extends State<PackItemCard>
             boxShadow: packed
                 ? [
                     BoxShadow(
-                      color: packCheckAccentStart.withValues(alpha: isDark ? 0.28 : 0.16),
+                      color: packCheckAccentStart.withValues(
+                        alpha: isDark ? 0.28 : 0.16,
+                      ),
                       blurRadius: 14,
                       spreadRadius: 0,
                     ),
@@ -118,7 +127,10 @@ class _PackItemCardState extends State<PackItemCard>
               // Content
               Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 10.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 4.w,
+                    vertical: 10.h,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -132,7 +144,7 @@ class _PackItemCardState extends State<PackItemCard>
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontFamily: 'Poppins_Medium',
+                          fontFamily: MyString.rubikMedium,
                           fontSize: 10.sp,
                           height: 1.2,
                           color: packed
@@ -159,11 +171,7 @@ class _PackItemCardState extends State<PackItemCard>
                         colors: [packCheckAccentStart, packCheckAccentEnd],
                       ),
                     ),
-                    child: Icon(
-                      Icons.check,
-                      size: 9.r,
-                      color: Colors.white,
-                    ),
+                    child: Icon(Icons.check, size: 9.r, color: Colors.white),
                   ),
                 ),
             ],
@@ -192,6 +200,11 @@ class _ItemVisual extends StatelessWidget {
           width: 38.r,
           height: 38.r,
           fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Icon(
+            Icons.broken_image_outlined,
+            color: colorScheme.onSurfaceVariant,
+            size: 28.r,
+          ),
         ),
       );
     }
