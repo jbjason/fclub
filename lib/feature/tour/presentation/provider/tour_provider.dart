@@ -14,7 +14,7 @@ import 'package:uuid/uuid.dart';
 
 class TourProvider with ChangeNotifier {
   TourProvider(this._globalContacts)
-      : _sessionsBox = Hive.box<TourSession>(TourHiveBoxes.sessionsBox) {
+    : _sessionsBox = Hive.box<TourSession>(TourHiveBoxes.sessionsBox) {
     _load();
   }
 
@@ -61,18 +61,19 @@ class TourProvider with ChangeNotifier {
   }
 
   List<ExtraPaymentModel> get extraPayments {
-    final list =
-        List<ExtraPaymentModel>.from(_activeSession?.extraPayments ?? []);
+    final list = List<ExtraPaymentModel>.from(
+      _activeSession?.extraPayments ?? [],
+    );
     list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     return list;
   }
 
   TourSummary get summary => TourCalculator.calculate(
-        members: members,
-        expenses: expenses,
-        extraPayments: extraPayments,
-        totalDecidedBudget: decidedBudget,
-      );
+    members: members,
+    expenses: expenses,
+    extraPayments: extraPayments,
+    totalDecidedBudget: decidedBudget,
+  );
 
   TourMemberModel? memberById(String id) {
     try {
@@ -100,8 +101,9 @@ class TourProvider with ChangeNotifier {
         .whereType<AppContact>()
         .toList();
 
-    final memberShare =
-        contacts.isEmpty ? 0.0 : decidedBudget / contacts.length;
+    final memberShare = contacts.isEmpty
+        ? 0.0
+        : decidedBudget / contacts.length;
 
     final sessionMembers = contacts.map((contact) {
       return TourMemberModel(
@@ -150,12 +152,14 @@ class TourProvider with ChangeNotifier {
     final contact = _globalContacts.contactById(contactId);
     if (contact == null) return;
     final colorIndex = session.members.length % 8;
-    session.members.add(TourMemberModel(
-      id: contact.id,
-      name: contact.isMe ? 'You (${contact.name})' : contact.name,
-      avatarColorIndex: colorIndex,
-      paidToManager: 0.0,
-    ));
+    session.members.add(
+      TourMemberModel(
+        id: contact.id,
+        name: contact.isMe ? 'You (${contact.name})' : contact.name,
+        avatarColorIndex: colorIndex,
+        paidToManager: 0.0,
+      ),
+    );
     await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
@@ -176,8 +180,7 @@ class TourProvider with ChangeNotifier {
     await _sessionsBox.put(session.id, session);
   }
 
-  Future<void> updateMemberPaidToManager(
-      String memberId, double amount) async {
+  Future<void> updateMemberPaidToManager(String memberId, double amount) async {
     final session = _activeSession;
     if (session == null) return;
     final idx = session.members.indexWhere((m) => m.id == memberId);
@@ -192,23 +195,27 @@ class TourProvider with ChangeNotifier {
   Future<void> addExpense({
     required String title,
     required double amount,
-    required String paidByMemberId,
+    required String? paidByMemberId,
     required List<String> beneficiaryMemberIds,
     required ExpenseCategory category,
+    bool paidByAllMembers = false,
     String? note,
   }) async {
     final session = _activeSession;
     if (session == null) return;
-    session.expenses.add(TourExpenseModel(
-      id: _uuid.v4(),
-      title: title,
-      amount: amount,
-      paidByMemberId: paidByMemberId,
-      beneficiaryMemberIds: beneficiaryMemberIds,
-      categoryIndex: category.index,
-      timestamp: DateTime.now(),
-      note: note,
-    ));
+    session.expenses.add(
+      TourExpenseModel(
+        id: _uuid.v4(),
+        title: title,
+        amount: amount,
+        paidByMemberId: paidByMemberId,
+        beneficiaryMemberIds: beneficiaryMemberIds,
+        categoryIndex: category.index,
+        timestamp: DateTime.now(),
+        note: note,
+        paidByAllMembers: paidByAllMembers,
+      ),
+    );
     await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
@@ -222,15 +229,16 @@ class TourProvider with ChangeNotifier {
   }) async {
     final session = _activeSession;
     if (session == null) return;
-    session.extraPayments.add(ExtraPaymentModel(
-      id: _uuid.v4(),
-      memberId: memberId,
-      amount: amount,
-      timestamp: DateTime.now(),
-      note: note,
-    ));
+    session.extraPayments.add(
+      ExtraPaymentModel(
+        id: _uuid.v4(),
+        memberId: memberId,
+        amount: amount,
+        timestamp: DateTime.now(),
+        note: note,
+      ),
+    );
     await _sessionsBox.put(session.id, session);
     notifyListeners();
   }
-
 }

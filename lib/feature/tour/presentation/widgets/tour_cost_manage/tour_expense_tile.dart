@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/feature/tour/data/expense_category.dart';
@@ -28,6 +29,9 @@ class TourExpenseTile extends StatelessWidget {
     return '$count people';
   }
 
+  String _payerLabel() =>
+      expense.paidByAllMembers ? 'all'.tr() : payer?.name ?? 'Unknown';
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -38,11 +42,17 @@ class TourExpenseTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(14.r),
       child: Row(
         children: [
-          TourMemberAvatar(
-            name: payer?.name ?? '?',
-            colorIndex: payer?.avatarColorIndex ?? 0,
-            radius: 18.r,
-          ),
+          if (expense.paidByAllMembers)
+            CircleAvatar(
+              radius: 18.r,
+              child: Icon(Icons.groups_rounded, size: 19.r),
+            )
+          else
+            TourMemberAvatar(
+              name: payer?.name ?? '?',
+              colorIndex: payer?.avatarColorIndex ?? 0,
+              radius: 18.r,
+            ),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
@@ -65,7 +75,7 @@ class TourExpenseTile extends StatelessWidget {
                     Icon(category.icon, size: 14.r, color: category.color),
                     SizedBox(width: 4.w),
                     Text(
-                      'Paid by ${payer?.name ?? 'Unknown'}',
+                      'Paid by ${_payerLabel()}',
                       style: TextStyle(
                         fontFamily: MyString.poppinsRegular,
                         fontSize: 11.sp,

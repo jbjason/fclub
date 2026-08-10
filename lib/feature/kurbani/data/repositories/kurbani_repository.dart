@@ -82,7 +82,8 @@ abstract interface class KurbaniRepository {
     required String eventId,
     required String title,
     required double amount,
-    required String paidByMemberId,
+    required String? paidByMemberId,
+    required bool paidByAllMembers,
     required String createdBy,
     String? note,
   });

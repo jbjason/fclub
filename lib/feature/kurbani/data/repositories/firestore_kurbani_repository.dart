@@ -367,7 +367,8 @@ class FirestoreKurbaniRepository implements KurbaniRepository {
     required String eventId,
     required String title,
     required double amount,
-    required String paidByMemberId,
+    required String? paidByMemberId,
+    required bool paidByAllMembers,
     required String createdBy,
     String? note,
   }) async {
@@ -378,6 +379,7 @@ class FirestoreKurbaniRepository implements KurbaniRepository {
         'title': title.trim(),
         'amount': amount,
         'paidByMemberId': paidByMemberId,
+        'paidByAllMembers': paidByAllMembers,
         'note': _nullable(note),
         'createdBy': createdBy,
         'createdAt': FieldValue.serverTimestamp(),

@@ -13,6 +13,7 @@ class TourExpenseModel extends HiveObject {
     required this.categoryIndex,
     required this.timestamp,
     this.note,
+    this.paidByAllMembers = false,
   });
 
   @HiveField(0)
@@ -25,7 +26,7 @@ class TourExpenseModel extends HiveObject {
   double amount;
 
   @HiveField(3)
-  String paidByMemberId;
+  String? paidByMemberId;
 
   /// Empty means "all members benefited".
   @HiveField(4)
@@ -39,4 +40,7 @@ class TourExpenseModel extends HiveObject {
 
   @HiveField(7)
   String? note;
+
+  @HiveField(8, defaultValue: false)
+  bool paidByAllMembers;
 }

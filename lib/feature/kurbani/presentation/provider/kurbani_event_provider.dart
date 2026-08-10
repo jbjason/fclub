@@ -204,14 +204,17 @@ class KurbaniEventProvider with ChangeNotifier {
   Future<void> addExpense({
     required String title,
     required double amount,
-    required String paidByMemberId,
+    required String? paidByMemberId,
+    bool paidByAllMembers = false,
     String? note,
   }) async {
     _requireEditable();
     if (title.trim().isEmpty || amount <= 0) {
       throw const KurbaniFailure('kurbani_error_expense_fields');
     }
-    if (!_participants.any((item) => item.id == paidByMemberId)) {
+    if (_participants.isEmpty ||
+        (!paidByAllMembers &&
+            !_participants.any((item) => item.id == paidByMemberId))) {
       throw const KurbaniFailure('kurbani_error_choose_payer');
     }
     await _runAction(
@@ -221,6 +224,7 @@ class KurbaniEventProvider with ChangeNotifier {
         title: title,
         amount: amount,
         paidByMemberId: paidByMemberId,
+        paidByAllMembers: paidByAllMembers,
         createdBy: _requireUserId(),
         note: note,
       ),

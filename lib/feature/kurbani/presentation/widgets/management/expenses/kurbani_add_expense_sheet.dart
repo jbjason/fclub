@@ -13,6 +13,8 @@ class KurbaniAddExpenseSheet extends StatefulWidget {
 }
 
 class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
+  static const _allMembersPayer = '__all_members__';
+
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
@@ -37,7 +39,8 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
       await context.read<KurbaniEventProvider>().addExpense(
         title: _titleController.text,
         amount: double.parse(_amountController.text.trim()),
-        paidByMemberId: _payerId!,
+        paidByMemberId: _payerId == _allMembersPayer ? null : _payerId,
+        paidByAllMembers: _payerId == _allMembersPayer,
         note: _noteController.text,
       );
       if (mounted) Navigator.pop(context);
@@ -124,14 +127,18 @@ class _KurbaniAddExpenseSheetState extends State<KurbaniAddExpenseSheet> {
                           labelText: 'kurbani_paid_by_label'.tr(),
                           prefixIcon: const Icon(Icons.person_outline_rounded),
                         ),
-                        items: provider.participants
-                            .map(
-                              (participant) => DropdownMenuItem(
-                                value: participant.id,
-                                child: Text(participant.username),
-                              ),
-                            )
-                            .toList(growable: false),
+                        items: [
+                          DropdownMenuItem(
+                            value: _allMembersPayer,
+                            child: Text('kurbani_all_members_shared'.tr()),
+                          ),
+                          ...provider.participants.map(
+                            (participant) => DropdownMenuItem(
+                              value: participant.id,
+                              child: Text(participant.username),
+                            ),
+                          ),
+                        ],
                         onChanged: (value) => setState(() => _payerId = value),
                       ),
                       const SizedBox(height: 12),

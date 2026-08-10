@@ -131,9 +131,10 @@ class KurbaniExpenseTile extends StatelessWidget {
   }
 
   String _payerName() {
+    if (expense.paidByAllMembers) return 'kurbani_all_members_shared'.tr();
     for (final participant in participants) {
       if (participant.id == expense.paidByMemberId) return participant.username;
     }
-    return expense.paidByMemberId;
+    return expense.paidByMemberId ?? '';
   }
 }

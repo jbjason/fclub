@@ -49,4 +49,49 @@ void main() {
     expect(summary.memberBalances.first.net, 1300);
     expect(summary.memberBalances.last.net, -300);
   });
+
+  test('an expense paid by all members credits each payer equally', () {
+    final participants = [
+      KurbaniParticipant(
+        id: 'a',
+        username: 'A',
+        email: 'a@example.com',
+        profilePic: '',
+        contribution: 0,
+        paidStatus: KurbaniPaidStatus.pending,
+        joinedAt: DateTime(2026),
+      ),
+      KurbaniParticipant(
+        id: 'b',
+        username: 'B',
+        email: 'b@example.com',
+        profilePic: '',
+        contribution: 0,
+        paidStatus: KurbaniPaidStatus.pending,
+        joinedAt: DateTime(2026),
+      ),
+    ];
+    final expenses = [
+      KurbaniExpense(
+        id: 'shared-expense',
+        title: 'Shared work',
+        amount: 600,
+        paidByMemberId: null,
+        paidByAllMembers: true,
+        note: null,
+        createdBy: 'admin',
+        createdAt: DateTime(2026),
+      ),
+    ];
+
+    final summary = KurbaniCalculator.calculate(
+      participants: participants,
+      expenses: expenses,
+    );
+
+    expect(summary.memberBalances.first.paidExpenses, 300);
+    expect(summary.memberBalances.last.paidExpenses, 300);
+    expect(summary.memberBalances.first.net, 0);
+    expect(summary.memberBalances.last.net, 0);
+  });
 }

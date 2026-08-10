@@ -25,11 +25,19 @@ abstract final class KurbaniCalculator {
         : totalSpent / participants.length;
     final paidExpenses = <String, double>{};
     for (final expense in expenses) {
-      paidExpenses.update(
-        expense.paidByMemberId,
-        (value) => value + expense.amount,
-        ifAbsent: () => expense.amount,
-      );
+      final payerIds = expense.paidByAllMembers
+          ? participants.map((participant) => participant.id)
+          : [expense.paidByMemberId].whereType<String>();
+      final payers = payerIds.toList(growable: false);
+      if (payers.isEmpty) continue;
+      final amountPerPayer = expense.amount / payers.length;
+      for (final payerId in payers) {
+        paidExpenses.update(
+          payerId,
+          (value) => value + amountPerPayer,
+          ifAbsent: () => amountPerPayer,
+        );
+      }
     }
 
     return KurbaniSummary(

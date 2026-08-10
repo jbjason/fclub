@@ -20,18 +20,19 @@ class TourExpenseModelAdapter extends TypeAdapter<TourExpenseModel> {
       id: fields[0] as String,
       title: fields[1] as String,
       amount: fields[2] as double,
-      paidByMemberId: fields[3] as String,
+      paidByMemberId: fields[3] as String?,
       beneficiaryMemberIds: (fields[4] as List).cast<String>(),
       categoryIndex: fields[5] as int,
       timestamp: fields[6] as DateTime,
       note: fields[7] as String?,
+      paidByAllMembers: fields[8] as bool? ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, TourExpenseModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class TourExpenseModelAdapter extends TypeAdapter<TourExpenseModel> {
       ..writeByte(6)
       ..write(obj.timestamp)
       ..writeByte(7)
-      ..write(obj.note);
+      ..write(obj.note)
+      ..writeByte(8)
+      ..write(obj.paidByAllMembers);
   }
 
   @override

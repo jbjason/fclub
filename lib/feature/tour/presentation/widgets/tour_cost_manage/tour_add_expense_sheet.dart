@@ -38,6 +38,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
 
   ExpenseCategory _category = ExpenseCategory.food;
   String? _paidByMemberId;
+  bool _paidByAllMembers = false;
   bool _allBenefit = true;
   final Set<String> _beneficiaryIds = {};
   bool _isSubmitting = false;
@@ -77,10 +78,13 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
       return;
     }
     if (amount <= 0) {
-      MyDialog().showFailedToast(msg: 'enter_valid_amount'.tr(), context: context);
+      MyDialog().showFailedToast(
+        msg: 'enter_valid_amount'.tr(),
+        context: context,
+      );
       return;
     }
-    if (_paidByMemberId == null) {
+    if (!_paidByAllMembers && _paidByMemberId == null) {
       MyDialog().showFailedToast(msg: 'select_who_paid'.tr(), context: context);
       return;
     }
@@ -96,7 +100,8 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
     await context.read<TourProvider>().addExpense(
       title: title,
       amount: amount,
-      paidByMemberId: _paidByMemberId!,
+      paidByMemberId: _paidByAllMembers ? null : _paidByMemberId!,
+      paidByAllMembers: _paidByAllMembers,
       beneficiaryMemberIds: _allBenefit ? [] : _beneficiaryIds.toList(),
       category: _category,
       note: _noteController.text.trim().isEmpty
@@ -112,10 +117,14 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final members = context.watch<TourProvider>().members;
-    _paidByMemberId ??= members.isNotEmpty ? members.first.id : null;
+    if (!_paidByAllMembers) {
+      _paidByMemberId ??= members.isNotEmpty ? members.first.id : null;
+    }
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Container(
         decoration: BoxDecoration(
           color: theme.cardColor,
@@ -142,8 +151,11 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                   Text('add_expense'.tr(), style: _titleStyle),
                   const Spacer(),
                   IconButton(
-                    icon: Icon(Icons.close_rounded,
-                        color: colorScheme.onSurfaceVariant, size: 22.r),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: colorScheme.onSurfaceVariant,
+                      size: 22.r,
+                    ),
                     onPressed: () => Navigator.pop(context),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -158,7 +170,9 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
               SizedBox(height: 12.h),
               TextField(
                 controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: InputDecoration(labelText: 'amount'.tr()),
               ),
               SizedBox(height: 16.h),
@@ -185,13 +199,26 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
               Wrap(
                 spacing: 10.w,
                 runSpacing: 10.h,
-                children: members.map((member) {
-                  return TourMemberSelectChip(
-                    member: member,
-                    isSelected: _paidByMemberId == member.id,
-                    onTap: () => setState(() => _paidByMemberId = member.id),
-                  );
-                }).toList(),
+                children: [
+                  TourAllBeneficiariesChip(
+                    isSelected: _paidByAllMembers,
+                    onTap: () => setState(() {
+                      _paidByAllMembers = true;
+                      _paidByMemberId = null;
+                    }),
+                  ),
+                  ...members.map((member) {
+                    return TourMemberSelectChip(
+                      member: member,
+                      isSelected:
+                          !_paidByAllMembers && _paidByMemberId == member.id,
+                      onTap: () => setState(() {
+                        _paidByAllMembers = false;
+                        _paidByMemberId = member.id;
+                      }),
+                    );
+                  }),
+                ],
               ),
               SizedBox(height: 16.h),
               Text('who_benefited'.tr(), style: _labelStyle),
@@ -207,7 +234,8 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                   ...members.map((member) {
                     return TourMemberSelectChip(
                       member: member,
-                      isSelected: !_allBenefit && _beneficiaryIds.contains(member.id),
+                      isSelected:
+                          !_allBenefit && _beneficiaryIds.contains(member.id),
                       onTap: () => _toggleBeneficiary(member.id),
                     );
                   }),

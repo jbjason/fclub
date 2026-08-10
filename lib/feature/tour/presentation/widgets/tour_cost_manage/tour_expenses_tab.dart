@@ -7,10 +7,13 @@ import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_em
 import 'package:fclub/feature/tour/presentation/widgets/tour_cost_manage/tour_expense_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 
 class TourExpensesTab extends StatelessWidget {
-  const TourExpensesTab({super.key, required this.expenses, required this.members});
+  const TourExpensesTab({
+    super.key,
+    required this.expenses,
+    required this.members,
+  });
 
   final List<TourExpenseModel> expenses;
   final List<TourMemberModel> members;
@@ -52,9 +55,11 @@ class TourExpensesTab extends StatelessWidget {
             ),
           ),
           ...entry.value.map((expense) {
-            final payer = members.firstWhereOrNull(
-              (member) => member.id == expense.paidByMemberId,
-            );
+            final payer = expense.paidByAllMembers
+                ? null
+                : members.firstWhereOrNull(
+                    (member) => member.id == expense.paidByMemberId,
+                  );
             return TourExpenseTile(
               expense: expense,
               payer: payer,

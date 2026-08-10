@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ class TourAllBeneficiariesChip extends StatelessWidget {
           ),
         ),
         child: Text(
-          'All',
+          'all'.tr(),
           style: TextStyle(
             fontFamily: MyString.poppinsMedium,
             fontWeight: FontWeight.w600,

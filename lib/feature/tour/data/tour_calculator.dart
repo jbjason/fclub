@@ -20,9 +20,17 @@ abstract class TourCalculator {
     final spentOnOthersByMember = <String, double>{};
     final consumedByMember = <String, double>{};
     for (final expense in expenses) {
-      spentOnOthersByMember[expense.paidByMemberId] =
-          (spentOnOthersByMember[expense.paidByMemberId] ?? 0) +
-          expense.amount;
+      final payerIds = expense.paidByAllMembers
+          ? members.map((member) => member.id)
+          : [expense.paidByMemberId].whereType<String>();
+      final payers = payerIds.toList(growable: false);
+      if (payers.isNotEmpty) {
+        final amountPerPayer = expense.amount / payers.length;
+        for (final payerId in payers) {
+          spentOnOthersByMember[payerId] =
+              (spentOnOthersByMember[payerId] ?? 0) + amountPerPayer;
+        }
+      }
 
       final beneficiaries = expense.beneficiaryMemberIds.isEmpty
           ? members.map((member) => member.id).toList()
@@ -39,16 +47,16 @@ abstract class TourCalculator {
     final memberBalances = members.map((member) {
       return MemberBalance(
         memberId: member.id,
-        totalPaidToManager: member.paidToManager + (extraByMember[member.id] ?? 0),
+        totalPaidToManager:
+            member.paidToManager + (extraByMember[member.id] ?? 0),
         totalSpentOnOthers: spentOnOthersByMember[member.id] ?? 0,
         totalConsumedByThem: consumedByMember[member.id] ?? 0,
       );
     }).toList();
 
-    final totalCollected = members.fold<double>(
-      0,
-      (sum, member) => sum + member.paidToManager,
-    ) + extraPayments.fold<double>(0, (sum, payment) => sum + payment.amount);
+    final totalCollected =
+        members.fold<double>(0, (sum, member) => sum + member.paidToManager) +
+        extraPayments.fold<double>(0, (sum, payment) => sum + payment.amount);
 
     final totalSpent = expenses.fold<double>(
       0,
