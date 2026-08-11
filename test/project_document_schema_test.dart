@@ -1,6 +1,7 @@
 import 'package:fclub/feature/club/data/repositories/firestore_club_repository.dart';
 import 'package:fclub/feature/locker/data/repositories/firestore_locker_repository.dart';
 import 'package:fclub/feature/kurbani/data/repositories/firestore_kurbani_repository.dart';
+import 'package:fclub/feature/tour/data/repositories/firestore_tour_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -42,6 +43,21 @@ void main() {
 
     expect(data['name'], 'Eid Circle');
     expect(data['status'], 'active');
+    expect(data, isNot(contains('type')));
+  });
+
+  test('Tour uses its type as the deterministic project document ID', () {
+    expect(FirestoreTourRepository.projectDocumentId, 'tour');
+
+    final data = FirestoreTourRepository.createProjectData(
+      name: '  Group Adventures  ',
+      adminId: 'admin-id',
+      createdAt: DateTime(2026, 8, 11),
+      updatedAt: DateTime(2026, 8, 11),
+    );
+
+    expect(data['name'], 'Group Adventures');
+    expect(data['adminId'], 'admin-id');
     expect(data, isNot(contains('type')));
   });
 }

@@ -1,4 +1,4 @@
-import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_new_tour_step_one.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_new_tour_step_two.dart';
@@ -8,99 +8,102 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class TourNewTourSheet extends StatefulWidget {
-  const TourNewTourSheet({super.key, required this.provider});
-  final TourProvider provider;
+  const TourNewTourSheet({super.key});
 
   @override
   State<TourNewTourSheet> createState() => _TourNewTourSheetState();
 }
 
 class _TourNewTourSheetState extends State<TourNewTourSheet> {
-  int _step = 0;
-
-  // Step 1
-  final _tourNameCtrl = TextEditingController();
-  final _budgetCtrl = TextEditingController(text: '20000');
+  final _tourNameController = TextEditingController();
+  final _budgetController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
-  // Step 2
   final Set<String> _selectedIds = {};
+  int _step = 0;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
-    _tourNameCtrl.dispose();
-    _budgetCtrl.dispose();
+    _tourNameController.dispose();
+    _budgetController.dispose();
     super.dispose();
   }
 
   void _toggleSelected(String id) {
     setState(() {
-      if (_selectedIds.contains(id)) {
-        _selectedIds.remove(id);
-      } else {
-        _selectedIds.add(id);
-      }
+      _selectedIds.contains(id)
+          ? _selectedIds.remove(id)
+          : _selectedIds.add(id);
     });
   }
 
   Future<void> _submit() async {
-    final budget = double.tryParse(_budgetCtrl.text.trim()) ?? 20000;
-    await widget.provider.createSession(
-      tourName: _tourNameCtrl.text.trim(),
-      decidedBudget: budget,
-      selectedContactIds: _selectedIds.toList(),
-    );
-    if (mounted) Navigator.pop(context);
+    final provider = context.read<TourProvider>();
+    setState(() => _isSubmitting = true);
+    try {
+      final event = await provider.createEvent(
+        tourName: _tourNameController.text,
+        decidedBudget: double.parse(_budgetController.text.trim()),
+        participantIds: _selectedIds,
+      );
+      if (mounted) Navigator.pop(context, event);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text((provider.actionError ?? 'tour_error_unknown').tr()),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final globalContacts = context.watch<GlobalContactsProvider>();
-
+    final provider = context.watch<TourProvider>();
     return Padding(
-      padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: Container(
         decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius:
-              BorderRadius.vertical(top: Radius.circular(28.r)),
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Center(
               child: Container(
-                margin: EdgeInsets.only(top: 12.h, bottom: 4.h),
-                width: 40.w,
+                margin: EdgeInsets.only(top: 10.h, bottom: 4.h),
+                width: 42.w,
                 height: 4.h,
                 decoration: BoxDecoration(
-                    color: theme.colorScheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(2.r)),
+                  color: theme.colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
               ),
             ),
             TourSheetHeader(
               step: _step,
-              onBack:
-                  _step == 1 ? () => setState(() => _step = 0) : null,
+              onBack: _step == 1 ? () => setState(() => _step = 0) : null,
             ),
             if (_step == 0)
               TourNewTourStepOne(
                 formKey: _formKey,
-                tourNameCtrl: _tourNameCtrl,
-                budgetCtrl: _budgetCtrl,
+                tourNameCtrl: _tourNameController,
+                budgetCtrl: _budgetController,
                 onNext: () {
-                  if (_formKey.currentState!.validate()) {
+                  if (_formKey.currentState?.validate() == true) {
                     setState(() => _step = 1);
                   }
                 },
               )
             else
               TourNewTourStepTwo(
-                contacts: globalContacts.contacts,
-                meId: globalContacts.meContact?.id,
+                members: provider.groupMembers,
+                currentUserId: provider.currentUserId,
                 selectedIds: _selectedIds,
+                isSubmitting: _isSubmitting,
                 onToggle: _toggleSelected,
                 onSubmit: _submit,
               ),

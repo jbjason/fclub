@@ -1,8 +1,8 @@
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
-import 'package:fclub/feature/tour/data/model/member_balance.dart';
-import 'package:fclub/feature/tour/data/model/tour_member_model.dart';
+import 'package:fclub/feature/tour/data/models/tour_member_balance.dart';
+import 'package:fclub/feature/tour/data/models/tour_participant.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_card_shell.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_summary/tour_breakdown_row.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_member_avatar.dart';
@@ -17,8 +17,8 @@ class TourMemberSettlementCard extends StatelessWidget {
     required this.extraPaid,
   });
 
-  final TourMemberModel member;
-  final MemberBalance balance;
+  final TourParticipant member;
+  final TourMemberBalance balance;
   final double extraPaid;
 
   @override
@@ -77,10 +77,19 @@ class TourMemberSettlementCard extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.w),
             child: Column(
               children: [
-                TourBreakdownRow(label: 'Paid to manager', value: member.paidToManager),
+                TourBreakdownRow(
+                  label: 'Paid to manager',
+                  value: member.paidToManager,
+                ),
                 TourBreakdownRow(label: 'Extra payments', value: extraPaid),
-                TourBreakdownRow(label: 'Spent on group', value: balance.totalSpentOnOthers),
-                TourBreakdownRow(label: 'Consumed', value: balance.totalConsumedByThem),
+                TourBreakdownRow(
+                  label: 'Spent on group',
+                  value: balance.totalSpentOnOthers,
+                ),
+                TourBreakdownRow(
+                  label: 'Consumed',
+                  value: balance.totalConsumedByThem,
+                ),
                 const Divider(),
                 TourBreakdownRow(label: 'Net', value: net, isTotal: true),
               ],

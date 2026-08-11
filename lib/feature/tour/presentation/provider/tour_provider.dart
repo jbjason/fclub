@@ -1,244 +1,280 @@
-import 'package:fclub/core/services/contacts/app_contact.dart';
-import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
-import 'package:fclub/feature/tour/data/expense_category.dart';
-import 'package:fclub/feature/tour/data/hive_boxes.dart';
-import 'package:fclub/feature/tour/data/model/extra_payment_model.dart';
-import 'package:fclub/feature/tour/data/model/tour_expense_model.dart';
-import 'package:fclub/feature/tour/data/model/tour_member_model.dart';
-import 'package:fclub/feature/tour/data/model/tour_session.dart';
-import 'package:fclub/feature/tour/data/model/tour_summary.dart';
-import 'package:fclub/feature/tour/data/tour_calculator.dart';
+import 'dart:async';
+
+import 'package:fclub/core/services/auth/firebase_auth_service.dart';
+import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
+import 'package:fclub/feature/tour/data/models/tour_event.dart';
+import 'package:fclub/feature/tour/data/models/tour_failure.dart';
+import 'package:fclub/feature/tour/data/models/tour_participant.dart';
+import 'package:fclub/feature/tour/data/models/tour_project.dart';
+import 'package:fclub/feature/tour/data/repositories/tour_repository.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:uuid/uuid.dart';
 
 class TourProvider with ChangeNotifier {
-  TourProvider(this._globalContacts)
-    : _sessionsBox = Hive.box<TourSession>(TourHiveBoxes.sessionsBox) {
-    _load();
+  TourProvider({
+    required TourRepository repository,
+    required GroupSessionProvider groupSession,
+    required FirebaseAuthService authService,
+  }) : _repository = repository,
+       _groupSession = groupSession,
+       _authService = authService;
+
+  final TourRepository _repository;
+  final GroupSessionProvider _groupSession;
+  final FirebaseAuthService _authService;
+
+  StreamSubscription<TourProject?>? _projectSubscription;
+  StreamSubscription<List<TourEvent>>? _eventSubscription;
+  TourProject? _project;
+  List<TourEvent> _events = const [];
+  List<TourParticipantCandidate> _groupMembers = const [];
+  String? _groupAdminId;
+  String? _loadedGroupId;
+  String? _loadError;
+  String? _actionError;
+  bool _isLoading = false;
+  bool _isSubmitting = false;
+  bool _isLoadingMembers = false;
+  bool _hasProjectSnapshot = false;
+  bool _hasEventSnapshot = false;
+
+  TourProject? get project => _project;
+  String get projectName => _project?.name ?? 'Tour';
+  List<TourEvent> get events => List.unmodifiable(_events);
+  List<TourParticipantCandidate> get groupMembers =>
+      List.unmodifiable(_groupMembers);
+
+  TourEvent? get activeEvent {
+    for (final event in _events) {
+      if (event.isOpen) return event;
+    }
+    return null;
   }
 
-  final Box<TourSession> _sessionsBox;
-  final GlobalContactsProvider _globalContacts;
-  final Uuid _uuid = const Uuid();
+  List<TourEvent> get history =>
+      List.unmodifiable(_events.where((event) => !event.isOpen));
 
-  TourSession? _activeSession;
-  List<TourSession> _history = [];
+  String? get currentUserId => _authService.currentUser?.uid;
+  String? get activeGroupId => _groupSession.groupId;
+  bool get isGroupAdmin =>
+      _groupAdminId?.isNotEmpty == true && _groupAdminId == currentUserId;
+  bool get isProjectAdmin =>
+      _project?.adminId.isNotEmpty == true &&
+      _project?.adminId == currentUserId;
+  bool get canManage => isGroupAdmin || isProjectAdmin;
+  bool get isLoading => _isLoading;
+  bool get isSubmitting => _isSubmitting;
+  bool get isLoadingMembers => _isLoadingMembers;
+  String? get loadError => _loadError;
+  String? get actionError => _actionError;
 
-  // ── Init ──────────────────────────────────────────────────────────────────
+  Future<void> initialize({bool force = false}) async {
+    final groupId = activeGroupId;
+    if (groupId == null || groupId.isEmpty) {
+      _setLoadError('tour_error_choose_group');
+      return;
+    }
+    if (currentUserId == null || currentUserId!.isEmpty) {
+      _setLoadError('tour_error_signed_out');
+      return;
+    }
+    if (!force && _loadedGroupId == groupId && _projectSubscription != null) {
+      return;
+    }
 
-  void _load() {
-    final all = _sessionsBox.values.toList();
-    final active = all.where((s) => !s.isCompleted).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    _activeSession = active.isNotEmpty ? active.first : null;
-    _history = all.where((s) => s.isCompleted).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    await _cancelSubscriptions();
+    _loadedGroupId = groupId;
+    _project = null;
+    _events = const [];
+    _groupMembers = const [];
+    _groupAdminId = null;
+    _loadError = null;
+    _actionError = null;
+    _isLoading = true;
+    _hasProjectSnapshot = false;
+    _hasEventSnapshot = false;
     notifyListeners();
-  }
 
-  // ── Public getters ─────────────────────────────────────────────────────────
-
-  bool get hasActiveSession => _activeSession != null;
-  TourSession? get activeSession => _activeSession;
-  List<TourSession> get history => List.unmodifiable(_history);
-
-  // ── Delegated getters for active session ──────────────────────────────────
-
-  String get tourName => _activeSession?.tourName ?? '';
-  double get decidedBudget => _activeSession?.decidedBudget ?? 0;
-
-  /// True when any session data exists (active or history).
-  bool get hasActiveTour => hasActiveSession;
-
-  List<TourMemberModel> get members =>
-      List<TourMemberModel>.from(_activeSession?.members ?? []);
-
-  List<TourExpenseModel> get expenses {
-    final list = List<TourExpenseModel>.from(_activeSession?.expenses ?? []);
-    list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    return list;
-  }
-
-  List<ExtraPaymentModel> get extraPayments {
-    final list = List<ExtraPaymentModel>.from(
-      _activeSession?.extraPayments ?? [],
-    );
-    list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    return list;
-  }
-
-  TourSummary get summary => TourCalculator.calculate(
-    members: members,
-    expenses: expenses,
-    extraPayments: extraPayments,
-    totalDecidedBudget: decidedBudget,
-  );
-
-  TourMemberModel? memberById(String id) {
     try {
-      return members.firstWhere((m) => m.id == id);
-    } on StateError {
-      return null;
+      _groupAdminId = await _repository.getGroupAdminId(groupId: groupId);
+      _project = await _repository.findProject(groupId: groupId);
+    } catch (error) {
+      _setLoadError(_message(error));
+      return;
+    }
+
+    if (_project == null) {
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    _projectSubscription = _repository.watchProject(groupId: groupId).listen((
+      project,
+    ) {
+      _project = project;
+      _hasProjectSnapshot = true;
+      _completeInitialLoad();
+    }, onError: _handleLoadError);
+    _eventSubscription = _repository.watchEvents(groupId: groupId).listen((
+      events,
+    ) {
+      _events = events;
+      _hasEventSnapshot = true;
+      _completeInitialLoad();
+    }, onError: _handleLoadError);
+  }
+
+  Future<void> createProject({required String name}) async {
+    if (!isGroupAdmin) {
+      throw const TourFailure('tour_error_group_admin_create');
+    }
+    if (name.trim().isEmpty) {
+      throw const TourFailure('tour_error_project_name');
+    }
+    await _runAction(
+      () => _repository.createProject(
+        groupId: _requireGroupId(),
+        name: name,
+        adminId: _requireUserId(),
+      ),
+    );
+    await initialize(force: true);
+  }
+
+  Future<void> loadGroupMembers() async {
+    _requireAdmin();
+    _isLoadingMembers = true;
+    _actionError = null;
+    notifyListeners();
+    try {
+      _groupMembers = await _repository.getGroupMembers(
+        groupId: _requireGroupId(),
+      );
+    } catch (error) {
+      _actionError = _message(error);
+    } finally {
+      _isLoadingMembers = false;
+      notifyListeners();
     }
   }
 
-  // ── Session lifecycle ──────────────────────────────────────────────────────
-
-  Future<void> createSession({
+  Future<TourEvent> createEvent({
     required String tourName,
     required double decidedBudget,
-    required List<String> selectedContactIds,
+    required Set<String> participantIds,
   }) async {
-    final meId = _globalContacts.meContact?.id;
-    final ids = [
-      if (meId != null && !selectedContactIds.contains(meId)) meId,
-      ...selectedContactIds,
-    ];
-
-    final contacts = ids
-        .map((id) => _globalContacts.contactById(id))
-        .whereType<AppContact>()
-        .toList();
-
-    final memberShare = contacts.isEmpty
-        ? 0.0
-        : decidedBudget / contacts.length;
-
-    final sessionMembers = contacts.map((contact) {
-      return TourMemberModel(
-        id: contact.id,
-        name: contact.isMe ? 'You (${contact.name})' : contact.name,
-        avatarColorIndex: contact.avatarColorIndex,
-        paidToManager: memberShare,
+    _requireAdmin();
+    if (activeEvent != null) {
+      throw const TourFailure('tour_error_active_event_exists');
+    }
+    if (tourName.trim().isEmpty || decidedBudget <= 0) {
+      throw const TourFailure('tour_error_event_fields');
+    }
+    final ids = {...participantIds, _requireUserId()};
+    TourEvent? result;
+    await _runAction(() async {
+      result = await _repository.createEvent(
+        groupId: _requireGroupId(),
+        tourName: tourName,
+        decidedBudget: decidedBudget,
+        createdBy: _requireUserId(),
+        participantIds: ids.toList(growable: false),
       );
-    }).toList();
-
-    final session = TourSession(
-      id: _uuid.v4(),
-      tourName: tourName,
-      decidedBudget: decidedBudget,
-      createdAt: DateTime.now(),
-      members: sessionMembers,
-      expenses: [],
-      extraPayments: [],
-    );
-    await _sessionsBox.put(session.id, session);
-    _activeSession = session;
-    notifyListeners();
+    });
+    return result!;
   }
 
-  Future<void> finishSession() async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.isCompleted = true;
-    await _sessionsBox.put(session.id, session);
-    _load();
-  }
-
-  Future<void> deleteSession(String sessionId) async {
-    await _sessionsBox.delete(sessionId);
-    _history.removeWhere((s) => s.id == sessionId);
-    if (_activeSession?.id == sessionId) _activeSession = null;
-    notifyListeners();
-  }
-
-  // ── Members in active session ──────────────────────────────────────────────
-
-  Future<void> addMemberFromContact(String contactId) async {
-    final session = _activeSession;
-    if (session == null) return;
-    if (session.members.any((m) => m.id == contactId)) return;
-    final contact = _globalContacts.contactById(contactId);
-    if (contact == null) return;
-    final colorIndex = session.members.length % 8;
-    session.members.add(
-      TourMemberModel(
-        id: contact.id,
-        name: contact.isMe ? 'You (${contact.name})' : contact.name,
-        avatarColorIndex: colorIndex,
-        paidToManager: 0.0,
+  Future<void> completeEvent(String eventId) async {
+    _requireAdmin();
+    await _runAction(
+      () => _repository.updateEventStatus(
+        groupId: _requireGroupId(),
+        eventId: eventId,
+        status: TourEventStatus.completed,
       ),
     );
-    await _sessionsBox.put(session.id, session);
-    notifyListeners();
   }
 
-  Future<void> deleteMember(String memberId) async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.members.removeWhere((m) => m.id == memberId);
-    await _sessionsBox.put(session.id, session);
-    notifyListeners();
-  }
-
-  Future<void> updateDecidedBudget(double amount) async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.decidedBudget = amount;
-    notifyListeners();
-    await _sessionsBox.put(session.id, session);
-  }
-
-  Future<void> updateMemberPaidToManager(String memberId, double amount) async {
-    final session = _activeSession;
-    if (session == null) return;
-    final idx = session.members.indexWhere((m) => m.id == memberId);
-    if (idx == -1) return;
-    session.members[idx].paidToManager = amount;
-    await _sessionsBox.put(session.id, session);
-    notifyListeners();
-  }
-
-  // ── Expenses ───────────────────────────────────────────────────────────────
-
-  Future<void> addExpense({
-    required String title,
-    required double amount,
-    required String? paidByMemberId,
-    required List<String> beneficiaryMemberIds,
-    required ExpenseCategory category,
-    bool paidByAllMembers = false,
-    String? note,
-  }) async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.expenses.add(
-      TourExpenseModel(
-        id: _uuid.v4(),
-        title: title,
-        amount: amount,
-        paidByMemberId: paidByMemberId,
-        beneficiaryMemberIds: beneficiaryMemberIds,
-        categoryIndex: category.index,
-        timestamp: DateTime.now(),
-        note: note,
-        paidByAllMembers: paidByAllMembers,
+  Future<void> cancelEvent(String eventId) async {
+    _requireAdmin();
+    await _runAction(
+      () => _repository.updateEventStatus(
+        groupId: _requireGroupId(),
+        eventId: eventId,
+        status: TourEventStatus.cancelled,
       ),
     );
-    await _sessionsBox.put(session.id, session);
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    _requireAdmin();
+    await _runAction(
+      () =>
+          _repository.deleteEvent(groupId: _requireGroupId(), eventId: eventId),
+    );
+  }
+
+  Future<void> _runAction(Future<void> Function() action) async {
+    _isSubmitting = true;
+    _actionError = null;
+    notifyListeners();
+    try {
+      await action();
+    } catch (error) {
+      _actionError = _message(error);
+      rethrow;
+    } finally {
+      _isSubmitting = false;
+      notifyListeners();
+    }
+  }
+
+  void _completeInitialLoad() {
+    if (_hasProjectSnapshot && _hasEventSnapshot) _isLoading = false;
     notifyListeners();
   }
 
-  // ── Extra payments ─────────────────────────────────────────────────────────
+  void _handleLoadError(Object error) => _setLoadError(_message(error));
 
-  Future<void> addExtraPayment({
-    required String memberId,
-    required double amount,
-    String? note,
-  }) async {
-    final session = _activeSession;
-    if (session == null) return;
-    session.extraPayments.add(
-      ExtraPaymentModel(
-        id: _uuid.v4(),
-        memberId: memberId,
-        amount: amount,
-        timestamp: DateTime.now(),
-        note: note,
-      ),
-    );
-    await _sessionsBox.put(session.id, session);
+  void _setLoadError(String key) {
+    _loadError = key;
+    _isLoading = false;
     notifyListeners();
+  }
+
+  String _requireGroupId() {
+    final value = activeGroupId;
+    if (value == null || value.isEmpty) {
+      throw const TourFailure('tour_error_choose_group');
+    }
+    return value;
+  }
+
+  String _requireUserId() {
+    final value = currentUserId;
+    if (value == null || value.isEmpty) {
+      throw const TourFailure('tour_error_signed_out');
+    }
+    return value;
+  }
+
+  void _requireAdmin() {
+    if (!canManage) throw const TourFailure('tour_error_admin_only');
+  }
+
+  String _message(Object error) =>
+      error is TourFailure ? error.messageKey : 'tour_error_unknown';
+
+  Future<void> _cancelSubscriptions() async {
+    await _projectSubscription?.cancel();
+    await _eventSubscription?.cancel();
+    _projectSubscription = null;
+    _eventSubscription = null;
+  }
+
+  @override
+  void dispose() {
+    unawaited(_cancelSubscriptions());
+    super.dispose();
   }
 }

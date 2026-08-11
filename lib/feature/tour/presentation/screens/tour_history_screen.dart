@@ -1,19 +1,27 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fclub/config/router/app_router.dart';
 import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
-import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
+import 'package:fclub/core/services/auth/firebase_auth_service.dart';
+import 'package:fclub/core/widgets/feature_ambient_background.dart';
+import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
+import 'package:fclub/feature/tour/data/models/tour_event.dart';
+import 'package:fclub/feature/tour/data/repositories/tour_repository.dart';
+import 'package:fclub/feature/tour/presentation/provider/tour_event_provider.dart';
 import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
+import 'package:fclub/feature/tour/presentation/screens/tour_details_screen.dart';
+import 'package:fclub/feature/tour/presentation/widgets/shared/tour_palette.dart';
+import 'package:fclub/feature/tour/presentation/widgets/shared/tour_state_panel.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_active_session_card.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_empty_history_state.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_history_app_bar.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_history_card.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_new_tour_sheet.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_overview_header.dart';
+import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_project_setup_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-/// Shows the full trip history and lets the user create a new tour.
 class TourHistoryScreen extends StatefulWidget {
   const TourHistoryScreen({super.key});
 
@@ -26,178 +34,252 @@ class _TourHistoryScreenState extends State<TourHistoryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<GlobalContactsProvider>().loadContacts();
+      if (mounted) context.read<TourProvider>().initialize();
     });
   }
 
-  // ── Navigation ─────────────────────────────────────────────────────────────
-
-  static void goToManagement(BuildContext context) {
-    Navigator.pushNamed(context, AppRouteName.tourManage);
-  }
-
-  // ── New tour flow ──────────────────────────────────────────────────────────
-
   Future<void> _startNewTour(TourProvider provider) async {
-    await showModalBottomSheet<void>(
+    await provider.loadGroupMembers();
+    if (!mounted || provider.actionError != null) {
+      if (mounted && provider.actionError != null) {
+        _showError(provider.actionError!);
+      }
+      return;
+    }
+    final event = await showModalBottomSheet<TourEvent>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => TourNewTourSheet(provider: provider),
+      barrierColor: Colors.black.withValues(alpha: .64),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: provider,
+        child: const TourNewTourSheet(),
+      ),
     );
+    if (event != null && mounted) _openEvent(event);
+  }
 
-    if (mounted && provider.hasActiveSession) {
-      goToManagement(context);
+  void _openEvent(TourEvent event) {
+    final repository = context.read<TourRepository>();
+    final groupSession = context.read<GroupSessionProvider>();
+    final authService = context.read<FirebaseAuthService>();
+    Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => TourEventProvider(
+            repository: repository,
+            groupSession: groupSession,
+            authService: authService,
+            event: event,
+          ),
+          child: const TourDetailsScreen(),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmFinish(TourProvider provider, TourEvent event) async {
+    final confirmed = await _confirm(
+      title: 'tour_finish_confirm_title'.tr(),
+      message: 'tour_finish_confirm_body'.tr(),
+      confirmLabel: 'finish'.tr(),
+      destructive: false,
+    );
+    if (confirmed == true && mounted) {
+      await _run(() => provider.completeEvent(event.id));
     }
   }
 
-  // ── Finish confirm ─────────────────────────────────────────────────────────
-
-  Future<void> _confirmFinish(TourProvider provider) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r)),
-        title: Text('tour_finish_confirm_title'.tr(),
-            style: TextStyle(
-                fontFamily: MyString.poppinsBold, fontSize: 16.sp)),
-        content: Text(
-          'tour_finish_confirm_body'.tr(),
-          style: TextStyle(
-              fontFamily: MyString.rubikRegular,
-              fontSize: 13.sp,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('cancel'.tr()),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: MyColor.success,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r)),
-            ),
-            child: Text('finish'.tr()),
-          ),
-        ],
-      ),
+  Future<void> _confirmDelete(TourProvider provider, TourEvent event) async {
+    final confirmed = await _confirm(
+      title: 'tour_delete_confirm_title'.tr(),
+      message: 'tour_delete_confirm_body'.tr(),
+      confirmLabel: 'delete'.tr(),
+      destructive: true,
     );
-    if (confirmed == true) await provider.finishSession();
+    if (confirmed == true && mounted) {
+      await _run(() => provider.deleteEvent(event.id));
+    }
   }
-
-  // ── Delete confirm ─────────────────────────────────────────────────────────
-
-  Future<void> _confirmDelete(TourProvider provider, String id) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r)),
-        title: Text('tour_delete_confirm_title'.tr(),
-            style: TextStyle(
-                fontFamily: MyString.poppinsBold, fontSize: 16.sp)),
-        content: Text(
-          'tour_delete_confirm_body'.tr(),
-          style: TextStyle(
-              fontFamily: MyString.rubikRegular,
-              fontSize: 13.sp,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('cancel'.tr()),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r)),
-            ),
-            child: Text('delete'.tr()),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) await provider.deleteSession(id);
-  }
-
-  // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<TourProvider>();
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Consumer<TourProvider>(
-        builder: (ctx, provider, _) {
-          return Column(
-            children: [
-              TourHistoryAppBar(onBack: () => Navigator.pop(context)),
-              SizedBox(height: 8.h),
-
-              // ── Active session resume card ─────────────────
-              if (provider.hasActiveSession) ...[
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: TourActiveSessionCard(
-                    session: provider.activeSession!,
-                    onResume: () => goToManagement(ctx),
-                    onFinish: () => _confirmFinish(provider),
-                    onDelete: () =>
-                        _confirmDelete(provider, provider.activeSession!.id),
-                  ),
-                ),
-                SizedBox(height: 12.h),
-              ],
-
-              // ── History list ───────────────────────────────
-              Expanded(
-                child: provider.history.isEmpty &&
-                        !provider.hasActiveSession
-                    ? TourEmptyHistoryState(
-                        onNew: () => _startNewTour(provider))
-                    : ListView.builder(
-                        padding:
-                            EdgeInsets.fromLTRB(16.w, 0, 16.w, 100.h),
-                        itemCount: provider.history.length,
-                        itemBuilder: (_, i) {
-                          final session = provider.history[i];
-                          return TourHistoryCard(
-                            session: session,
-                            onDelete: () =>
-                                _confirmDelete(provider, session.id),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          );
-        },
+      appBar: TourHistoryAppBar(
+        title: provider.projectName,
+        onBack: () => Navigator.pop(context),
       ),
-      floatingActionButton: Consumer<TourProvider>(
-        builder: (ctx, provider, _) => FloatingActionButton.extended(
-          onPressed: provider.hasActiveSession
-              ? null
-              : () => _startNewTour(provider),
-          backgroundColor: provider.hasActiveSession
-              ? Colors.grey.shade400
-              : MyColor.primary,
-          foregroundColor: Colors.white,
-          icon: const Icon(Icons.add_rounded),
-          label: Text('tour_new'.tr(),
-              style: TextStyle(
-                  fontFamily: MyString.poppinsBold, fontSize: 13.sp)),
+      body: SafeArea(
+        child: FeatureAmbientBackground(
+          accent: TourPalette.ocean,
+          secondaryAccent: TourPalette.sunset,
+          child: _body(provider),
         ),
+      ),
+      floatingActionButton:
+          provider.project != null &&
+              provider.canManage &&
+              provider.activeEvent == null &&
+              !provider.isLoading
+          ? FloatingActionButton.extended(
+              onPressed: provider.isSubmitting
+                  ? null
+                  : () => _startNewTour(provider),
+              backgroundColor: TourPalette.sunset,
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.flight_takeoff_rounded),
+              label: Text(
+                'tour_start'.tr(),
+                style: const TextStyle(fontFamily: MyString.poppinsBold),
+              ),
+            )
+          : null,
+    );
+  }
+
+  Widget _body(TourProvider provider) {
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (provider.loadError != null) {
+      return TourStatePanel(
+        icon: Icons.cloud_off_rounded,
+        title: 'tour_load_error_title'.tr(),
+        message: provider.loadError!.tr(),
+        actionLabel: 'group_retry'.tr(),
+        onAction: () => provider.initialize(force: true),
+      );
+    }
+    if (provider.project == null) return const TourProjectSetupPanel();
+
+    final active = provider.activeEvent;
+    final history = provider.history;
+    return RefreshIndicator(
+      onRefresh: () => provider.initialize(force: true),
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 8.h),
+            sliver: SliverToBoxAdapter(
+              child: TourOverviewHeader(
+                projectName: provider.projectName,
+                eventCount: provider.events.length,
+                hasActiveEvent: active != null,
+              ),
+            ),
+          ),
+          if (active != null)
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 14.h),
+              sliver: SliverToBoxAdapter(
+                child: TourActiveSessionCard(
+                  event: active,
+                  canManage: provider.canManage,
+                  onResume: () => _openEvent(active),
+                  onFinish: () => _confirmFinish(provider, active),
+                  onDelete: () => _confirmDelete(provider, active),
+                ),
+              ),
+            ),
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(18.w, 4.h, 18.w, 10.h),
+            sliver: SliverToBoxAdapter(
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: TourPalette.sunset,
+                    size: 18,
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    'tour_past_adventures'.tr(),
+                    style: TextStyle(
+                      fontFamily: MyString.poppinsBold,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (history.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: TourEmptyHistoryState(
+                showAction: active == null && provider.canManage,
+                onNew: () => _startNewTour(provider),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 100.h),
+              sliver: SliverList.builder(
+                itemCount: history.length,
+                itemBuilder: (_, index) {
+                  final event = history[index];
+                  return TourHistoryCard(
+                    event: event,
+                    canManage: provider.canManage,
+                    onOpen: () => _openEvent(event),
+                    onDelete: () => _confirmDelete(provider, event),
+                  );
+                },
+              ),
+            ),
+        ],
       ),
     );
   }
+
+  Future<void> _run(Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (_) {
+      if (!mounted) return;
+      _showError(
+        context.read<TourProvider>().actionError ?? 'tour_error_unknown',
+      );
+    }
+  }
+
+  void _showError(String key) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(key.tr())));
+  }
+
+  Future<bool?> _confirm({
+    required String title,
+    required String message,
+    required String confirmLabel,
+    required bool destructive,
+  }) => showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      icon: Icon(
+        destructive ? Icons.delete_outline_rounded : Icons.task_alt_rounded,
+        color: destructive ? MyColor.error : TourPalette.lagoon,
+      ),
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: Text('cancel'.tr()),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: destructive ? MyColor.error : TourPalette.lagoon,
+          ),
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: Text(confirmLabel),
+        ),
+      ],
+    ),
+  );
 }

@@ -5,6 +5,7 @@ import 'package:fclub/core/services/locale_service.dart';
 import 'package:fclub/core/util/my_dialog.dart';
 import 'package:fclub/feature/auth/data/model/auth_user.dart';
 import 'package:fclub/feature/auth/presentation/provider/auth_session_provider.dart';
+import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
 import 'package:fclub/feature/settings/presentation/provider/settings_provider.dart';
 import 'package:fclub/feature/settings/presentation/widget/settings_account_section.dart';
 import 'package:fclub/feature/settings/presentation/widget/settings_header.dart';
@@ -30,6 +31,9 @@ class SettingsScreen extends StatelessWidget {
     final user = session.currentUser ?? GlobalService.instance.currentUser;
     final settings = context.watch<SettingsProvider>().settings;
     final locale = context.watch<LocaleProvider>().locale;
+    final groupName = context.select<GroupSessionProvider, String>(
+      (provider) => provider.activeGroup?.name.trim() ?? '',
+    );
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -42,7 +46,7 @@ class SettingsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SettingsHeader(),
+                  SettingsHeader(groupName: groupName),
                   SizedBox(height: 16.h),
                   SettingsProfileCard(
                     displayName: _displayName(user),

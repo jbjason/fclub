@@ -8,10 +8,13 @@ class TourFieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text,
-        style: TextStyle(
-            fontFamily: MyString.poppinsBold,
-            fontSize: 12.sp,
-            color: Theme.of(context).colorScheme.onSurfaceVariant));
+    return Text(
+      text,
+      style: TextStyle(
+        fontFamily: MyString.poppinsBold,
+        fontSize: 12.sp,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+    );
   }
 }

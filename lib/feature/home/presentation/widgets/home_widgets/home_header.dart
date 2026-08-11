@@ -6,13 +6,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// Decorative brand header shown at the top of the home dashboard.
 ///
-/// Renders the Fundora wallet icon, app name, version badge, a bold
+/// Renders the Fundora wallet icon, active group name, version badge, a bold
 /// headline, and a short tagline — all inside a gradient-tinted
 /// container that adapts to both dark and light themes.
 ///
 /// This widget is entirely presentational and carries no business logic.
 class HomeHeader extends StatelessWidget {
-  const HomeHeader({super.key});
+  const HomeHeader({super.key, this.groupName = ''});
+
+  final String groupName;
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +46,21 @@ class HomeHeader extends StatelessWidget {
             children: [
               _BrandIcon(),
               SizedBox(width: 10.w),
-              Text(
-                'Fundora',
-                style: TextStyle(
-                  fontFamily: MyString.poppinsBold,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18.sp,
-                  color: MyColor.primary,
-                  letterSpacing: 0.6,
+              Expanded(
+                child: Text(
+                  groupName.trim().isEmpty ? 'Fundora' : groupName.trim(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: MyString.poppinsBold,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18.sp,
+                    color: MyColor.primary,
+                    letterSpacing: 0.6,
+                  ),
                 ),
               ),
-              const Spacer(),
+              SizedBox(width: 10.w),
               _VersionBadge(isDark: isDark),
             ],
           ),

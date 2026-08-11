@@ -19,8 +19,11 @@ class TourSheetHeader extends StatelessWidget {
           if (onBack != null) ...[
             GestureDetector(
               onTap: onBack,
-              child: Icon(Icons.arrow_back_ios_new_rounded,
-                  color: MyColor.primary, size: 18.r),
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: MyColor.primary,
+                size: 18.r,
+              ),
             ),
             SizedBox(width: 8.w),
           ],
@@ -31,16 +34,18 @@ class TourSheetHeader extends StatelessWidget {
                 Text(
                   step == 0 ? 'tour_new'.tr() : 'tour_add_members'.tr(),
                   style: TextStyle(
-                      fontFamily: MyString.poppinsBold,
-                      fontSize: 17.sp,
-                      color: colorScheme.onSurface),
+                    fontFamily: MyString.poppinsBold,
+                    fontSize: 17.sp,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
                 Text(
                   step == 0 ? 'tour_step1'.tr() : 'tour_step2'.tr(),
                   style: TextStyle(
-                      fontFamily: MyString.rubikRegular,
-                      fontSize: 11.sp,
-                      color: colorScheme.onSurfaceVariant),
+                    fontFamily: MyString.rubikRegular,
+                    fontSize: 11.sp,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),

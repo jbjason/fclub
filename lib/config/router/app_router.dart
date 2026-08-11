@@ -3,7 +3,7 @@ import 'package:fclub/core/services/auth/firebase_auth_service.dart';
 import 'package:fclub/feature/auth/presentation/provider/signin_provider.dart';
 import 'package:fclub/feature/auth/presentation/screens/auth_gate_screen.dart';
 import 'package:fclub/feature/auth/presentation/screens/auth_screen.dart';
-import 'package:fclub/feature/club/presentation/screens/club_monthly_overview_screen.dart';
+import 'package:fclub/feature/club/presentation/screens/club_screen.dart';
 import 'package:fclub/feature/home/presentation/screens/group_gateway_screen.dart';
 import 'package:fclub/feature/home/data/models/group_user.dart';
 import 'package:fclub/feature/home/data/repositories/group_repository.dart';
@@ -13,9 +13,7 @@ import 'package:fclub/feature/home/presentation/screens/home.dart';
 import 'package:fclub/feature/kurbani/presentation/screens/kurbani_screen.dart';
 import 'package:fclub/feature/locker/presentation/screens/locker_screen.dart';
 import 'package:fclub/feature/pack_check/presentation/screens/pack_check_screen.dart';
-import 'package:fclub/feature/tour/presentation/screens/tour_cost_manage_screen.dart';
 import 'package:fclub/feature/tour/presentation/screens/tour_history_screen.dart';
-import 'package:fclub/feature/tour/presentation/screens/tour_summary_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -31,8 +29,6 @@ class AppRouteName {
   static const String locker = '/home/locker';
   static const String kurbani = '/home/kurbani';
   static const String tourCostManage = '/home/tour-cost-manage';
-  static const String tourManage = '/home/tour-cost-manage/session';
-  static const String tourSummary = '/home/tour-cost-manage/summary';
   static const String packCheck = '/home/carry-check';
 }
 
@@ -52,21 +48,10 @@ abstract class AppRouter {
           settings: settings,
           child: const TourHistoryScreen(),
         );
-      case AppRouteName.tourManage:
-        return _materialRoute(
-          settings: settings,
-          child: const TourCostManageScreen(),
-        );
-      case AppRouteName.tourSummary:
-        return _materialRoute(
-          settings: settings,
-          child: const TourSummaryScreen(),
-        );
-
       case AppRouteName.club:
         return _materialRoute(
           settings: settings,
-          child: const ClubMonthlyOverviewScreen(),
+          child: const ClubScreen(),
         );
       case AppRouteName.locker:
         return _materialRoute(settings: settings, child: const LockerScreen());
@@ -156,16 +141,5 @@ abstract class AppRouter {
       settings: settings,
       builder: (_) => child,
     );
-  }
-}
-
-class _RouteMessageScreen extends StatelessWidget {
-  const _RouteMessageScreen({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text(message)));
   }
 }

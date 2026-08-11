@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
-import 'package:fclub/feature/tour/data/model/tour_session.dart';
+import 'package:fclub/feature/tour/data/models/tour_event.dart';
+import 'package:fclub/feature/tour/presentation/widgets/shared/tour_palette.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_card_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,124 +10,112 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class TourActiveSessionCard extends StatelessWidget {
   const TourActiveSessionCard({
     super.key,
-    required this.session,
+    required this.event,
+    required this.canManage,
     required this.onResume,
-    this.onFinish,
-    this.onDelete,
+    required this.onFinish,
+    required this.onDelete,
   });
-  final TourSession session;
+
+  final TourEvent event;
+  final bool canManage;
   final VoidCallback onResume;
-  final VoidCallback? onFinish;
-  final VoidCallback? onDelete;
+  final VoidCallback onFinish;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colors = Theme.of(context).colorScheme;
     return TourCardShell(
-      accent: MyColor.primary,
+      accent: TourPalette.ocean,
       glow: true,
       onTap: onResume,
-      borderRadius: BorderRadius.circular(18.r),
-      padding: EdgeInsets.all(14.r),
+      borderRadius: BorderRadius.circular(22.r),
+      padding: EdgeInsets.all(16.r),
       child: Row(
         children: [
-          TourCardIcon(
-            icon: Icons.card_travel_rounded,
-            accent: MyColor.primary,
-            size: 44,
+          const TourCardIcon(
+            icon: Icons.flight_rounded,
+            accent: TourPalette.sunset,
+            size: 48,
           ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 13.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 7.w, vertical: 2.h),
-                  decoration: BoxDecoration(
-                    color: MyColor.primary.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(6.r),
-                  ),
-                  child: Text(
-                    'in_progress'.tr(),
-                    style: TextStyle(
-                      fontFamily: MyString.poppinsBold,
-                      fontSize: 9.sp,
-                      color: MyColor.primary,
-                      letterSpacing: 0.8,
+                Row(
+                  children: [
+                    Container(
+                      width: 7.r,
+                      height: 7.r,
+                      decoration: const BoxDecoration(
+                        color: TourPalette.lagoon,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 6.w),
+                    Text(
+                      'in_progress'.tr().toUpperCase(),
+                      style: TextStyle(
+                        color: TourPalette.lagoon,
+                        fontFamily: MyString.poppinsBold,
+                        fontSize: 9.sp,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  session.tourName,
+                  event.tourName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
+                    color: colors.onSurface,
                     fontFamily: MyString.poppinsBold,
-                    fontSize: 14.sp,
-                    color: colorScheme.onSurface,
+                    fontSize: 15.sp,
                   ),
                 ),
                 Text(
-                  '${session.members.length} members · ${CurrencyFormatter.format(session.totalSpent)} spent',
+                  '${'tour_budget_short'.tr()} ${CurrencyFormatter.format(event.decidedBudget)}',
                   style: TextStyle(
+                    color: colors.onSurfaceVariant,
                     fontFamily: MyString.rubikRegular,
                     fontSize: 11.sp,
-                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
           ),
-          Container(
-            padding:
-                EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: MyColor.primary,
-              borderRadius: BorderRadius.circular(10.r),
+          FilledButton(
+            onPressed: onResume,
+            style: FilledButton.styleFrom(
+              backgroundColor: TourPalette.ocean,
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              visualDensity: VisualDensity.compact,
             ),
-            child: Text(
-              'resume'.tr(),
-              style: TextStyle(
-                fontFamily: MyString.poppinsBold,
-                fontSize: 12.sp,
-                color: Colors.white,
+            child: Text('resume'.tr()),
+          ),
+          if (canManage)
+            PopupMenuButton<String>(
+              icon: Icon(
+                Icons.more_vert_rounded,
+                color: colors.onSurfaceVariant,
               ),
+              onSelected: (value) =>
+                  value == 'finish' ? onFinish() : onDelete(),
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'finish',
+                  child: Text('finish_session'.tr()),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Text('delete_session'.tr()),
+                ),
+              ],
             ),
-          ),
-          SizedBox(width: 4.w),
-          PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert_rounded,
-                color: colorScheme.onSurfaceVariant, size: 18.r),
-            padding: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14.r)),
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: 'finish',
-                child: Row(children: [
-                  Icon(Icons.done_all_rounded,
-                      color: MyColor.success, size: 18.r),
-                  SizedBox(width: 10.w),
-                  Text('finish_session'.tr(),
-                      style: TextStyle(color: MyColor.success)),
-                ]),
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                child: Row(children: [
-                  Icon(Icons.delete_outline_rounded,
-                      color: MyColor.error, size: 18.r),
-                  SizedBox(width: 10.w),
-                  Text('delete_session'.tr(),
-                      style: TextStyle(color: MyColor.error)),
-                ]),
-              ),
-            ],
-            onSelected: (v) {
-              if (v == 'finish') onFinish?.call();
-              if (v == 'delete') onDelete?.call();
-            },
-          ),
         ],
       ),
     );

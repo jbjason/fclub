@@ -1,107 +1,122 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
-import 'package:fclub/core/services/contacts/app_contact.dart';
+import 'package:fclub/feature/tour/data/models/tour_participant.dart';
+import 'package:fclub/feature/tour/presentation/widgets/shared/tour_palette.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_member_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// Member picker for step 2 of tour creation — choose from the shared
-/// contacts pool with a checkmark list, mirroring Kurbani's equivalent step.
 class TourNewTourStepTwo extends StatelessWidget {
   const TourNewTourStepTwo({
     super.key,
-    required this.contacts,
-    required this.meId,
+    required this.members,
+    required this.currentUserId,
     required this.selectedIds,
+    required this.isSubmitting,
     required this.onToggle,
     required this.onSubmit,
   });
 
-  final List<AppContact> contacts;
-  final String? meId;
+  final List<TourParticipantCandidate> members;
+  final String? currentUserId;
   final Set<String> selectedIds;
+  final bool isSubmitting;
   final void Function(String id) onToggle;
   final VoidCallback onSubmit;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final selectedCount = selectedIds.length + 1; // +1 for "me" (always included)
-
+    final colors = Theme.of(context).colorScheme;
+    final selectedCount = {
+      ...selectedIds,
+      if (currentUserId != null) currentUserId,
+    }.length;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 340.h),
+          constraints: BoxConstraints(maxHeight: 350.h),
           child: ListView.builder(
             shrinkWrap: true,
             padding: EdgeInsets.symmetric(horizontal: 20.w),
-            itemCount: contacts.length,
-            itemBuilder: (_, i) {
-              final contact = contacts[i];
-              final isMe = contact.id == meId;
-              final isSelected = isMe || selectedIds.contains(contact.id);
-
-              return GestureDetector(
-                onTap: isMe ? null : () => onToggle(contact.id),
-                child: Container(
-                  margin: EdgeInsets.only(bottom: 8.h),
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 12.w, vertical: 10.h),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? MyColor.primary.withValues(alpha: 0.06)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: isSelected
-                          ? MyColor.primary.withValues(alpha: 0.3)
-                          : Colors.transparent,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      TourMemberAvatar(
-                        name: contact.name,
-                        colorIndex: contact.avatarColorIndex,
-                        radius: 18.r,
+            itemCount: members.length,
+            itemBuilder: (_, index) {
+              final member = members[index];
+              final isMe = member.id == currentUserId;
+              final isSelected = isMe || selectedIds.contains(member.id);
+              return Padding(
+                padding: EdgeInsets.only(bottom: 8.h),
+                child: Material(
+                  color: isSelected
+                      ? TourPalette.ocean.withValues(alpha: .09)
+                      : colors.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(15.r),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(15.r),
+                    onTap: isMe ? null : () => onToggle(member.id),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 10.h,
                       ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              contact.name,
-                              style: TextStyle(
-                                fontFamily: MyString.poppinsBold,
-                                fontSize: 13.sp,
-                                color: colorScheme.onSurface,
-                              ),
-                            ),
-                            if (isMe)
-                              Text(
-                                'creator_always_included'.tr(),
-                                style: TextStyle(
-                                  fontFamily: MyString.rubikRegular,
-                                  fontSize: 10.sp,
-                                  color: MyColor.tertiary,
-                                ),
-                              ),
-                          ],
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15.r),
+                        border: Border.all(
+                          color: isSelected
+                              ? TourPalette.ocean.withValues(alpha: .45)
+                              : colors.outlineVariant.withValues(alpha: .45),
                         ),
                       ),
-                      if (isMe)
-                        Icon(Icons.star_rounded,
-                            color: MyColor.tertiary, size: 18.r)
-                      else if (isSelected)
-                        Icon(Icons.check_circle_rounded,
-                            color: MyColor.primary, size: 20.r)
-                      else
-                        Icon(Icons.radio_button_unchecked_rounded,
-                            color: colorScheme.outlineVariant, size: 20.r),
-                    ],
+                      child: Row(
+                        children: [
+                          TourMemberAvatar(
+                            name: member.username,
+                            colorIndex: member.avatarColorIndex,
+                            radius: 19.r,
+                          ),
+                          SizedBox(width: 11.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  member.username,
+                                  style: TextStyle(
+                                    color: colors.onSurface,
+                                    fontFamily: MyString.poppinsBold,
+                                    fontSize: 13.sp,
+                                  ),
+                                ),
+                                Text(
+                                  isMe
+                                      ? 'creator_always_included'.tr()
+                                      : member.email,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: colors.onSurfaceVariant,
+                                    fontFamily: MyString.rubikRegular,
+                                    fontSize: 10.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            isMe
+                                ? Icons.star_rounded
+                                : isSelected
+                                ? Icons.check_circle_rounded
+                                : Icons.circle_outlined,
+                            color: isMe
+                                ? TourPalette.sunset
+                                : isSelected
+                                ? TourPalette.ocean
+                                : colors.outline,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -112,19 +127,27 @@ class TourNewTourStepTwo extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
           child: SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onSubmit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: MyColor.primary,
+            child: FilledButton.icon(
+              onPressed: isSubmitting || selectedCount == 0 ? null : onSubmit,
+              style: FilledButton.styleFrom(
+                backgroundColor: TourPalette.sunset,
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(vertical: 14.h),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r)),
               ),
-              child: Text(
-                'tour_create'.tr(namedArgs: {'count': selectedCount.toString()}),
+              icon: isSubmitting
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.flight_takeoff_rounded),
+              label: Text(
+                'tour_create'.tr(
+                  namedArgs: {'count': selectedCount.toString()},
+                ),
                 style: TextStyle(
-                    fontFamily: MyString.poppinsBold, fontSize: 14.sp),
+                  fontFamily: MyString.poppinsBold,
+                  fontSize: 14.sp,
+                ),
               ),
             ),
           ),

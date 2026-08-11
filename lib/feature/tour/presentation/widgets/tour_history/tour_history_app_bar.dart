@@ -1,72 +1,50 @@
-import 'package:fclub/core/constants/my_color.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
+import 'package:fclub/feature/tour/presentation/widgets/shared/tour_palette.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class TourHistoryAppBar extends StatelessWidget {
-  const TourHistoryAppBar({super.key, required this.onBack});
+class TourHistoryAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const TourHistoryAppBar({
+    super.key,
+    required this.title,
+    required this.onBack,
+  });
+  final String title;
   final VoidCallback onBack;
 
   @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [MyColor.primary, MyColor.secondary, MyColor.tertiary],
-        ),
+    final colors = Theme.of(context).colorScheme;
+    return AppBar(
+      backgroundColor: colors.surface.withValues(alpha: .92),
+      leading: IconButton(
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+        onPressed: onBack,
+        icon: const Icon(Icons.arrow_back_ios_new_rounded),
       ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(8.w, 4.h, 16.w, 16.h),
-          child: Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white70, size: 20.r),
-                onPressed: onBack,
-              ),
-              SizedBox(width: 4.w),
-              Container(
-                padding: EdgeInsets.all(9.r),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.card_travel_rounded,
-                    size: 20.r, color: Colors.white),
-              ),
-              SizedBox(width: 10.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Tour',
-                    style: TextStyle(
-                      fontFamily: MyString.poppinsBold,
-                      fontSize: 18.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      height: 1.1,
-                    ),
-                  ),
-                  Text(
-                    'Trip history',
-                    style: TextStyle(
-                      fontFamily: MyString.rubikRegular,
-                      fontSize: 11.sp,
-                      color: Colors.white60,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+      title: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+          Text(
+            'tour_cloud_ledger'.tr(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: TourPalette.ocean,
+              fontFamily: MyString.rubikMedium,
+              fontSize: 8,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.4,
+            ),
           ),
-        ),
+        ],
       ),
+      actions: const [SizedBox(width: 8)],
     );
   }
 }

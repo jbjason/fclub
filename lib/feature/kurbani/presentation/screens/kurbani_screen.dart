@@ -7,7 +7,7 @@ import 'package:fclub/feature/kurbani/data/models/kurbani_event.dart';
 import 'package:fclub/feature/kurbani/data/repositories/kurbani_repository.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_event_provider.dart';
 import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dart';
-import 'package:fclub/feature/kurbani/presentation/screens/kurbani_management_screen.dart';
+import 'package:fclub/feature/kurbani/presentation/screens/kurbani_details_screen.dart';
 import 'package:fclub/feature/kurbani/presentation/widgets/overview/kurbani_event_card.dart';
 import 'package:fclub/feature/kurbani/presentation/widgets/overview/kurbani_event_setup_sheet.dart';
 import 'package:fclub/feature/kurbani/presentation/widgets/overview/kurbani_overview_hero.dart';
@@ -206,7 +206,7 @@ class _KurbaniScreenState extends State<KurbaniScreen> {
             authService: authService,
             event: event,
           ),
-          child: const KurbaniManagementScreen(),
+          child: const KurbaniDetailsScreen(),
         ),
       ),
     );

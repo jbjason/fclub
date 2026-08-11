@@ -1,147 +1,99 @@
-import 'package:easy_localization/easy_localization.dart';
-import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
-import 'package:fclub/feature/tour/data/model/tour_session.dart';
+import 'package:fclub/feature/tour/data/models/tour_event.dart';
+import 'package:fclub/feature/tour/presentation/widgets/shared/tour_palette.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_card_shell.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_history_detail_sheet.dart';
-import 'package:fclub/feature/tour/presentation/widgets/tour_history/tour_info_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 class TourHistoryCard extends StatelessWidget {
-  const TourHistoryCard({super.key, required this.session, required this.onDelete});
-  final TourSession session;
+  const TourHistoryCard({
+    super.key,
+    required this.event,
+    required this.canManage,
+    required this.onOpen,
+    required this.onDelete,
+  });
+
+  final TourEvent event;
+  final bool canManage;
+  final VoidCallback onOpen;
   final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final spent = session.totalSpent;
-    final budget = session.decidedBudget;
-    final progress =
-        budget > 0 ? (spent / budget).clamp(0.0, 1.0) : 0.0;
-    final isOver = spent > budget;
-    final progressColor = isOver ? MyColor.error : MyColor.success;
-
+    final colors = Theme.of(context).colorScheme;
+    final isCancelled = event.status == TourEventStatus.cancelled;
+    final accent = isCancelled ? colors.outline : TourPalette.lagoon;
     return TourCardShell(
-      accent: MyColor.primary,
-      margin: EdgeInsets.only(bottom: 12.h),
+      accent: accent,
+      onTap: onOpen,
+      margin: EdgeInsets.only(bottom: 11.h),
       borderRadius: BorderRadius.circular(18.r),
-      padding: EdgeInsets.all(16.r),
-      onTap: () => TourHistoryDetailSheet.show(context, session),
-      child: Column(
+      padding: EdgeInsets.all(14.r),
+      child: Row(
+        children: [
+          TourCardIcon(
+            icon: isCancelled
+                ? Icons.flight_land_rounded
+                : Icons.landscape_rounded,
+            accent: accent,
+            size: 42,
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Header row ─────────────────────────────────
-                Row(
-                  children: [
-                    TourCardIcon(
-                      icon: Icons.card_travel_rounded,
-                      accent: MyColor.primary,
-                      size: 36,
-                    ),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            session.tourName,
-                            style: TextStyle(
-                              fontFamily: MyString.poppinsBold,
-                              fontSize: 14.sp,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                          Text(
-                            DateFormat('d MMM y')
-                                .format(session.createdAt),
-                            style: TextStyle(
-                              fontFamily: MyString.rubikRegular,
-                              fontSize: 11.sp,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: onDelete,
-                      icon: Icon(Icons.delete_outline_rounded,
-                          color: colorScheme.onSurfaceVariant, size: 20.r),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12.h),
-
-                // ── Spending bar ────────────────────────────────
-                Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('spent'.tr(),
-                        style: TextStyle(
-                            fontFamily: MyString.rubikRegular,
-                            fontSize: 11.sp,
-                            color: colorScheme.onSurfaceVariant)),
-                    Text(
-                      '${CurrencyFormatter.format(spent)} / ${CurrencyFormatter.format(budget)}',
-                      style: TextStyle(
-                        fontFamily: MyString.poppinsBold,
-                        fontSize: 11.sp,
-                        color: isOver
-                            ? MyColor.error
-                            : MyColor.primary,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 6.h),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4.r),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 6.h,
-                    backgroundColor: colorScheme.surfaceContainerHighest,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        progressColor),
+                Text(
+                  event.tourName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colors.onSurface,
+                    fontFamily: MyString.poppinsBold,
+                    fontSize: 14.sp,
                   ),
                 ),
-                SizedBox(height: 12.h),
-
-                // ── Chips ───────────────────────────────────────
-                Row(
-                  children: [
-                    TourInfoChip(
-                      icon: Icons.people_rounded,
-                      label:
-                          '${session.members.length} members',
-                      color: MyColor.primary,
-                    ),
-                    SizedBox(width: 8.w),
-                    TourInfoChip(
-                      icon: Icons.receipt_long_rounded,
-                      label:
-                          '${session.expenses.length} expenses',
-                      color: MyColor.secondary,
-                    ),
-                    SizedBox(width: 8.w),
-                    TourInfoChip(
-                      icon: Icons.payments_rounded,
-                      label:
-                          '${session.extraPayments.length} payments',
-                      color: MyColor.tertiary,
-                    ),
-                  ],
+                SizedBox(height: 2.h),
+                Text(
+                  '${DateFormat('d MMM y').format(event.completedAt ?? event.createdAt)}  ·  ${CurrencyFormatter.format(event.decidedBudget)}',
+                  style: TextStyle(
+                    color: colors.onSurfaceVariant,
+                    fontFamily: MyString.rubikRegular,
+                    fontSize: 11.sp,
+                  ),
                 ),
               ],
             ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: .11),
+              borderRadius: BorderRadius.circular(9.r),
+            ),
+            child: Text(
+              event.status.value.toUpperCase(),
+              style: TextStyle(
+                color: accent,
+                fontFamily: MyString.poppinsBold,
+                fontSize: 8.sp,
+                letterSpacing: .7,
+              ),
+            ),
+          ),
+          if (canManage)
+            IconButton(
+              tooltip: 'Delete',
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline_rounded, size: 19),
+            )
+          else
+            const TourCardArrow(accent: TourPalette.ocean),
+        ],
+      ),
     );
   }
 }
-
-

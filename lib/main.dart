@@ -28,7 +28,8 @@ import 'package:fclub/feature/kurbani/presentation/provider/kurbani_provider.dar
 import 'package:fclub/feature/settings/data/repository/settings_repository.dart';
 import 'package:fclub/feature/settings/data/settings_hive_box.dart';
 import 'package:fclub/feature/settings/presentation/provider/settings_provider.dart';
-import 'package:fclub/feature/tour/data/hive_boxes.dart';
+import 'package:fclub/feature/tour/data/repositories/firestore_tour_repository.dart';
+import 'package:fclub/feature/tour/data/repositories/tour_repository.dart';
 import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -40,7 +41,6 @@ void main() async {
   await GlobalService.instance.initialize();
   await GlobalContactsHiveBox.openBox();
   await GroupSessionHiveBox.openBox();
-  await TourHiveBoxes.openBoxes();
   await PackCheckHiveBoxes.openBoxes();
   await SettingsHiveBox.openBox();
   await EasyLocalization.ensureInitialized();
@@ -84,14 +84,18 @@ class MyApp extends StatelessWidget {
           Provider<KurbaniRepository>(
             create: (_) => FirestoreKurbaniRepository(),
           ),
+          Provider<TourRepository>(create: (_) => FirestoreTourRepository()),
           ChangeNotifierProvider(
             create: (context) =>
                 AuthSessionProvider(context.read<AuthRepository>()),
           ),
           ChangeNotifierProvider(create: (_) => GlobalContactsProvider()),
           ChangeNotifierProvider(
-            create: (context) =>
-                TourProvider(context.read<GlobalContactsProvider>()),
+            create: (context) => TourProvider(
+              repository: context.read<TourRepository>(),
+              groupSession: context.read<GroupSessionProvider>(),
+              authService: context.read<FirebaseAuthService>(),
+            ),
           ),
           ChangeNotifierProvider(
             create: (context) => KurbaniProvider(

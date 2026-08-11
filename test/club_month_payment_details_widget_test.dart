@@ -7,7 +7,7 @@ import 'package:fclub/feature/club/data/model/club_payment.dart';
 import 'package:fclub/feature/club/presentation/widgets/month_payment_details/club_month_payment_filter_bar.dart';
 import 'package:fclub/feature/club/presentation/widgets/month_payment_details/club_month_payment_hero.dart';
 import 'package:fclub/feature/club/presentation/widgets/month_payment_details/club_month_payment_list.dart';
-import 'package:fclub/feature/club/presentation/widgets/monthly_overview/club_month_summary_card.dart';
+import 'package:fclub/feature/club/presentation/widgets/club_widgets/club_month_summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

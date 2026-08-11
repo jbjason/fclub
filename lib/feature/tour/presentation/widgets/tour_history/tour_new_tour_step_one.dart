@@ -33,11 +33,14 @@ class TourNewTourStepOne extends StatelessWidget {
             TextFormField(
               controller: tourNameCtrl,
               style: TextStyle(
-                  fontFamily: MyString.poppinsRegular, fontSize: 14.sp),
+                fontFamily: MyString.poppinsRegular,
+                fontSize: 14.sp,
+              ),
               decoration: tourInputDecoration(
-                  context,
-                  hint: 'tour_trip_name_hint'.tr(),
-                  icon: Icons.card_travel_rounded),
+                context,
+                hint: 'tour_trip_name_hint'.tr(),
+                icon: Icons.card_travel_rounded,
+              ),
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? 'required'.tr() : null,
             ),
@@ -48,10 +51,14 @@ class TourNewTourStepOne extends StatelessWidget {
               controller: budgetCtrl,
               keyboardType: TextInputType.number,
               style: TextStyle(
-                  fontFamily: MyString.poppinsRegular, fontSize: 14.sp),
+                fontFamily: MyString.poppinsRegular,
+                fontSize: 14.sp,
+              ),
               decoration: tourInputDecoration(
-                  context,
-                  hint: '20000', icon: Icons.savings_rounded),
+                context,
+                hint: '20000',
+                icon: Icons.savings_rounded,
+              ),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'required'.tr();
                 if (double.tryParse(v.trim()) == null) {
@@ -70,12 +77,16 @@ class TourNewTourStepOne extends StatelessWidget {
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r)),
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
                 ),
-                child: Text('tour_next_step'.tr(),
-                    style: TextStyle(
-                        fontFamily: MyString.poppinsBold,
-                        fontSize: 14.sp)),
+                child: Text(
+                  'tour_next_step'.tr(),
+                  style: TextStyle(
+                    fontFamily: MyString.poppinsBold,
+                    fontSize: 14.sp,
+                  ),
+                ),
               ),
             ),
           ],

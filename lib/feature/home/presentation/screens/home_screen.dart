@@ -3,6 +3,7 @@ import 'package:fclub/core/constants/my_color.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/services/contacts/global_contacts_provider.dart';
 import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
+import 'package:fclub/feature/home/presentation/provider/group_session_provider.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_club_stats_card.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_feature_grid.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_widgets/home_header.dart';
@@ -45,6 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final groupName = context.select<GroupSessionProvider, String>(
+      (provider) => provider.activeGroup?.name.trim() ?? '',
+    );
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -60,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ── Brand hero ──────────────────────────────────────
-                const HomeHeader(),
+                HomeHeader(groupName: groupName),
                 SizedBox(height: 24.h),
                 // ── Highlights section ──────────────────────────────
                 _SectionTitle(label: 'highlights'.tr()),

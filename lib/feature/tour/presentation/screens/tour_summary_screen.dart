@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/core/util/currency_formatter.dart';
 import 'package:fclub/core/util/my_dialog.dart';
-import 'package:fclub/feature/tour/presentation/provider/tour_provider.dart';
+import 'package:fclub/feature/tour/presentation/provider/tour_event_provider.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_summary/tour_balance_hero.dart';
 import 'package:fclub/feature/tour/presentation/widgets/tour_summary/tour_member_settlement_card.dart';
 import 'package:flutter/material.dart';
@@ -14,11 +14,13 @@ import 'package:url_launcher/url_launcher.dart';
 class TourSummaryScreen extends StatelessWidget {
   const TourSummaryScreen({super.key});
 
-  String _buildShareText(TourProvider tourProvider) {
+  String _buildShareText(TourEventProvider tourProvider) {
     final summary = tourProvider.summary;
     final buffer = StringBuffer()
       ..writeln('*${tourProvider.tourName} — Settlement*')
-      ..writeln('Collected: ${CurrencyFormatter.format(summary.totalCollected)}')
+      ..writeln(
+        'Collected: ${CurrencyFormatter.format(summary.totalCollected)}',
+      )
       ..writeln('Spent: ${CurrencyFormatter.format(summary.totalSpent)}')
       ..writeln();
 
@@ -35,24 +37,33 @@ class TourSummaryScreen extends StatelessWidget {
     return buffer.toString();
   }
 
-  Future<void> _copyToClipboard(BuildContext context, TourProvider tourProvider) async {
+  Future<void> _copyToClipboard(
+    BuildContext context,
+    TourEventProvider tourProvider,
+  ) async {
     await Clipboard.setData(ClipboardData(text: _buildShareText(tourProvider)));
     if (!context.mounted) return;
     MyDialog().showSuccessToast(msg: 'copied_clipboard'.tr(), context: context);
   }
 
-  Future<void> _shareToWhatsApp(BuildContext context, TourProvider tourProvider) async {
+  Future<void> _shareToWhatsApp(
+    BuildContext context,
+    TourEventProvider tourProvider,
+  ) async {
     final text = Uri.encodeComponent(_buildShareText(tourProvider));
     final uri = Uri.parse('https://wa.me/?text=$text');
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && context.mounted) {
-      MyDialog().showFailedToast(msg: 'could_not_open_whatsapp'.tr(), context: context);
+      MyDialog().showFailedToast(
+        msg: 'could_not_open_whatsapp'.tr(),
+        context: context,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final tourProvider = context.watch<TourProvider>();
+    final tourProvider = context.watch<TourEventProvider>();
     final summary = tourProvider.summary;
 
     return Scaffold(
@@ -61,7 +72,10 @@ class TourSummaryScreen extends StatelessWidget {
       body: ListView(
         padding: EdgeInsets.all(16.w),
         children: [
-          TourBalanceHero(balance: summary.balance, totalCollected: summary.totalCollected),
+          TourBalanceHero(
+            balance: summary.balance,
+            totalCollected: summary.totalCollected,
+          ),
           SizedBox(height: 12.h),
           Row(
             children: [

@@ -63,7 +63,9 @@ class TourBalanceHero extends StatelessWidget {
                         value: value,
                         strokeWidth: 10.w,
                         strokeCap: StrokeCap.round,
-                        backgroundColor: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                        backgroundColor: colorScheme.outlineVariant.withValues(
+                          alpha: 0.3,
+                        ),
                         valueColor: AlwaysStoppedAnimation<Color>(color),
                       ),
                     ),

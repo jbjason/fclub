@@ -6,7 +6,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// Decorative introduction for the settings experience.
 class SettingsHeader extends StatelessWidget {
-  const SettingsHeader({super.key});
+  const SettingsHeader({super.key, this.groupName = ''});
+
+  final String groupName;
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +119,11 @@ class SettingsHeader extends StatelessWidget {
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  'settings_description'.tr(),
+                  groupName.trim().isEmpty
+                      ? 'settings_description'.tr()
+                      : 'settings_group_description'.tr(
+                          namedArgs: {'name': groupName.trim()},
+                        ),
                   style: TextStyle(
                     color: colorScheme.onSurfaceVariant,
                     fontFamily: MyString.rubikRegular,
