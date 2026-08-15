@@ -12,6 +12,9 @@ import 'package:fclub/feature/home/presentation/provider/group_session_provider.
 import 'package:flutter/foundation.dart';
 
 class ClubProvider with ChangeNotifier {
+  static const Duration _networkTimeout = Duration(seconds: 10);
+  static const Duration _listenerCancelTimeout = Duration(seconds: 2);
+
   ClubProvider({
     required ClubRepository repository,
     required GroupSessionProvider groupSession,
@@ -25,12 +28,18 @@ class ClubProvider with ChangeNotifier {
   final FirebaseAuthService _authService;
 
   StreamSubscription<List<ClubPayment>>? _paymentsSubscription;
-  StreamSubscription<List<ClubPayment>>? _filteredSubscription;
+  StreamSubscription<List<ClubPayment>>? _sharedPaidPaymentsSubscription;
   StreamSubscription<List<ClubMember>>? _membersSubscription;
   StreamSubscription<String?>? _adminSubscription;
+  Future<void>? _initializeOperation;
+  Future<void>? _reloadOperation;
+  int _sessionListenerVersion = 0;
+  int _paymentListenerVersion = 0;
 
   List<ClubPayment> _payments = const [];
   List<ClubPayment> _filteredPayments = const [];
+  List<ClubPayment> _primaryPayments = const [];
+  List<ClubPayment> _sharedPaidPayments = const [];
   List<ClubMember> _members = const [];
   List<ClubMemberCandidate> _availableMembers = const [];
   ClubPaymentFilter _filter = const ClubPaymentFilter();
@@ -38,15 +47,17 @@ class ClubProvider with ChangeNotifier {
   String? _groupAdminId;
   ClubProject? _project;
   String? _loadedGroupId;
+  String? _loadedUserId;
   String? _loadError;
   String? _actionError;
   bool _isLoading = false;
-  bool _isFiltering = false;
   bool _isSubmitting = false;
   bool _isLoadingCandidates = false;
   bool _hasAdminSnapshot = false;
   bool _hasMembersSnapshot = false;
   bool _hasPaymentsSnapshot = false;
+  bool _hasPrimaryPaymentsSnapshot = false;
+  bool _hasSharedPaidPaymentsSnapshot = false;
   bool _hasPaymentScope = false;
   String? _paymentScopeUserId;
 
@@ -68,7 +79,6 @@ class ClubProvider with ChangeNotifier {
       List.unmodifiable(_availableMembers);
   ClubPaymentFilter get filter => _filter;
   bool get isLoading => _isLoading;
-  bool get isFiltering => _isFiltering;
   bool get isSubmitting => _isSubmitting;
   bool get isLoadingCandidates => _isLoadingCandidates;
   String? get loadError => _loadError;
@@ -114,7 +124,7 @@ class ClubProvider with ChangeNotifier {
     final now = DateTime.now();
     return ClubMonthSummary.calculate(
       month: DateTime(now.year, now.month),
-      memberCount: isAdmin ? _members.length : (currentMember == null ? 0 : 1),
+      memberCount: _members.length,
       perMemberTarget: monthlyTargetPerMember,
       payments: _payments,
     );
@@ -131,9 +141,7 @@ class ClubProvider with ChangeNotifier {
         .map(
           (month) => ClubMonthSummary.calculate(
             month: month,
-            memberCount: isAdmin
-                ? _members.length
-                : (currentMember == null ? 0 : 1),
+            memberCount: _members.length,
             perMemberTarget: monthlyTargetPerMember,
             payments: _payments,
           ),
@@ -142,6 +150,27 @@ class ClubProvider with ChangeNotifier {
   }
 
   Future<void> initialize({bool force = false}) async {
+    final activeOperation = _initializeOperation;
+    if (activeOperation != null) {
+      await activeOperation;
+      final groupId = activeGroupId;
+      final userId = currentUserId;
+      if (_loadedGroupId == groupId && _loadedUserId == userId) return;
+      return initialize(force: force);
+    }
+
+    final operation = _initialize(force: force);
+    _initializeOperation = operation;
+    try {
+      await operation;
+    } finally {
+      if (identical(_initializeOperation, operation)) {
+        _initializeOperation = null;
+      }
+    }
+  }
+
+  Future<void> _initialize({required bool force}) async {
     final groupId = activeGroupId;
     final userId = currentUserId;
     if (groupId == null || groupId.isEmpty) {
@@ -158,108 +187,160 @@ class ClubProvider with ChangeNotifier {
     }
     if (!force &&
         _loadedGroupId == groupId &&
+        _loadedUserId == userId &&
         _paymentsSubscription != null &&
         _adminSubscription != null) {
       return;
     }
 
+    final preserveData =
+        force &&
+        _loadedGroupId == groupId &&
+        _loadedUserId == userId &&
+        _project != null;
     await _cancelSubscriptions();
     _loadedGroupId = groupId;
-    _payments = const [];
-    _filteredPayments = const [];
-    _members = const [];
-    _adminId = null;
-    _groupAdminId = null;
-    _project = null;
-    _filter = const ClubPaymentFilter();
+    _loadedUserId = userId;
+    if (!preserveData) {
+      _payments = const [];
+      _filteredPayments = const [];
+      _primaryPayments = const [];
+      _sharedPaidPayments = const [];
+      _members = const [];
+      _adminId = null;
+      _groupAdminId = null;
+      _project = null;
+      _filter = const ClubPaymentFilter();
+    }
     _hasAdminSnapshot = false;
     _hasMembersSnapshot = false;
     _hasPaymentsSnapshot = false;
+    _hasPrimaryPaymentsSnapshot = false;
+    _hasSharedPaidPaymentsSnapshot = false;
     _hasPaymentScope = false;
     _paymentScopeUserId = null;
-    _isLoading = true;
+    _isLoading = !preserveData;
     _loadError = null;
     _actionError = null;
     notifyListeners();
 
     try {
-      _groupAdminId = await _repository.getGroupAdminId(groupId: groupId);
-      _project = await _repository.findProject(groupId: groupId);
+      final metadata = await Future.wait<Object?>([
+        _repository.getGroupAdminId(groupId: groupId),
+        _repository.findProject(groupId: groupId),
+      ]).timeout(_networkTimeout);
+      _groupAdminId = metadata[0] as String?;
+      _project = metadata[1] as ClubProject?;
+    } on TimeoutException {
+      _handleLoadError(
+        const ClubFailure('Club refresh timed out. Please try again.'),
+      );
+      return;
     } catch (error) {
       _handleLoadError(error);
       return;
     }
+    if (activeGroupId != groupId || currentUserId != userId) return;
     final activeProject = _project;
     if (activeProject == null) {
+      _payments = const [];
+      _filteredPayments = const [];
+      _members = const [];
       _isLoading = false;
       notifyListeners();
       return;
     }
     _adminId = activeProject.adminId;
+    final sessionListenerVersion = _sessionListenerVersion;
 
     _membersSubscription = _repository
         .watchMembers(groupId: groupId, projectId: activeProject.id)
-        .listen((members) {
-          _members = members;
-          _hasMembersSnapshot = true;
-          _completeInitialLoad();
-        }, onError: _handleLoadError);
+        .listen(
+          (members) {
+            if (sessionListenerVersion != _sessionListenerVersion) return;
+            _members = members;
+            _hasMembersSnapshot = true;
+            _completeInitialLoad();
+          },
+          onError: (Object error) {
+            if (sessionListenerVersion != _sessionListenerVersion) return;
+            _handleLoadError(error);
+          },
+        );
     _adminSubscription = _repository
         .watchAdminId(groupId: groupId, projectId: activeProject.id)
-        .listen((adminId) {
-          final wasAdmin = isAdmin;
-          _adminId = adminId;
-          _hasAdminSnapshot = true;
-          _completeInitialLoad();
-          if (wasAdmin != isAdmin) {
-            unawaited(
-              _restartPaymentsForRole(
-                groupId: groupId,
-                projectId: activeProject.id,
-              ),
-            );
-          }
-        }, onError: _handleLoadError);
+        .listen(
+          (adminId) {
+            if (sessionListenerVersion != _sessionListenerVersion) return;
+            final wasAdmin = isAdmin;
+            _adminId = adminId;
+            _hasAdminSnapshot = true;
+            _completeInitialLoad();
+            if (wasAdmin != isAdmin) {
+              unawaited(
+                _restartPaymentsForRole(
+                  groupId: groupId,
+                  projectId: activeProject.id,
+                ),
+              );
+            }
+          },
+          onError: (Object error) {
+            if (sessionListenerVersion != _sessionListenerVersion) return;
+            _handleLoadError(error);
+          },
+        );
     _listenToPayments(groupId: groupId, projectId: activeProject.id);
+  }
+
+  /// Restarts the payment listeners used by pull-to-refresh.
+  ///
+  /// Club data is already backed by live Firestore streams, so pull-to-refresh
+  /// only needs to reconnect the payment queries. Keeping the member/admin
+  /// streams alive avoids an unnecessary metadata round trip, and the returned
+  /// future completes as soon as the listeners have been reattached so a
+  /// [RefreshIndicator] cannot wait forever for a network snapshot.
+  Future<void> reload() async {
+    final activeOperation = _reloadOperation;
+    if (activeOperation != null) return activeOperation;
+
+    final operation = _reloadPayments();
+    _reloadOperation = operation;
+    try {
+      await operation;
+    } finally {
+      if (identical(_reloadOperation, operation)) _reloadOperation = null;
+    }
+  }
+
+  Future<void> _reloadPayments() async {
+    final groupId = activeGroupId;
+    final userId = currentUserId;
+    final activeProject = _project;
+    if (groupId == null ||
+        groupId.isEmpty ||
+        userId == null ||
+        userId.isEmpty ||
+        _loadedGroupId != groupId ||
+        _loadedUserId != userId ||
+        activeProject == null) {
+      await initialize(force: true);
+      return;
+    }
+
+    _loadError = null;
+    _actionError = null;
+    await _cancelPaymentSubscriptions();
+    _listenToPayments(groupId: groupId, projectId: activeProject.id);
+    notifyListeners();
   }
 
   Future<void> setFilter(ClubPaymentFilter filter) async {
     if (_sameFilter(_filter, filter)) return;
     _filter = filter;
     _actionError = null;
-    await _filteredSubscription?.cancel();
-    _filteredSubscription = null;
-    if (filter.isEmpty) {
-      _filteredPayments = _payments;
-      _isFiltering = false;
-      notifyListeners();
-      return;
-    }
-
-    final groupId = _requireGroupId();
-    _isFiltering = true;
+    _applyPaymentFilter();
     notifyListeners();
-    final effectiveFilter = isAdmin
-        ? filter
-        : filter.copyWith(userId: _requireUserId());
-    _filteredSubscription = _repository
-        .watchPayments(
-          groupId: groupId,
-          projectId: _requireProjectId(),
-          filter: effectiveFilter,
-        )
-        .listen(
-          (payments) {
-            _filteredPayments = payments;
-            _isFiltering = false;
-            notifyListeners();
-          },
-          onError: (Object error) {
-            _isFiltering = false;
-            _actionError = _message(error);
-            notifyListeners();
-          },
-        );
   }
 
   Future<void> submitPayment({
@@ -415,7 +496,10 @@ class ClubProvider with ChangeNotifier {
     if (isAdmin) return List<ClubPayment>.unmodifiable(payments);
     if (memberId == null || memberId.isEmpty) return const [];
     return List<ClubPayment>.unmodifiable(
-      payments.where((payment) => payment.userId == memberId),
+      payments.where(
+        (payment) =>
+            payment.status == PaymentStatus.paid || payment.userId == memberId,
+      ),
     );
   }
 
@@ -435,9 +519,14 @@ class ClubProvider with ChangeNotifier {
   }
 
   void _listenToPayments({required String groupId, required String projectId}) {
+    final paymentListenerVersion = _paymentListenerVersion;
     final scopeUserId = isAdmin ? null : _requireUserId();
     _hasPaymentScope = true;
     _paymentScopeUserId = scopeUserId;
+    _primaryPayments = const [];
+    _sharedPaidPayments = const [];
+    _hasPrimaryPaymentsSnapshot = false;
+    _hasSharedPaidPaymentsSnapshot = isAdmin;
     _paymentsSubscription = _repository
         .watchPayments(
           groupId: groupId,
@@ -446,12 +535,75 @@ class ClubProvider with ChangeNotifier {
               ? const ClubPaymentFilter()
               : ClubPaymentFilter(userId: scopeUserId),
         )
-        .listen((payments) {
-          _payments = payments;
-          if (_filter.isEmpty) _filteredPayments = payments;
-          _hasPaymentsSnapshot = true;
-          _completeInitialLoad();
-        }, onError: _handleLoadError);
+        .listen(
+          (payments) {
+            if (paymentListenerVersion != _paymentListenerVersion) return;
+            _primaryPayments = payments;
+            _hasPrimaryPaymentsSnapshot = true;
+            _syncPayments();
+          },
+          onError: (Object error) {
+            if (paymentListenerVersion != _paymentListenerVersion) return;
+            _handleLoadError(error);
+          },
+        );
+
+    if (!isAdmin) {
+      _sharedPaidPaymentsSubscription = _repository
+          .watchPayments(
+            groupId: groupId,
+            projectId: projectId,
+            filter: const ClubPaymentFilter(status: PaymentStatus.paid),
+          )
+          .listen(
+            (payments) {
+              if (paymentListenerVersion != _paymentListenerVersion) return;
+              _sharedPaidPayments = payments;
+              _hasSharedPaidPaymentsSnapshot = true;
+              _syncPayments();
+            },
+            onError: (Object error) {
+              if (paymentListenerVersion != _paymentListenerVersion) return;
+              _handleLoadError(error);
+            },
+          );
+    }
+  }
+
+  void _syncPayments() {
+    _payments = mergePaymentSnapshots(
+      primaryPayments: _primaryPayments,
+      sharedPaidPayments: _sharedPaidPayments,
+    );
+    _applyPaymentFilter();
+    _hasPaymentsSnapshot =
+        _hasPrimaryPaymentsSnapshot && _hasSharedPaidPaymentsSnapshot;
+    _completeInitialLoad();
+  }
+
+  /// Merges the member-scoped stream with the shared approved stream.
+  ///
+  /// The approved stream is deliberately applied last. During a Firestore
+  /// status transition the two query snapshots can arrive in either order; an
+  /// approved copy must never be overwritten by the older pending copy.
+  @visibleForTesting
+  static List<ClubPayment> mergePaymentSnapshots({
+    required Iterable<ClubPayment> primaryPayments,
+    required Iterable<ClubPayment> sharedPaidPayments,
+  }) {
+    final paymentsById = <String, ClubPayment>{
+      for (final payment in primaryPayments) payment.id: payment,
+      for (final payment in sharedPaidPayments) payment.id: payment,
+    };
+    return paymentsById.values.toList(
+      growable: false,
+    )..sort((first, second) => second.submittedAt.compareTo(first.submittedAt));
+  }
+
+  void _applyPaymentFilter() {
+    _filteredPayments = _filter.isEmpty
+        ? _payments
+        : _payments.where(_filter.matches).toList(growable: false);
   }
 
   Future<void> _restartPaymentsForRole({
@@ -460,10 +612,7 @@ class ClubProvider with ChangeNotifier {
   }) async {
     final nextScope = isAdmin ? null : _requireUserId();
     if (_hasPaymentScope && _paymentScopeUserId == nextScope) return;
-    await _paymentsSubscription?.cancel();
-    await _filteredSubscription?.cancel();
-    _paymentsSubscription = null;
-    _filteredSubscription = null;
+    await _cancelPaymentSubscriptions();
     _filter = const ClubPaymentFilter();
     _listenToPayments(groupId: groupId, projectId: projectId);
   }
@@ -537,14 +686,29 @@ class ClubProvider with ChangeNotifier {
   }
 
   Future<void> _cancelSubscriptions() async {
-    await _paymentsSubscription?.cancel();
-    await _filteredSubscription?.cancel();
-    await _membersSubscription?.cancel();
-    await _adminSubscription?.cancel();
-    _paymentsSubscription = null;
-    _filteredSubscription = null;
+    _sessionListenerVersion++;
+    await _cancelPaymentSubscriptions();
+    final membersSubscription = _membersSubscription;
+    final adminSubscription = _adminSubscription;
     _membersSubscription = null;
     _adminSubscription = null;
+    await Future.wait<void>([
+      if (membersSubscription != null) membersSubscription.cancel(),
+      if (adminSubscription != null) adminSubscription.cancel(),
+    ]).timeout(_listenerCancelTimeout, onTimeout: () => const []);
+  }
+
+  Future<void> _cancelPaymentSubscriptions() async {
+    _paymentListenerVersion++;
+    final paymentsSubscription = _paymentsSubscription;
+    final sharedPaidPaymentsSubscription = _sharedPaidPaymentsSubscription;
+    _paymentsSubscription = null;
+    _sharedPaidPaymentsSubscription = null;
+    await Future.wait<void>([
+      if (paymentsSubscription != null) paymentsSubscription.cancel(),
+      if (sharedPaidPaymentsSubscription != null)
+        sharedPaidPaymentsSubscription.cancel(),
+    ]).timeout(_listenerCancelTimeout, onTimeout: () => const []);
   }
 
   @override

@@ -16,35 +16,55 @@ class ClubPaymentHistoryTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<ClubProvider>();
     final visiblePayments = provider.visibleFilteredPayments;
+    final accessiblePayments = provider.visiblePayments;
+    final sortedMonths =
+        accessiblePayments.map((payment) => payment.month).toSet().toList()
+          ..sort((a, b) => b.compareTo(a));
     return Column(
       children: [
         ClubPaymentFilterBar(
           filter: provider.filter,
           members: provider.members,
+          months: sortedMonths,
+          shownCount: visiblePayments.length,
+          totalCount: accessiblePayments.length,
           onChanged: provider.setFilter,
         ),
         Expanded(
-          child: provider.isFiltering
-              ? const Center(child: CircularProgressIndicator())
-              : visiblePayments.isEmpty
-              ? ClubStatePanel(
-                  icon: provider.filter.isEmpty
-                      ? Icons.receipt_long_rounded
-                      : Icons.filter_alt_off_rounded,
-                  title: provider.filter.isEmpty
-                      ? 'No payments yet'
-                      : 'No matching payments',
-                  message: provider.filter.isEmpty
-                      ? 'Use Add Entry to create the first Firestore payment.'
-                      : 'Try changing or clearing the active API filters.',
-                  actionLabel: provider.filter.isEmpty ? null : 'Clear filters',
-                  onAction: provider.filter.isEmpty
-                      ? null
-                      : () => provider.setFilter(const ClubPaymentFilter()),
-                )
-              : RefreshIndicator(
-                  onRefresh: () => provider.initialize(force: true),
-                  child: ListView.builder(
+          child: RefreshIndicator(
+            onRefresh: provider.reload,
+            child: visiblePayments.isEmpty
+                ? LayoutBuilder(
+                    builder: (context, constraints) => ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(
+                          height: constraints.maxHeight,
+                          child: ClubStatePanel(
+                            icon: provider.filter.isEmpty
+                                ? Icons.receipt_long_rounded
+                                : Icons.filter_alt_off_rounded,
+                            title: provider.filter.isEmpty
+                                ? 'No payments yet'
+                                : 'No matching payments',
+                            message: provider.filter.isEmpty
+                                ? 'Use Add Entry to create the first Firestore payment.'
+                                : 'Try changing or clearing the active API filters.',
+                            actionLabel: provider.filter.isEmpty
+                                ? null
+                                : 'Clear filters',
+                            onAction: provider.filter.isEmpty
+                                ? null
+                                : () => provider.setFilter(
+                                    const ClubPaymentFilter(),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 100.h),
                     itemCount: visiblePayments.length,
                     itemBuilder: (context, index) {
@@ -75,7 +95,7 @@ class ClubPaymentHistoryTab extends StatelessWidget {
                       );
                     },
                   ),
-                ),
+          ),
         ),
       ],
     );

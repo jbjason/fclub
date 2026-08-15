@@ -114,26 +114,65 @@ void main() {
     ]);
   });
 
-  test('participant sees only their own transactions', () {
+  test(
+    'participant sees all paid payments and only their own private ones',
+    () {
+      final payments = [
+        _payment(
+          id: 'own-paid',
+          userId: 'member-1',
+          amount: 5000,
+          status: PaymentStatus.paid,
+        ),
+        _payment(
+          id: 'own-pending',
+          userId: 'member-1',
+          amount: 5000,
+          status: PaymentStatus.pending,
+        ),
+        _payment(
+          id: 'own-rejected',
+          userId: 'member-1',
+          amount: 2500,
+          status: PaymentStatus.rejected,
+        ),
+        _payment(
+          id: 'other-paid',
+          userId: 'member-2',
+          amount: 5000,
+          status: PaymentStatus.paid,
+        ),
+        _payment(
+          id: 'other-pending',
+          userId: 'member-2',
+          amount: 5000,
+          status: PaymentStatus.pending,
+        ),
+        _payment(
+          id: 'other-rejected',
+          userId: 'member-2',
+          amount: 2500,
+          status: PaymentStatus.rejected,
+        ),
+      ];
+
+      final visible = ClubProvider.paymentsVisibleTo(
+        payments,
+        isAdmin: false,
+        memberId: 'member-1',
+      );
+
+      expect(visible.map((payment) => payment.id), [
+        'own-paid',
+        'own-pending',
+        'own-rejected',
+        'other-paid',
+      ]);
+    },
+  );
+
+  test('payment filters apply only after visibility rules', () {
     final payments = [
-      _payment(
-        id: 'own-paid',
-        userId: 'member-1',
-        amount: 5000,
-        status: PaymentStatus.paid,
-      ),
-      _payment(
-        id: 'own-pending',
-        userId: 'member-1',
-        amount: 5000,
-        status: PaymentStatus.pending,
-      ),
-      _payment(
-        id: 'own-rejected',
-        userId: 'member-1',
-        amount: 2500,
-        status: PaymentStatus.rejected,
-      ),
       _payment(
         id: 'other-paid',
         userId: 'member-2',
@@ -146,25 +185,40 @@ void main() {
         amount: 5000,
         status: PaymentStatus.pending,
       ),
-      _payment(
-        id: 'other-rejected',
-        userId: 'member-2',
-        amount: 2500,
-        status: PaymentStatus.rejected,
-      ),
     ];
+    const memberFilter = ClubPaymentFilter(userId: 'member-2');
 
-    final visible = ClubProvider.paymentsVisibleTo(
+    final accessible = ClubProvider.paymentsVisibleTo(
       payments,
       isAdmin: false,
       memberId: 'member-1',
     );
+    final filtered = accessible.where(memberFilter.matches);
 
-    expect(visible.map((payment) => payment.id), [
-      'own-paid',
-      'own-pending',
-      'own-rejected',
-    ]);
+    expect(filtered.map((payment) => payment.id), ['other-paid']);
+  });
+
+  test('approved snapshot wins over an older pending snapshot', () {
+    final pending = _payment(
+      id: 'payment-1',
+      userId: 'member-1',
+      amount: 5000,
+      status: PaymentStatus.pending,
+    );
+    final approved = pending.copyWith(
+      status: PaymentStatus.paid,
+      reviewedBy: 'admin-1',
+      reviewedAt: DateTime(2026, 8, 6),
+    );
+
+    final merged = ClubProvider.mergePaymentSnapshots(
+      primaryPayments: [pending],
+      sharedPaidPayments: [approved],
+    );
+
+    expect(merged, hasLength(1));
+    expect(merged.single.status, PaymentStatus.paid);
+    expect(merged.single.reviewedBy, 'admin-1');
   });
 }
 

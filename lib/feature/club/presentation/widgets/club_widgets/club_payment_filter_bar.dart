@@ -1,146 +1,102 @@
-import 'package:fclub/core/constants/my_color.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fclub/core/constants/my_string.dart';
 import 'package:fclub/feature/club/data/model/club_member.dart';
 import 'package:fclub/feature/club/data/model/club_payment_filter.dart';
-import 'package:fclub/feature/club/presentation/provider/club_provider.dart';
 import 'package:fclub/feature/club/presentation/extensions/payment_display_extension.dart';
+import 'package:fclub/feature/club/presentation/widgets/shared/club_payment_status_filter_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 
 class ClubPaymentFilterBar extends StatelessWidget {
   const ClubPaymentFilterBar({
     super.key,
     required this.filter,
     required this.members,
+    required this.months,
+    required this.shownCount,
+    required this.totalCount,
     required this.onChanged,
   });
 
   final ClubPaymentFilter filter;
   final List<ClubMember> members;
+  final List<String> months;
+  final int shownCount;
+  final int totalCount;
   final ValueChanged<ClubPaymentFilter> onChanged;
-
-  int get _activeCount => [
-    filter.userId,
-    filter.month,
-    filter.status,
-    filter.paymentMethod,
-  ].where((value) => value != null).length;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
-      child: Row(
-        children: [
-          Expanded(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16.r),
-              onTap: () async {
-                final selected = await showModalBottomSheet<ClubPaymentFilter>(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (_) =>
-                      _FilterSheet(initial: filter, members: members),
-                );
-                if (selected != null) onChanged(selected);
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 11.h),
-                decoration: BoxDecoration(
-                  color: MyColor.primary.withValues(alpha: .08),
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(
-                    color: MyColor.primary.withValues(alpha: .2),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.tune_rounded,
-                      size: 18.r,
-                      color: MyColor.primary,
-                    ),
-                    SizedBox(width: 9.w),
-                    Text(
-                      _activeCount == 0
-                          ? 'Filter payments'
-                          : '$_activeCount filters active',
-                      style: TextStyle(
-                        fontFamily: MyString.poppinsMedium,
-                        fontSize: 12.sp,
-                        color: MyColor.primary,
-                      ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 20.r,
-                      color: MyColor.primary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          if (_activeCount > 0) ...[
-            SizedBox(width: 8.w),
-            IconButton.filledTonal(
-              tooltip: 'Clear filters',
-              onPressed: () => onChanged(const ClubPaymentFilter()),
-              icon: const Icon(Icons.filter_alt_off_rounded),
-            ),
-          ],
-        ],
+    return ClubPaymentStatusFilterBar(
+      selectedStatus: filter.status,
+      hasActiveFilters: !filter.isEmpty,
+      advancedFilterCount: filter.advancedFilterCount,
+      shownCount: shownCount,
+      totalCount: totalCount,
+      onStatusChanged: (status) => onChanged(
+        filter.copyWith(status: status, clearStatus: status == null),
+      ),
+      onMoreFilters: () => _showMoreFilters(context),
+      onClear: () => onChanged(const ClubPaymentFilter()),
+    );
+  }
+
+  Future<void> _showMoreFilters(BuildContext context) async {
+    final selected = await showModalBottomSheet<ClubPaymentFilter>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ClubPaymentFilterSheet(
+        initialFilter: filter,
+        members: members,
+        months: months,
       ),
     );
+    if (selected != null) onChanged(selected);
   }
 }
 
-class _FilterSheet extends StatefulWidget {
-  const _FilterSheet({required this.initial, required this.members});
+class _ClubPaymentFilterSheet extends StatefulWidget {
+  const _ClubPaymentFilterSheet({
+    required this.initialFilter,
+    required this.members,
+    required this.months,
+  });
 
-  final ClubPaymentFilter initial;
+  final ClubPaymentFilter initialFilter;
   final List<ClubMember> members;
+  final List<String> months;
 
   @override
-  State<_FilterSheet> createState() => _FilterSheetState();
+  State<_ClubPaymentFilterSheet> createState() =>
+      _ClubPaymentFilterSheetState();
 }
 
-class _FilterSheetState extends State<_FilterSheet> {
-  String? _userId;
-  String? _month;
-  PaymentStatus? _status;
-  PaymentMethod? _method;
+class _ClubPaymentFilterSheetState extends State<_ClubPaymentFilterSheet> {
+  static const _allValue = '__all__';
+
+  late String _userId;
+  late String _month;
+  late String _paymentMethod;
 
   @override
   void initState() {
     super.initState();
-    _userId = widget.initial.userId;
-    _month = widget.initial.month;
-    _status = widget.initial.status;
-    _method = widget.initial.paymentMethod;
-  }
-
-  List<DateTime> get _months {
-    final now = DateTime.now();
-    return List.generate(
-      22,
-      (index) => DateTime(now.year, now.month + 3 - index),
-    );
+    _userId =
+        widget.members.any((member) => member.id == widget.initialFilter.userId)
+        ? widget.initialFilter.userId!
+        : _allValue;
+    _month = widget.months.contains(widget.initialFilter.month)
+        ? widget.initialFilter.month!
+        : _allValue;
+    _paymentMethod = widget.initialFilter.paymentMethod?.value ?? _allValue;
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Container(
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        10.h,
-        20.w,
-        MediaQuery.viewInsetsOf(context).bottom + 24.h,
-      ),
+      padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 24.h),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
@@ -163,92 +119,94 @@ class _FilterSheetState extends State<_FilterSheet> {
             ),
             SizedBox(height: 18.h),
             Text(
-              'Filter Firestore payments',
+              'club_payment_more_filters'.tr(),
               style: TextStyle(
                 fontFamily: MyString.poppinsBold,
                 fontSize: 18.sp,
+                color: colors.onSurface,
               ),
             ),
             SizedBox(height: 16.h),
             DropdownButtonFormField<String>(
               initialValue: _userId,
-              decoration: const InputDecoration(
-                labelText: 'Member',
-                prefixIcon: Icon(Icons.person_search_rounded),
+              decoration: InputDecoration(
+                labelText: 'member'.tr(),
+                prefixIcon: const Icon(Icons.person_search_rounded),
               ),
-              items: widget.members
-                  .map(
-                    (member) => DropdownMenuItem(
-                      value: member.id,
-                      child: Text(member.name, overflow: TextOverflow.ellipsis),
+              items: [
+                DropdownMenuItem(
+                  value: _allValue,
+                  child: Text('club_all_members'.tr()),
+                ),
+                ...widget.members.map(
+                  (member) => DropdownMenuItem(
+                    value: member.id,
+                    child: Text(
+                      member.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  )
-                  .toList(growable: false),
-              onChanged: (value) => setState(() => _userId = value),
+                  ),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) setState(() => _userId = value);
+              },
             ),
             SizedBox(height: 12.h),
             DropdownButtonFormField<String>(
               initialValue: _month,
-              decoration: const InputDecoration(
-                labelText: 'Month',
-                prefixIcon: Icon(Icons.calendar_month_rounded),
+              decoration: InputDecoration(
+                labelText: 'club_payment_month'.tr(),
+                prefixIcon: const Icon(Icons.calendar_month_rounded),
               ),
-              items: _months
-                  .map(
-                    (month) => DropdownMenuItem(
-                      value: ClubProvider.monthKey(month),
-                      child: Text(DateFormat('MMMM yyyy').format(month)),
-                    ),
-                  )
-                  .toList(growable: false),
-              onChanged: (value) => setState(() => _month = value),
+              items: [
+                DropdownMenuItem(
+                  value: _allValue,
+                  child: Text('club_payment_all_months'.tr()),
+                ),
+                ...widget.months.map(
+                  (month) => DropdownMenuItem(
+                    value: month,
+                    child: Text(_monthLabel(month)),
+                  ),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) setState(() => _month = value);
+              },
             ),
             SizedBox(height: 12.h),
-            DropdownButtonFormField<PaymentStatus>(
-              initialValue: _status,
-              decoration: const InputDecoration(
-                labelText: 'Status',
-                prefixIcon: Icon(Icons.fact_check_rounded),
+            DropdownButtonFormField<String>(
+              initialValue: _paymentMethod,
+              decoration: InputDecoration(
+                labelText: 'club_payment_method'.tr(),
+                prefixIcon: const Icon(Icons.account_balance_wallet_rounded),
               ),
-              items: PaymentStatus.values
-                  .map(
-                    (status) => DropdownMenuItem(
-                      value: status,
-                      child: Text(status.localizedLabel(context)),
-                    ),
-                  )
-                  .toList(growable: false),
-              onChanged: (value) => setState(() => _status = value),
+              items: [
+                DropdownMenuItem(
+                  value: _allValue,
+                  child: Text('club_all_payment_methods'.tr()),
+                ),
+                ...PaymentMethod.values.map(
+                  (method) => DropdownMenuItem(
+                    value: method.value,
+                    child: Text(method.localizedLabel(context)),
+                  ),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) setState(() => _paymentMethod = value);
+              },
             ),
-            SizedBox(height: 12.h),
-            DropdownButtonFormField<PaymentMethod>(
-              initialValue: _method,
-              decoration: const InputDecoration(
-                labelText: 'Payment method',
-                prefixIcon: Icon(Icons.account_balance_wallet_rounded),
-              ),
-              items: PaymentMethod.values
-                  .map(
-                    (method) => DropdownMenuItem(
-                      value: method,
-                      child: Text(method.localizedLabel(context)),
-                    ),
-                  )
-                  .toList(growable: false),
-              onChanged: (value) => setState(() => _method = value),
-            ),
-            SizedBox(height: 18.h),
+            SizedBox(height: 20.h),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => setState(() {
-                      _userId = null;
-                      _month = null;
-                      _status = null;
-                      _method = null;
-                    }),
-                    child: const Text('Reset'),
+                    onPressed: () =>
+                        Navigator.pop(context, const ClubPaymentFilter()),
+                    child: Text('club_reset_filters'.tr()),
                   ),
                 ),
                 SizedBox(width: 10.w),
@@ -258,14 +216,16 @@ class _FilterSheetState extends State<_FilterSheet> {
                     onPressed: () => Navigator.pop(
                       context,
                       ClubPaymentFilter(
-                        userId: _userId,
-                        month: _month,
-                        status: _status,
-                        paymentMethod: _method,
+                        status: widget.initialFilter.status,
+                        userId: _userId == _allValue ? null : _userId,
+                        month: _month == _allValue ? null : _month,
+                        paymentMethod: _paymentMethod == _allValue
+                            ? null
+                            : PaymentMethod.fromValue(_paymentMethod),
                       ),
                     ),
-                    icon: const Icon(Icons.cloud_sync_rounded),
-                    label: const Text('Apply API filter'),
+                    icon: const Icon(Icons.filter_alt_rounded),
+                    label: Text('club_apply_filters'.tr()),
                   ),
                 ),
               ],
@@ -274,5 +234,10 @@ class _FilterSheetState extends State<_FilterSheet> {
         ),
       ),
     );
+  }
+
+  String _monthLabel(String month) {
+    final date = DateTime.tryParse('$month-01');
+    return date == null ? month : DateFormat('MMMM yyyy').format(date);
   }
 }

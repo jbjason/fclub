@@ -28,7 +28,7 @@ class ClubMonthPaymentDetailsView extends StatelessWidget {
     );
     final summary = detailsProvider.summary(
       payments: accessiblePayments,
-      memberCount: clubProvider.isAdmin ? clubProvider.members.length : 1,
+      memberCount: clubProvider.members.length,
       perMemberTarget: clubProvider.monthlyTargetPerMember,
     );
     final paymentUserIds = detailsProvider.paymentUserIds(accessiblePayments);
@@ -41,7 +41,7 @@ class ClubMonthPaymentDetailsView extends StatelessWidget {
       appBar: AppBar(title: Text('club_month_payments_title'.tr())),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () => clubProvider.initialize(force: true),
+          onRefresh: clubProvider.reload,
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [

@@ -20,7 +20,8 @@ class ClubScreen extends StatefulWidget {
   State<ClubScreen> createState() => _ClubScreenState();
 }
 
-class _ClubScreenState extends State<ClubScreen> with SingleTickerProviderStateMixin {
+class _ClubScreenState extends State<ClubScreen>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -105,84 +106,32 @@ class _ClubScreenState extends State<ClubScreen> with SingleTickerProviderStateM
                   title: 'project_access_required'.tr(),
                   message: 'club_access_required_message'.tr(),
                 )
-              : Column(
-                  children: [
-                    ClubDashboardHero(
-                      summary: provider.currentMonthSummary,
-                      isAdmin: provider.isAdmin,
-                    ),
-                    Container(
-                      height: 54,
-                      margin: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerLowest.withValues(
-                          alpha: .9,
-                        ),
-                        borderRadius: BorderRadius.circular(19),
-                        border: Border.all(
-                          color: MyColor.primary.withValues(alpha: .14),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: MyColor.primary.withValues(alpha: .08),
-                            blurRadius: 18,
-                            offset: const Offset(0, 7),
-                          ),
-                        ],
-                      ),
-                      child: TabBar(
-                        controller: _tabController,
-                        dividerHeight: 0,
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        indicator: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFA855F7), Color(0xFF7C3AED)],
-                          ),
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: MyColor.primary.withValues(alpha: .28),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        labelColor: Colors.white,
-                        unselectedLabelColor: colors.onSurfaceVariant,
-                        labelStyle: const TextStyle(
-                          fontFamily: MyString.rubikMedium,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 11,
-                        ),
-                        tabs: [
-                          Tab(
-                            icon: const Icon(
-                              Icons.auto_graph_rounded,
-                              size: 18,
-                            ),
-                            text: 'club_tab_overview'.tr(),
-                          ),
-                          Tab(
-                            icon: const Icon(
-                              Icons.receipt_long_rounded,
-                              size: 18,
-                            ),
-                            text: 'club_tab_payments'.tr(),
-                          ),
-                        ],
+              : NestedScrollView(
+                  headerSliverBuilder: (context, _) => [
+                    SliverToBoxAdapter(
+                      child: ClubDashboardHero(
+                        summary: provider.currentMonthSummary,
+                        isAdmin: provider.isAdmin,
                       ),
                     ),
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          ClubOverviewTab(summaries: provider.monthSummaries),
-                          const ClubPaymentHistoryTab(),
-                        ],
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _ClubTabBarHeaderDelegate(
+                        backgroundColor: colors.surface,
+                        child: _ClubTabBar(controller: _tabController),
                       ),
                     ),
                   ],
+                  body: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      ClubOverviewTab(
+                        summaries: provider.monthSummaries,
+                        onRefresh: provider.reload,
+                      ),
+                      const ClubPaymentHistoryTab(),
+                    ],
+                  ),
                 ),
         ),
       ),
@@ -198,5 +147,101 @@ class _ClubScreenState extends State<ClubScreen> with SingleTickerProviderStateM
             )
           : null,
     );
+  }
+}
+
+class _ClubTabBar extends StatelessWidget {
+  const _ClubTabBar({required this.controller});
+
+  final TabController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      height: 54,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLowest.withValues(alpha: .96),
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(color: MyColor.primary.withValues(alpha: .14)),
+        boxShadow: [
+          BoxShadow(
+            color: MyColor.primary.withValues(alpha: .08),
+            blurRadius: 18,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      child: TabBar(
+        controller: controller,
+        dividerHeight: 0,
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicator: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFA855F7), Color(0xFF7C3AED)],
+          ),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: MyColor.primary.withValues(alpha: .28),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        labelColor: Colors.white,
+        unselectedLabelColor: colors.onSurfaceVariant,
+        labelStyle: const TextStyle(
+          fontFamily: MyString.rubikMedium,
+          fontWeight: FontWeight.w700,
+          fontSize: 11,
+        ),
+        tabs: [
+          Tab(
+            icon: const Icon(Icons.auto_graph_rounded, size: 18),
+            text: 'club_tab_overview'.tr(),
+          ),
+          Tab(
+            icon: const Icon(Icons.receipt_long_rounded, size: 18),
+            text: 'club_tab_payments'.tr(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ClubTabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _ClubTabBarHeaderDelegate({
+    required this.backgroundColor,
+    required this.child,
+  });
+
+  static const double _height = 58;
+
+  final Color backgroundColor;
+  final Widget child;
+
+  @override
+  double get minExtent => _height;
+
+  @override
+  double get maxExtent => _height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return ColoredBox(color: backgroundColor, child: child);
+  }
+
+  @override
+  bool shouldRebuild(covariant _ClubTabBarHeaderDelegate oldDelegate) {
+    return backgroundColor != oldDelegate.backgroundColor ||
+        child != oldDelegate.child;
   }
 }

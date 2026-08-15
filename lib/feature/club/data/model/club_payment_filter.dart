@@ -19,6 +19,16 @@ class ClubPaymentFilter {
       status == null &&
       paymentMethod == null;
 
+  int get advancedFilterCount =>
+      [userId, month, paymentMethod].where((value) => value != null).length;
+
+  bool matches(ClubPayment payment) {
+    return (userId == null || payment.userId == userId) &&
+        (month == null || payment.month == month) &&
+        (status == null || payment.status == status) &&
+        (paymentMethod == null || payment.paymentMethod == paymentMethod);
+  }
+
   ClubPaymentFilter copyWith({
     String? userId,
     String? month,

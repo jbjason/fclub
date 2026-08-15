@@ -1,4 +1,5 @@
 
+import 'package:fclub/feature/club/presentation/screens/club_screen.dart';
 import 'package:fclub/feature/home/presentation/screens/home_screen.dart';
 import 'package:fclub/feature/home/presentation/widgets/home_navbar.dart';
 import 'package:fclub/feature/settings/presentation/screen/settings_screen.dart';
@@ -13,6 +14,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _currentPage = 0;
   final List<Widget> _pages = [
+    ClubScreen(),
     HomeScreen(),
     SettingsScreen(),
   ];

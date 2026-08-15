@@ -7,9 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ClubOverviewTab extends StatefulWidget {
-  const ClubOverviewTab({super.key, required this.summaries});
+  const ClubOverviewTab({
+    super.key,
+    required this.summaries,
+    required this.onRefresh,
+  });
 
   final List<ClubMonthSummary> summaries;
+  final Future<void> Function() onRefresh;
 
   @override
   State<ClubOverviewTab> createState() => _ClubOverviewTabState();
@@ -56,30 +61,44 @@ class _ClubOverviewTabState extends State<ClubOverviewTab> {
           ),
         ),
         Expanded(
-          child: visible.isEmpty
-              ? ClubStatePanel(
-                  icon: Icons.calendar_view_month_rounded,
-                  title: 'club_no_monthly_data'.tr(),
-                  message: 'club_no_monthly_data_message'.tr(),
-                )
-              : ListView.builder(
-                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 100.h),
-                  itemCount: visible.length,
-                  itemBuilder: (context, index) {
-                    final summary = visible[index];
-                    return ClubMonthSummaryCard(
-                      summary: summary,
-                      onTap: () => Navigator.push<void>(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ClubMonthPaymentDetailsScreen(
-                            month: summary.month,
+          child: RefreshIndicator(
+            onRefresh: widget.onRefresh,
+            child: visible.isEmpty
+                ? LayoutBuilder(
+                    builder: (context, constraints) => ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(
+                          height: constraints.maxHeight,
+                          child: ClubStatePanel(
+                            icon: Icons.calendar_view_month_rounded,
+                            title: 'club_no_monthly_data'.tr(),
+                            message: 'club_no_monthly_data_message'.tr(),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 100.h),
+                    itemCount: visible.length,
+                    itemBuilder: (context, index) {
+                      final summary = visible[index];
+                      return ClubMonthSummaryCard(
+                        summary: summary,
+                        onTap: () => Navigator.push<void>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ClubMonthPaymentDetailsScreen(
+                              month: summary.month,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
         ),
       ],
     );

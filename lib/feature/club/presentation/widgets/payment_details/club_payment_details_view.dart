@@ -48,7 +48,7 @@ class ClubPaymentDetailsView extends StatelessWidget {
       appBar: AppBar(title: Text('club_member_payments_title'.tr())),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () => clubProvider.initialize(force: true),
+          onRefresh: clubProvider.reload,
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
