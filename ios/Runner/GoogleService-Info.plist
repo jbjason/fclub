@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.thehalalway.fclub</string>
+	<string>com.thehalalway.fclub.app</string>
 	<key>PROJECT_ID</key>
 	<string>fclub-d4d8a</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:21742985984:ios:57c32174cf1a738c0289e5</string>
+	<string>1:21742985984:ios:ac0a4e69c66c7fec0289e5</string>
 </dict>
 </plist>

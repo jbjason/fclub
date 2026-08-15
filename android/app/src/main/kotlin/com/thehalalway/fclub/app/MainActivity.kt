@@ -1,4 +1,4 @@
-package com.thehalalway.fclub
+package com.thehalalway.fclub.app
 
 import io.flutter.embedding.android.FlutterActivity
 
